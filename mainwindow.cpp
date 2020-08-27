@@ -13,29 +13,30 @@ MainWindow::MainWindow(QWidget *parent)
 
 	this->setGeometry(0, rect.height()*0.6, rect.width(), rect.height()*0.4);
 	this->setWindowFlags(Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint |
-#ifdef Q_OS_LINUX
-			     Qt::X11BypassWindowManagerHint |
-#endif
-			     Qt::SplashScreen);
+			     Qt::BypassWindowManagerHint | Qt::SplashScreen);
 
-	QObject::connect(this->__hide_animation, &QPropertyAnimation::finished, this, [this](void) {
+	QObject::connect(this->__hide_animation, &QPropertyAnimation::finished, [this](void) {
 		/* If in hidden stage, hide it */
-		if (this->__hide_animation->direction() == QAbstractAnimation::Forward)
+		if (this->__hide_animation->direction() == QAbstractAnimation::Forward) {
 			this->hide();
+		} else {
+			this->activateWindow();
+			this->setFocus();
+		}
 	});
 	this->__hide_animation->setDuration(350);
 	this->__hide_animation->setStartValue(this->pos());
 	this->__hide_animation->setEndValue(QPoint(0, QApplication::primaryScreen()->geometry().height()));
+#ifndef Q_OS_WINDOWS
 	this->__hide_animation->setEasingCurve(QEasingCurve::OutQuad);
+#endif
 
 	this->__shortcut->setShortcut(QKeySequence("Ctrl+Shift+v"));
-	QObject::connect(this->__shortcut, &QxtGlobalShortcut::activated, this, [=](void) {
+	QObject::connect(this->__shortcut, &QxtGlobalShortcut::activated, [this](void) {
 		if (!this->isVisible()) {
 			this->__hide_animation->setDirection(QAbstractAnimation::Backward);
 			this->__hide_animation->start();
 			this->show();
-			this->activateWindow();
-			this->setFocus();
 		}
 	});
 
