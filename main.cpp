@@ -7,9 +7,7 @@ int main(int argc, char *argv[])
 	QApplication a(argc, argv);
 
 	MainWindow w;
-	w.show();
-	w.setFocus();
-	w.activateWindow();
+	w.hide();
 
 	return a.exec();
 }
