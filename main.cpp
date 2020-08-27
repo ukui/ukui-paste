@@ -1,13 +1,16 @@
 #include "mainwindow.h"
 
 #include <QApplication>
+#include <SingleApplication>
 
 int main(int argc, char *argv[])
 {
-	QApplication a(argc, argv);
+	SingleApplication a(argc, argv);
 
 	MainWindow w;
-	w.hide();
+	QObject::connect(&a, &SingleApplication::instanceStarted, [&w](void) {
+		w.hide();
+	});
 
 	return a.exec();
 }
