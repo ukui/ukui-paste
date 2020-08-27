@@ -2,17 +2,20 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QPropertyAnimation>
 
 class MainWindow : public QMainWindow
 {
-    Q_OBJECT
+	Q_OBJECT
 
 public:
-    MainWindow(QWidget *parent = nullptr);
-    ~MainWindow();
+	MainWindow(QWidget *parent = nullptr);
+	~MainWindow();
 
 protected:
-    void focusOutEvent(QFocusEvent *e);
+	void focusOutEvent(QFocusEvent *e);
 
+private:
+	QPropertyAnimation *__hide_animation;
 };
 #endif // MAINWINDOW_H
