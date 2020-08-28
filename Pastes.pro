@@ -22,10 +22,12 @@ DEFINES += QAPPLICATION_CLASS=QApplication
 
 SOURCES += \
     main.cpp \
-    mainwindow.cpp
+    mainwindow.cpp \
+    pasteitem.cpp
 
 HEADERS += \
-    mainwindow.h
+    mainwindow.h \
+    pasteitem.h
 
 TRANSLATIONS += \
     Pastes_zh_CN.ts

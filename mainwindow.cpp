@@ -2,6 +2,8 @@
 
 #include <QApplication>
 #include <QScreen>
+#include <QLabel>
+#include <QSizePolicy>
 #include <QDebug>
 
 MainWindow::MainWindow(QWidget *parent)
@@ -30,10 +32,11 @@ MainWindow::MainWindow(QWidget *parent)
 	this->__main_frame->setGraphicsEffect(this->__main_frame_shadow);
 
 	QObject::connect(this->__hide_animation, &QPropertyAnimation::finished, [this](void) {
-		/* If in hidden stage, hide it */
 		if (this->__hide_animation->direction() == QAbstractAnimation::Forward) {
+			/* Hidden stage */
 			this->hide();
 		} else {
+			/* Show stage */
 			this->activateWindow();
 			this->setFocus();
 		}
@@ -54,7 +57,9 @@ MainWindow::MainWindow(QWidget *parent)
 		}
 	});
 
-	/* Let show it */
+	this->initUI();
+
+	/* Let show it, Just for test, Delete in the future */
 	emit this->__shortcut->activated();
 }
 
@@ -63,8 +68,33 @@ MainWindow::~MainWindow()
 	delete this->__hide_animation;
 }
 
-void MainWindow::focusOutEvent(QFocusEvent *)
+bool MainWindow::event(QEvent *e)
 {
-	this->__hide_animation->setDirection(QAbstractAnimation::Forward);
-	this->__hide_animation->start();
+	if (e->type() == QEvent::ActivationChange) {
+		if (QApplication::activeWindow() != this) {
+			qDebug() << "Focus Out";
+			this->__hide_animation->setDirection(QAbstractAnimation::Forward);
+			this->__hide_animation->start();
+		}
+	}
+
+	return QMainWindow::event(e);
+}
+
+void MainWindow::initUI(void)
+{
+	QLabel *label = new QLabel(QString("HelloWord"));
+	label->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+
+	this->__hlayout = new QHBoxLayout();
+	this->__vlayout = new QVBoxLayout();
+	this->__scroll_area = new QScrollArea(this);
+
+	this->__hlayout->addStretch();
+	this->__hlayout->addWidget(label);
+	this->__hlayout->addStretch();
+
+	this->__vlayout->addLayout(this->__hlayout);
+	this->__vlayout->addWidget(this->__scroll_area);
+	this->__main_frame->setLayout(this->__vlayout);
 }
