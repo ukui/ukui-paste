@@ -38,7 +38,7 @@ MainWindow::MainWindow(QWidget *parent)
 			this->setFocus();
 		}
 	});
-	this->__hide_animation->setDuration(350);
+	this->__hide_animation->setDuration(200);
 	this->__hide_animation->setStartValue(this->pos());
 	this->__hide_animation->setEndValue(QPoint(0, QApplication::primaryScreen()->geometry().height()));
 #ifndef Q_OS_WINDOWS
