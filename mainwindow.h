@@ -26,6 +26,7 @@ protected:
 
 private:
 	void initUI(void);
+	static void loadStyleSheet(QWidget *, const QString &);
 
 private:
 	QWidget				*__main_frame;
@@ -36,7 +37,6 @@ private:
 	/* widgets */
 	QHBoxLayout			*__hlayout;
 	QVBoxLayout			*__vlayout;
-	//QScrollArea			*__scroll_area;
 	QListWidget			*__scroll_widget;
 };
 #endif // MAINWINDOW_H

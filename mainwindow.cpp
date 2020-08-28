@@ -5,6 +5,8 @@
 #include <QLabel>
 #include <QSizePolicy>
 #include <QScroller>
+#include <QFile>
+#include <QMessageBox>
 #include <QDebug>
 
 MainWindow::MainWindow(QWidget *parent)
@@ -20,10 +22,8 @@ MainWindow::MainWindow(QWidget *parent)
 	this->setWindowFlags(Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint |
 			     Qt::BypassWindowManagerHint | Qt::SplashScreen);
 	this->__main_frame->setGeometry(this->geometry());
-	this->__main_frame->setStyleSheet("background-color: rgb(232, 232, 232);"
-					  "border-top: 1px solid rgb(202, 202, 202);"
-					  "border-top-right-radius: 3px;"
-					  "border-top-left-radius: 3px;");
+	this->__main_frame->setObjectName(QString("MainFrame"));
+	MainWindow::loadStyleSheet(this->__main_frame, ":/stylesheet.qss");
 	this->setCentralWidget(this->__main_frame);
 	this->setContentsMargins(0, 10, 0, 0);
 	this->setAttribute(Qt::WA_TranslucentBackground, true);
@@ -112,4 +112,19 @@ void MainWindow::initUI(void)
 	this->__vlayout->addLayout(this->__hlayout);
 	this->__vlayout->addWidget(this->__scroll_widget);
 	this->__main_frame->setLayout(this->__vlayout);
+}
+
+void MainWindow::loadStyleSheet(QWidget *w, const QString &styleSheetFile)
+{
+
+	QFile file(styleSheetFile);
+	file.open(QFile::ReadOnly);
+	if (file.isOpen()) {
+		QString styleSheet = w->styleSheet();
+		styleSheet += QLatin1String(file.readAll());
+		w->setStyleSheet(styleSheet);
+		file.close();
+	} else {
+		QMessageBox::information(nullptr, "tip", "cannot find qss file");
+	}
 }
