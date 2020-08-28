@@ -4,6 +4,7 @@
 #include <QScreen>
 #include <QLabel>
 #include <QSizePolicy>
+#include <QScroller>
 #include <QDebug>
 
 MainWindow::MainWindow(QWidget *parent)
@@ -20,7 +21,9 @@ MainWindow::MainWindow(QWidget *parent)
 			     Qt::BypassWindowManagerHint | Qt::SplashScreen);
 	this->__main_frame->setGeometry(this->geometry());
 	this->__main_frame->setStyleSheet("background-color: rgb(232, 232, 232);"
-					  "border-top: 1px solid rgb(202, 202, 202);");
+					  "border-top: 1px solid rgb(202, 202, 202);"
+					  "border-top-right-radius: 3px;"
+					  "border-top-left-radius: 3px;");
 	this->setCentralWidget(this->__main_frame);
 	this->setContentsMargins(0, 10, 0, 0);
 	this->setAttribute(Qt::WA_TranslucentBackground, true);
@@ -72,7 +75,6 @@ bool MainWindow::event(QEvent *e)
 {
 	if (e->type() == QEvent::ActivationChange) {
 		if (QApplication::activeWindow() != this) {
-			qDebug() << "Focus Out";
 			this->__hide_animation->setDirection(QAbstractAnimation::Forward);
 			this->__hide_animation->start();
 		}
@@ -86,15 +88,28 @@ void MainWindow::initUI(void)
 	QLabel *label = new QLabel(QString("HelloWord"));
 	label->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 
+	this->__scroll_widget = new QListWidget();
+	this->__scroll_widget->setHorizontalScrollMode(QListWidget::ScrollPerPixel);
+	this->__scroll_widget->setFlow(QListView::LeftToRight);
+	this->__scroll_widget->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+	this->__scroll_widget->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+	QScroller::grabGesture(this->__scroll_widget, QScroller::LeftMouseButtonGesture);
+
 	this->__hlayout = new QHBoxLayout();
 	this->__vlayout = new QVBoxLayout();
-	this->__scroll_area = new QScrollArea(this);
 
 	this->__hlayout->addStretch();
 	this->__hlayout->addWidget(label);
 	this->__hlayout->addStretch();
 
+	for (int i = 0; i < 100; i++) {
+		QListWidgetItem *item = new QListWidgetItem("123123");
+		QLabel *x_label = new QLabel("2222222");
+		this->__scroll_widget->setItemWidget(item, x_label);
+		this->__scroll_widget->addItem(item);
+	}
+
 	this->__vlayout->addLayout(this->__hlayout);
-	this->__vlayout->addWidget(this->__scroll_area);
+	this->__vlayout->addWidget(this->__scroll_widget);
 	this->__main_frame->setLayout(this->__vlayout);
 }

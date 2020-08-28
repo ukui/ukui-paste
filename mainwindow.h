@@ -5,12 +5,13 @@
 #include "pasteitem.h"
 
 #include <QMainWindow>
-#include <QFrame>
 #include <QPropertyAnimation>
 #include <QGraphicsDropShadowEffect>
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <QScrollArea>
+#include <QListWidget>
+#include <QListWidgetItem>
 
 class MainWindow : public QMainWindow
 {
@@ -21,7 +22,6 @@ public:
 	~MainWindow();
 
 protected:
-//	void focusOutEvent(QFocusEvent *e);
 	bool event(QEvent *e);
 
 private:
@@ -36,6 +36,7 @@ private:
 	/* widgets */
 	QHBoxLayout			*__hlayout;
 	QVBoxLayout			*__vlayout;
-	QScrollArea			*__scroll_area;
+	//QScrollArea			*__scroll_area;
+	QListWidget			*__scroll_widget;
 };
 #endif // MAINWINDOW_H
