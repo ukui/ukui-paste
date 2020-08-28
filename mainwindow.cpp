@@ -6,6 +6,8 @@
 
 MainWindow::MainWindow(QWidget *parent)
 	: QMainWindow(parent),
+	  __main_frame(new QFrame(this)),
+	  __main_frame_shadow(new QGraphicsDropShadowEffect(this)),
 	  __hide_animation(new QPropertyAnimation(this, "pos")),
 	  __shortcut(new QxtGlobalShortcut(this))
 {
@@ -14,6 +16,18 @@ MainWindow::MainWindow(QWidget *parent)
 	this->setGeometry(0, rect.height()*0.6, rect.width(), rect.height()*0.4);
 	this->setWindowFlags(Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint |
 			     Qt::BypassWindowManagerHint | Qt::SplashScreen);
+	this->__main_frame->setGeometry(this->geometry());
+	this->__main_frame->setStyleSheet("background-color: rgb(232, 232, 232);"
+					  "border-top: 1px solid rgb(202, 202, 202);");
+	this->setCentralWidget(this->__main_frame);
+	this->setContentsMargins(0, 10, 0, 0);
+	this->setAttribute(Qt::WA_TranslucentBackground, true);
+	this->setFocusPolicy(Qt::StrongFocus);
+
+	this->__main_frame_shadow->setOffset(0, 0);
+	this->__main_frame_shadow->setColor(Qt::lightGray);
+	this->__main_frame_shadow->setBlurRadius(10);
+	this->__main_frame->setGraphicsEffect(this->__main_frame_shadow);
 
 	QObject::connect(this->__hide_animation, &QPropertyAnimation::finished, [this](void) {
 		/* If in hidden stage, hide it */
