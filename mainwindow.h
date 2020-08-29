@@ -23,10 +23,11 @@ public:
 
 protected:
 	bool event(QEvent *e);
+	void showEvent(QShowEvent *event);
 
 private:
 	void initUI(void);
-	static QWidget *createItemWidget(QWidget *parent);
+	QWidget *createItemWidget();
 	static void loadStyleSheet(QWidget *, const QString &);
 
 public Q_SLOTS:
