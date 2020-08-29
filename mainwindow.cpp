@@ -53,11 +53,8 @@ MainWindow::MainWindow(QWidget *parent)
 
 	this->__shortcut->setShortcut(QKeySequence("Ctrl+Shift+v"));
 	QObject::connect(this->__shortcut, &QxtGlobalShortcut::activated, [this](void) {
-		if (!this->isVisible()) {
-			this->__hide_animation->setDirection(QAbstractAnimation::Backward);
-			this->__hide_animation->start();
-			this->show();
-		}
+		if (!this->isVisible())
+			this->show_window();
 	});
 
 	this->initUI();
@@ -74,25 +71,42 @@ MainWindow::~MainWindow()
 bool MainWindow::event(QEvent *e)
 {
 	if (e->type() == QEvent::ActivationChange) {
-		if (QApplication::activeWindow() != this) {
-			this->__hide_animation->setDirection(QAbstractAnimation::Forward);
-			this->__hide_animation->start();
-		}
+		if (QApplication::activeWindow() != this)
+			this->hide_window();
 	}
 
 	return QMainWindow::event(e);
 }
 
+void MainWindow::show_window(void)
+{
+	this->__hide_animation->setDirection(QAbstractAnimation::Backward);
+	this->__hide_animation->start();
+	this->show();
+}
+
+void MainWindow::hide_window(void)
+{
+	this->__hide_animation->setDirection(QAbstractAnimation::Forward);
+	this->__hide_animation->start();
+}
+
 void MainWindow::initUI(void)
 {
-	QLabel *label = new QLabel(QString("HelloWord"));
+	QRect rect = QApplication::primaryScreen()->geometry();
+	auto *label = new QLabel(QString("HelloWord"));
 	label->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 
-	this->__scroll_widget = new QListWidget();
+	this->__scroll_widget = new QListWidget(this->__main_frame);
 	this->__scroll_widget->setHorizontalScrollMode(QListWidget::ScrollPerPixel);
 	this->__scroll_widget->setFlow(QListView::LeftToRight);
 	this->__scroll_widget->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 	this->__scroll_widget->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+	this->__scroll_widget->setViewMode(QListView::ListMode);
+	this->__scroll_widget->setEditTriggers(QAbstractItemView::NoEditTriggers);
+	this->__scroll_widget->setFrameShape(QListWidget::NoFrame);
+	this->__scroll_widget->setSpacing(10);
+	this->__scroll_widget->setWrapping(false);
 	QScroller::grabGesture(this->__scroll_widget, QScroller::LeftMouseButtonGesture);
 
 	this->__hlayout = new QHBoxLayout();
@@ -102,16 +116,17 @@ void MainWindow::initUI(void)
 	this->__hlayout->addWidget(label);
 	this->__hlayout->addStretch();
 
-	for (int i = 0; i < 100; i++) {
-		QListWidgetItem *item = new QListWidgetItem("123123");
-		QLabel *x_label = new QLabel("2222222");
-		this->__scroll_widget->setItemWidget(item, x_label);
-		this->__scroll_widget->addItem(item);
-	}
-
 	this->__vlayout->addLayout(this->__hlayout);
 	this->__vlayout->addWidget(this->__scroll_widget);
 	this->__main_frame->setLayout(this->__vlayout);
+
+	for (int i = 0; i < 30; i++) {
+		auto *item = new QListWidgetItem();
+		item->setSizeHint(QSize(rect.width()/6, this->__scroll_widget->sizeHint().height()));
+
+		this->__scroll_widget->addItem(item);
+		this->__scroll_widget->setItemWidget(item, this->createItemWidget(this));
+	}
 }
 
 void MainWindow::loadStyleSheet(QWidget *w, const QString &styleSheetFile)
@@ -127,4 +142,13 @@ void MainWindow::loadStyleSheet(QWidget *w, const QString &styleSheetFile)
 	} else {
 		QMessageBox::information(nullptr, "tip", "cannot find qss file");
 	}
+}
+
+QWidget *MainWindow::createItemWidget(QWidget *parent)
+{
+	auto *widget = new PasteItem(parent);
+	widget->setStyleSheet("background-color: red; border-top-right-radius: 10px;"
+			      "border-top-left-radius: 10px;");
+	widget->show();
+	return widget;
 }

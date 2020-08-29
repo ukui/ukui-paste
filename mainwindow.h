@@ -26,7 +26,12 @@ protected:
 
 private:
 	void initUI(void);
+	static QWidget *createItemWidget(QWidget *parent);
 	static void loadStyleSheet(QWidget *, const QString &);
+
+public Q_SLOTS:
+	void hide_window(void);
+	void show_window(void);
 
 private:
 	QWidget				*__main_frame;
