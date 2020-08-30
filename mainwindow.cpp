@@ -160,7 +160,7 @@ void MainWindow::loadStyleSheet(QWidget *w, const QString &styleSheetFile)
 
 PasteItem *MainWindow::insertItemWidget(void)
 {
-	auto *widget = new PasteItem(this);
+	auto *widget = new PasteItem();
 
 	QObject::connect(widget, SIGNAL(click()), this, SLOT(hide_window()));
 
@@ -168,7 +168,6 @@ PasteItem *MainWindow::insertItemWidget(void)
 	auto *item = new QListWidgetItem();
 	item->setSizeHint(QSize(rect.width()/6, this->__scroll_widget->height()));
 
-	qDebug() << this->__scroll_widget->size();
 	this->__scroll_widget->addItem(item);
 	widget->resize(item->sizeHint());
 
@@ -180,7 +179,6 @@ PasteItem *MainWindow::insertItemWidget(void)
 
 void MainWindow::clipboard_later(void)
 {
-	qDebug() << "Clipboard changed";
 	const QMimeData *mime_data = this->__clipboard->mimeData();
 
 	if (mime_data->hasImage()) {
@@ -189,10 +187,9 @@ void MainWindow::clipboard_later(void)
 		widget->setImage(image);
 	} else if (mime_data->hasHtml()) {
 		auto widget = this->insertItemWidget();
-		qDebug() << mime_data->html() << mime_data->text() << this->__clipboard->text();
-		widget->setRichText(mime_data->html());
+		widget->setRichText(mime_data->html().trimmed());
 	} else if (mime_data->hasText()) {
 		auto widget = this->insertItemWidget();
-		widget->setPlainText(mime_data->text());
+		widget->setPlainText(mime_data->text().trimmed());
 	}
 }

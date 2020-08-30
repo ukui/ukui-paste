@@ -7,6 +7,7 @@
 #include <QFrame>
 #include <QResizeEvent>
 #include <QLabel>
+#include <QGraphicsDropShadowEffect>
 
 class PasteItem : public QWidget
 {
@@ -23,10 +24,11 @@ protected:
 	void keyPressEvent(QKeyEvent *event);
 
 private:
-	QFrame		*m_frame;
-	PixmapFrame	*m_pixmap;
-	QLabel		*m_plaintext;
-	QLabel		*m_richtext;
+	QWidget				*m_frame;
+	QGraphicsDropShadowEffect	*m_frame_effect;
+	PixmapFrame			*m_pixmap;
+	QLabel				*m_plaintext;
+	QLabel				*m_richtext;
 
 Q_SIGNALS:
 	void click(void);

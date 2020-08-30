@@ -13,21 +13,22 @@ QWidget#MainFrame
 
 QListWidget
 {
-    background-color:transparent;
+    padding: 0px;
+    background-color: transparent;
     outline: 0px;
 }
 
 QListWidget::Item
 {
-    padding: 5px;
-    border-top-right-radius: 10px;
-    border-top-left-radius: 10px;
-    background-color:transparent;
+    padding: 0px;
+    background-color: transparent;
 }
 
 QListWidget::Item:hover
 {
     background: skyblue;
+    border-top-right-radius: 10px;
+    border-top-left-radius: 10px;
 }
 
 QListWidget::Item:selected
