@@ -27,7 +27,7 @@ QListWidget::Item
 
 QListWidget::Item:hover
 {
-    background:skyblue;
+    background: skyblue;
 }
 
 QListWidget::Item:selected

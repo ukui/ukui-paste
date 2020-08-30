@@ -12,5 +12,6 @@ int main(int argc, char *argv[])
 		w.hide();
 	});
 
+	a.setQuitOnLastWindowClosed(false);
 	return a.exec();
 }

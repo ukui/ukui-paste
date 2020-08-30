@@ -23,11 +23,13 @@ DEFINES += QAPPLICATION_CLASS=QApplication
 SOURCES += \
     main.cpp \
     mainwindow.cpp \
-    pasteitem.cpp
+    pasteitem.cpp \
+    pixmapframe.cpp
 
 HEADERS += \
     mainwindow.h \
-    pasteitem.h
+    pasteitem.h \
+    pixmapframe.h
 
 TRANSLATIONS += \
     Pastes_zh_CN.ts

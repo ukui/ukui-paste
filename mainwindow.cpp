@@ -7,6 +7,8 @@
 #include <QScroller>
 #include <QFile>
 #include <QMessageBox>
+#include <QMimeData>
+#include <QImage>
 #include <QDebug>
 
 MainWindow::MainWindow(QWidget *parent)
@@ -14,7 +16,8 @@ MainWindow::MainWindow(QWidget *parent)
 	  __main_frame(new QFrame(this)),
 	  __main_frame_shadow(new QGraphicsDropShadowEffect(this)),
 	  __hide_animation(new QPropertyAnimation(this, "pos")),
-	  __shortcut(new QxtGlobalShortcut(this))
+	  __shortcut(new QxtGlobalShortcut(this)),
+	  __clipboard(QApplication::clipboard())
 {
 	QRect rect = QApplication::primaryScreen()->geometry();
 
@@ -35,6 +38,9 @@ MainWindow::MainWindow(QWidget *parent)
 	this->__main_frame->setGraphicsEffect(this->__main_frame_shadow);
 	this->__main_frame->setFocusPolicy(Qt::NoFocus);
 
+	QObject::connect(this->__clipboard, &QClipboard::dataChanged, [this](void) {
+		QTimer::singleShot(50, this, SLOT(clipboard_later()));
+	});
 	QObject::connect(this->__hide_animation, &QPropertyAnimation::finished, [this](void) {
 		if (this->__hide_animation->direction() == QAbstractAnimation::Forward) {
 			/* Hidden stage */
@@ -106,7 +112,6 @@ void MainWindow::hide_window(void)
 
 void MainWindow::initUI(void)
 {
-	QRect rect = QApplication::primaryScreen()->geometry();
 	auto *label = new QLabel(QString("HelloWord"));
 	label->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 
@@ -136,17 +141,6 @@ void MainWindow::initUI(void)
 	this->__main_frame->setLayout(this->__vlayout);
 	/* need this for resize this->__scroll_widget size */
 	this->__main_frame->show();
-
-	for (int i = 0; i < 30; i++) {
-		auto *item = new QListWidgetItem();
-		item->setSizeHint(QSize(rect.width()/6, this->__scroll_widget->height()));
-
-		this->__scroll_widget->addItem(item);
-		auto widget = this->createItemWidget();
-		widget->resize(item->sizeHint());
-
-		this->__scroll_widget->setItemWidget(item, widget);
-	}
 }
 
 void MainWindow::loadStyleSheet(QWidget *w, const QString &styleSheetFile)
@@ -164,13 +158,41 @@ void MainWindow::loadStyleSheet(QWidget *w, const QString &styleSheetFile)
 	}
 }
 
-QWidget *MainWindow::createItemWidget()
+PasteItem *MainWindow::insertItemWidget(void)
 {
 	auto *widget = new PasteItem(this);
 
 	QObject::connect(widget, SIGNAL(click()), this, SLOT(hide_window()));
-	widget->setStyleSheet("background-color: red; border-top-right-radius: 10px;"
-			      "border-top-left-radius: 10px;");
+
+	QRect rect = QApplication::primaryScreen()->geometry();
+	auto *item = new QListWidgetItem();
+	item->setSizeHint(QSize(rect.width()/6, this->__scroll_widget->height()));
+
+	qDebug() << this->__scroll_widget->size();
+	this->__scroll_widget->addItem(item);
+	widget->resize(item->sizeHint());
+
+	this->__scroll_widget->setItemWidget(item, widget);
 	widget->show();
+
 	return widget;
+}
+
+void MainWindow::clipboard_later(void)
+{
+	qDebug() << "Clipboard changed";
+	const QMimeData *mime_data = this->__clipboard->mimeData();
+
+	if (mime_data->hasImage()) {
+		auto *widget = this->insertItemWidget();
+		QImage image = qvariant_cast<QImage>(mime_data->imageData());
+		widget->setImage(image);
+	} else if (mime_data->hasHtml()) {
+		auto widget = this->insertItemWidget();
+		qDebug() << mime_data->html() << mime_data->text() << this->__clipboard->text();
+		widget->setRichText(mime_data->html());
+	} else if (mime_data->hasText()) {
+		auto widget = this->insertItemWidget();
+		widget->setPlainText(mime_data->text());
+	}
 }

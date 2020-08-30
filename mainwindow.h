@@ -12,6 +12,8 @@
 #include <QScrollArea>
 #include <QListWidget>
 #include <QListWidgetItem>
+#include <QClipboard>
+#include <QTimer>
 
 class MainWindow : public QMainWindow
 {
@@ -27,12 +29,13 @@ protected:
 
 private:
 	void initUI(void);
-	QWidget *createItemWidget();
+	PasteItem *insertItemWidget(void);
 	static void loadStyleSheet(QWidget *, const QString &);
 
 public Q_SLOTS:
 	void hide_window(void);
 	void show_window(void);
+	void clipboard_later(void);
 
 private:
 	QWidget				*__main_frame;
@@ -44,5 +47,7 @@ private:
 	QHBoxLayout			*__hlayout;
 	QVBoxLayout			*__vlayout;
 	QListWidget			*__scroll_widget;
+
+	QClipboard			*__clipboard;
 };
 #endif // MAINWINDOW_H
