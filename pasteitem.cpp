@@ -14,14 +14,13 @@ PasteItem::PasteItem(QWidget *parent) : QWidget(parent),
 	this->setAttribute(Qt::WA_TranslucentBackground);
 	m_frame->setStyleSheet("margin: 5px;"
 			       "padding: 10px;"
-			       "border: 1px solid rgb(202, 202, 202);"
+			       "border: 1px solid rgb(220, 215, 208);"
 			       "background-color: white;"
-			       "border-top-right-radius: 10px;"
-			       "border-top-left-radius: 10px;"
+			       "border-radius: 8px;"
 			       "color: #000;");
 	m_frame_effect->setOffset(0, 0);
-	m_frame_effect->setColor(Qt::lightGray);
-	m_frame_effect->setBlurRadius(10);
+	m_frame_effect->setColor(Qt::gray);
+	m_frame_effect->setBlurRadius(8);
 	m_frame->setGraphicsEffect(m_frame_effect);
 	m_frame->show();
 }

@@ -30,7 +30,9 @@ MainWindow::MainWindow(QWidget *parent)
 	this->__main_frame->setObjectName(QString("MainFrame"));
 	MainWindow::loadStyleSheet(this->__main_frame, ":/stylesheet.qss");
 	this->setCentralWidget(this->__main_frame);
+#ifndef Q_OS_LINUX
 	this->setContentsMargins(0, 10, 0, 0);
+#endif
 	this->setAttribute(Qt::WA_TranslucentBackground, true);
 
 	this->__main_frame_shadow->setOffset(0, 0);

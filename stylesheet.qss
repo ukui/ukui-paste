@@ -5,7 +5,7 @@
 
 QWidget#MainFrame
 {
-    background-color: #F4F9FF;
+    background-color: rgba(244, 249, 255, 50%);
     border-top: 1px solid rgb(202, 202, 202);
     border-top-right-radius: 3px;
     border-top-left-radius: 3px;
@@ -27,13 +27,11 @@ QListWidget::Item
 QListWidget::Item:hover
 {
     background: #A3ABBD;
-    border-top-right-radius: 10px;
-    border-top-left-radius: 10px;
+    border-radius: 8px;
 }
 
 QListWidget::Item:selected
 {
     background: #4A9CF5;
-    border-top-right-radius: 10px;
-    border-top-left-radius: 10px;
+    border-radius: 8px;
 }
