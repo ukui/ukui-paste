@@ -4,7 +4,6 @@
 #include "pixmapframe.h"
 
 #include <QWidget>
-#include <QFrame>
 #include <QResizeEvent>
 #include <QLabel>
 #include <QGraphicsDropShadowEffect>
@@ -16,7 +15,9 @@ public:
 	explicit PasteItem(QWidget *parent = nullptr);
 	void setImage(QImage &image);
 	void setPlainText(QString s);
-	void setRichText(QString s);
+
+private:
+	void copyData(void);
 
 protected:
 	void resizeEvent(QResizeEvent *event);
@@ -28,10 +29,9 @@ private:
 	QGraphicsDropShadowEffect	*m_frame_effect;
 	PixmapFrame			*m_pixmap;
 	QLabel				*m_plaintext;
-	QLabel				*m_richtext;
 
 Q_SIGNALS:
-	void click(void);
+	void hideWindow(void);
 };
 
 #endif // PASTEITEM_H

@@ -42,6 +42,7 @@ private:
 	QGraphicsDropShadowEffect	*__main_frame_shadow;
 	QPropertyAnimation		*__hide_animation;
 	QxtGlobalShortcut		*__shortcut;
+	bool				__hide_state;
 
 	/* widgets */
 	QHBoxLayout			*__hlayout;

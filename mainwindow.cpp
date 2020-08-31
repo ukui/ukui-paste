@@ -17,6 +17,7 @@ MainWindow::MainWindow(QWidget *parent)
 	  __main_frame_shadow(new QGraphicsDropShadowEffect(this)),
 	  __hide_animation(new QPropertyAnimation(this, "pos")),
 	  __shortcut(new QxtGlobalShortcut(this)),
+	  __hide_state(true),
 	  __clipboard(QApplication::clipboard())
 {
 	QRect rect = QApplication::primaryScreen()->geometry();
@@ -101,13 +102,18 @@ void MainWindow::show_window(void)
 {
 	this->__hide_animation->setDirection(QAbstractAnimation::Backward);
 	this->__hide_animation->start();
+	this->__hide_state = false;
 	this->show();
 }
 
 void MainWindow::hide_window(void)
 {
+	if (this->__hide_state)
+		return;
+
 	this->__hide_animation->setDirection(QAbstractAnimation::Forward);
 	this->__hide_animation->start();
+	this->__hide_state = true;
 }
 
 void MainWindow::initUI(void)
@@ -162,7 +168,7 @@ PasteItem *MainWindow::insertItemWidget(void)
 {
 	auto *widget = new PasteItem();
 
-	QObject::connect(widget, SIGNAL(click()), this, SLOT(hide_window()));
+	QObject::connect(widget, SIGNAL(hideWindow()), this, SLOT(hide_window()));
 
 	QRect rect = QApplication::primaryScreen()->geometry();
 	auto *item = new QListWidgetItem();
@@ -172,7 +178,6 @@ PasteItem *MainWindow::insertItemWidget(void)
 	widget->resize(item->sizeHint());
 
 	this->__scroll_widget->setItemWidget(item, widget);
-	widget->show();
 
 	return widget;
 }
@@ -185,9 +190,6 @@ void MainWindow::clipboard_later(void)
 		auto *widget = this->insertItemWidget();
 		QImage image = qvariant_cast<QImage>(mime_data->imageData());
 		widget->setImage(image);
-	} else if (mime_data->hasHtml()) {
-		auto widget = this->insertItemWidget();
-		widget->setRichText(mime_data->html().trimmed());
 	} else if (mime_data->hasText()) {
 		auto widget = this->insertItemWidget();
 		widget->setPlainText(mime_data->text().trimmed());
