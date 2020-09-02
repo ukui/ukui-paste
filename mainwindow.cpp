@@ -125,9 +125,7 @@ MainWindow::MainWindow(QWidget *parent)
 	this->__hide_animation->setDuration(200);
 	this->__hide_animation->setStartValue(this->pos());
 	this->__hide_animation->setEndValue(QPoint(0, QApplication::primaryScreen()->geometry().height()));
-#ifndef Q_OS_WINDOWS
 	this->__hide_animation->setEasingCurve(QEasingCurve::OutQuad);
-#endif
 
 	this->__shortcut->setShortcut(QKeySequence("Ctrl+Shift+v"));
 	QObject::connect(this->__shortcut, &QxtGlobalShortcut::activated, [this](void) {
