@@ -31,6 +31,8 @@ private:
 	void initUI(void);
 	PasteItem *insertItemWidget(void);
 	static void loadStyleSheet(QWidget *, const QString &);
+	QPixmap getClipboardOwnerIcon(void);
+	void enabledGlassEffect(void);
 
 public Q_SLOTS:
 	void hide_window(void);
@@ -42,6 +44,7 @@ private:
 	QGraphicsDropShadowEffect	*__main_frame_shadow;
 	QPropertyAnimation		*__hide_animation;
 	QxtGlobalShortcut		*__shortcut;
+	/* That is a workaround for hide window */
 	bool				__hide_state;
 
 	/* widgets */

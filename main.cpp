@@ -48,8 +48,5 @@ int main(int argc, char *argv[])
 	});
 
 	a.setQuitOnLastWindowClosed(false);
-#ifdef Q_OS_LINUX
-	KWindowEffects::enableBlurBehind(w.winId(), true);
-#endif
 	return a.exec();
 }

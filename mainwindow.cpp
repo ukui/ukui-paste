@@ -9,12 +9,19 @@
 #include <QMessageBox>
 #include <QMimeData>
 #include <QImage>
+#include <QFileInfo>
+#include <QFileIconProvider>
+#include <QDebug>
+
 #ifdef Q_OS_WIN
 #include <windows.h>
+#include <windowsx.h>
 #include <winuser.h>
+#include <psapi.h>
 #include <QOperatingSystemVersion>
+#include <QtWinExtras/QtWinExtras>
+#include <QtWinExtras/QtWin>
 #endif
-#include <QDebug>
 
 #ifdef Q_OS_WIN
 typedef enum _WINDOWCOMPOSITIONATTRIB
@@ -74,7 +81,7 @@ typedef BOOL (WINAPI *pfnSetWindowCompositionAttribute)(HWND, WINDOWCOMPOSITIONA
 
 MainWindow::MainWindow(QWidget *parent)
 	: QMainWindow(parent),
-	  __main_frame(new QFrame(this)),
+	  __main_frame(new QWidget(this)),
 	  __main_frame_shadow(new QGraphicsDropShadowEffect(this)),
 	  __hide_animation(new QPropertyAnimation(this, "pos")),
 	  __shortcut(new QxtGlobalShortcut(this)),
@@ -95,24 +102,8 @@ MainWindow::MainWindow(QWidget *parent)
 	this->setContentsMargins(0, 10, 0, 0);
 #endif
 	this->setAttribute(Qt::WA_TranslucentBackground, true);
-#ifdef Q_OS_WIN
-	if (QOperatingSystemVersion::current() >= QOperatingSystemVersion(QOperatingSystemVersion::Windows, 10, 0)) {
-		HWND hWnd = HWND(winId());
-		HMODULE hUser = GetModuleHandle(L"user32.dll");
-		if (hUser) {
-			pfnSetWindowCompositionAttribute setWindowCompositionAttribute =
-					(pfnSetWindowCompositionAttribute)GetProcAddress(hUser, "SetWindowCompositionAttribute");
-			if (setWindowCompositionAttribute) {
-				ACCENT_POLICY accent = { ACCENT_ENABLE_BLURBEHIND, 0, 0, 0 };
-				WINDOWCOMPOSITIONATTRIBDATA data;
-				data.Attrib = WCA_ACCENT_POLICY;
-				data.pvData = &accent;
-				data.cbData = sizeof(accent);
-				setWindowCompositionAttribute(hWnd, &data);
-			}
-		}
-	}
-#endif
+	this->enabledGlassEffect();
+
 	this->__main_frame_shadow->setOffset(0, 0);
 	this->__main_frame_shadow->setColor(Qt::lightGray);
 	this->__main_frame_shadow->setBlurRadius(10);
@@ -216,14 +207,14 @@ void MainWindow::initUI(void)
 	QScroller::grabGesture(this->__scroll_widget, QScroller::LeftMouseButtonGesture);
 
 	this->__hlayout = new QHBoxLayout();
-	this->__vlayout = new QVBoxLayout();
-
 	this->__hlayout->addStretch();
 	this->__hlayout->addWidget(label);
 	this->__hlayout->addStretch();
 
+	this->__vlayout = new QVBoxLayout();
 	this->__vlayout->addLayout(this->__hlayout);
 	this->__vlayout->addWidget(this->__scroll_widget);
+
 	this->__main_frame->setLayout(this->__vlayout);
 	/* need this for resize this->__scroll_widget size */
 	this->__main_frame->show();
@@ -231,7 +222,6 @@ void MainWindow::initUI(void)
 
 void MainWindow::loadStyleSheet(QWidget *w, const QString &styleSheetFile)
 {
-
 	QFile file(styleSheetFile);
 	file.open(QFile::ReadOnly);
 	if (file.isOpen()) {
@@ -244,14 +234,15 @@ void MainWindow::loadStyleSheet(QWidget *w, const QString &styleSheetFile)
 	}
 }
 
+/* Insert a PasteItem into listwidget */
 PasteItem *MainWindow::insertItemWidget(void)
 {
 	auto *widget = new PasteItem();
-
 	QObject::connect(widget, SIGNAL(hideWindow()), this, SLOT(hide_window()));
 
 	QRect rect = QApplication::primaryScreen()->geometry();
 	auto *item = new QListWidgetItem();
+	/* resize item, It's use for pasteitem frame */
 	item->setSizeHint(QSize(rect.width()/6, this->__scroll_widget->height()));
 
 	this->__scroll_widget->addItem(item);
@@ -265,6 +256,11 @@ PasteItem *MainWindow::insertItemWidget(void)
 void MainWindow::clipboard_later(void)
 {
 	const QMimeData *mime_data = this->__clipboard->mimeData();
+	QPixmap pixmap = this->getClipboardOwnerIcon();
+
+	QLabel *label = new QLabel();
+	label->setPixmap(pixmap);
+	label->show();
 
 	if (mime_data->hasImage()) {
 		auto *widget = this->insertItemWidget();
@@ -274,4 +270,69 @@ void MainWindow::clipboard_later(void)
 		auto widget = this->insertItemWidget();
 		widget->setPlainText(mime_data->text().trimmed());
 	}
+}
+
+QPixmap MainWindow::getClipboardOwnerIcon(void)
+{
+	QPixmap pixmap;
+
+#ifdef Q_OS_WIN
+	HWND hwnd = GetClipboardOwner();
+	/* Get icon from Window */
+	HICON icon = reinterpret_cast<HICON>(::SendMessageW(hwnd, WM_GETICON, ICON_BIG, 0));
+	if (!icon)
+		/* Try get icon from window class */
+		icon = reinterpret_cast<HICON>(::GetClassLongPtr(hwnd, GCLP_HICON));
+	if (!icon) {
+		/* Find process id and get the process path, Final extract icons from executable files */
+		DWORD pid;
+		::GetWindowThreadProcessId(hwnd, &pid);
+		HANDLE processHandle = ::OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, pid);
+		TCHAR filename[MAX_PATH];
+		DWORD cbNeeded;
+		HMODULE hMod;
+		if (processHandle) {
+			if(::EnumProcessModules(processHandle, &hMod, sizeof(hMod), &cbNeeded)) {
+				GetModuleFileNameEx(processHandle, NULL, filename, MAX_PATH);
+				QFileInfo fileInfo(QString::fromWCharArray(filename));
+				QFileIconProvider icon;
+				pixmap = icon.icon(fileInfo).pixmap(32, 32);
+			}
+			::CloseHandle(processHandle);
+		} else {
+			/* Failed, use default windows icon */
+			pixmap = QtWin::fromHICON(::LoadIcon(0, IDI_APPLICATION));
+		}
+	} else {
+		pixmap = QtWin::fromHICON(icon);
+	}
+#endif
+
+	return pixmap;
+}
+
+void MainWindow::enabledGlassEffect(void)
+{
+#ifdef Q_OS_WIN
+	if (QOperatingSystemVersion::current() >= QOperatingSystemVersion(QOperatingSystemVersion::Windows, 10, 0)) {
+		HWND hWnd = HWND(this->winId());
+		HMODULE hUser = GetModuleHandle(L"user32.dll");
+		if (hUser) {
+			pfnSetWindowCompositionAttribute setWindowCompositionAttribute =
+					(pfnSetWindowCompositionAttribute)GetProcAddress(hUser, "SetWindowCompositionAttribute");
+			if (setWindowCompositionAttribute) {
+				ACCENT_POLICY accent = { ACCENT_ENABLE_BLURBEHIND, 0, 0, 0 };
+				WINDOWCOMPOSITIONATTRIBDATA data;
+				data.Attrib = WCA_ACCENT_POLICY;
+				data.pvData = &accent;
+				data.cbData = sizeof(accent);
+				setWindowCompositionAttribute(hWnd, &data);
+			}
+		}
+	}
+#endif
+
+#ifdef Q_OS_LINUX
+	KWindowEffects::enableBlurBehind(this->winId(), true);
+#endif
 }
