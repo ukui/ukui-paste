@@ -47,6 +47,7 @@ void PasteItem::setPlainText(QString s)
 	m_plaintext->setText(s);
 	m_plaintext->setFocusPolicy(Qt::NoFocus);
 	m_plaintext->setTextFormat(Qt::PlainText);
+	m_plaintext->setWordWrap(true);
 	m_plaintext->show();
 }
 
