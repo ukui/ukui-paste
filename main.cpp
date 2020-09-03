@@ -5,7 +5,6 @@
 #include <SingleApplication>
 
 #ifdef Q_OS_LINUX
-#include <KF5/KWindowSystem/KWindowEffects>
 #include <X11/Xlib.h>
 
 static int getScreenWidth(void)

@@ -23,6 +23,12 @@
 #include <QtWinExtras/QtWin>
 #endif
 
+#ifdef Q_OS_LINUX
+#include <KF5/KWindowSystem/KWindowEffects>
+#include <X11/Xlib.h>
+#include <X11/Xatom.h>
+#endif
+
 #ifdef Q_OS_WIN
 typedef enum _WINDOWCOMPOSITIONATTRIB
 {
@@ -242,10 +248,8 @@ PasteItem *MainWindow::insertItemWidget(void)
 	auto *item = new QListWidgetItem();
 	/* resize item, It's use for pasteitem frame */
 	item->setSizeHint(QSize(rect.width()/6, this->__scroll_widget->height()));
-
 	this->__scroll_widget->addItem(item);
 	widget->resize(item->sizeHint());
-
 	this->__scroll_widget->setItemWidget(item, widget);
 
 	return widget;
@@ -304,6 +308,105 @@ QPixmap MainWindow::getClipboardOwnerIcon(void)
 	} else {
 		pixmap = QtWin::fromHICON(icon);
 	}
+#endif
+
+#ifdef Q_OS_LINUX
+	int i = 0;
+	Display *display = XOpenDisplay(NULL);
+	Atom clipboard_atom = XInternAtom(display, "CLIPBOARD", False);
+	Window old_clipboard_owner_win;
+	Window clipboard_owner_win = old_clipboard_owner_win = XGetSelectionOwner(display, clipboard_atom);
+
+	unsigned long nitems, bytesafter;
+	unsigned char *ret;
+	int format;
+	Atom type;
+	Atom wm_icon_atom = XInternAtom(display, "_NET_WM_ICON", True);
+again:
+	/* Get the width of the icon */
+	XGetWindowProperty(display,
+			   clipboard_owner_win,
+			   wm_icon_atom,
+			   0, 1, 0,
+			   XA_CARDINAL,
+			   &type,
+			   &format,
+			   &nitems,
+			   &bytesafter,
+			   &ret);
+	if (!ret) {
+		/* FIXME: In fact, Get clipboard window id from XLIB is not the
+		 * actual window id, but it is strange that But his actual ID is
+		 * near this, between -100 and +100.
+		 *
+		 * I didn't find out what happened, but he seems to be working.
+		 * if anyone finds a good way, please let me know.
+		 */
+		if (i >= 0 && i < 100)
+			clipboard_owner_win++;
+		if (i == 100)
+			clipboard_owner_win = old_clipboard_owner_win;
+		if (i < 200 && i > 100)
+			clipboard_owner_win--;
+		if (i > 200) {
+			XCloseDisplay(display);
+			return pixmap;
+		}
+		i++;
+
+		goto again;
+	}
+
+	int width = *(int *)ret;
+	XFree(ret);
+
+	/* Get the height of the Icon */
+	XGetWindowProperty(display,
+			   clipboard_owner_win,
+			   wm_icon_atom,
+			   1, 1, 0,
+			   XA_CARDINAL,
+			   &type,
+			   &format,
+			   &nitems,
+			   &bytesafter,
+			   &ret);
+	if (!ret) {
+		qDebug() << "No X11 Icon height Found.";
+		return pixmap;
+	}
+
+	int height = *(int *)ret;
+	XFree(ret);
+
+	/* Get data from Icon */
+	int size = width * height;
+	XGetWindowProperty(display,
+			   clipboard_owner_win,
+			   wm_icon_atom,
+			   2, size, 0,
+			   XA_CARDINAL,
+			   &type,
+			   &format,
+			   &nitems,
+			   &bytesafter,
+			   &ret);
+	if (!ret) {
+		qDebug() << "No X11 Icon Data Found.";
+		return pixmap;
+	}
+
+	unsigned long *imgArr = (unsigned long*)(ret);
+	std::vector<uint32_t> imgARGB32(size);
+	for(int i=0; i<size; ++i)
+		imgARGB32[i] = (uint32_t)(imgArr[i]);
+
+	QImage *image = new QImage((uchar*)imgARGB32.data(), width, height, QImage::Format_ARGB32);
+	pixmap.convertFromImage(*image);
+
+	XFree(ret);
+	delete image;
+	XCloseDisplay(display);
 #endif
 
 	return pixmap;
