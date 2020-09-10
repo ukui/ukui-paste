@@ -92,7 +92,8 @@ MainWindow::MainWindow(QWidget *parent)
 	  __hide_animation(new QPropertyAnimation(this, "pos")),
 	  __shortcut(new QxtGlobalShortcut(this)),
 	  __hide_state(true),
-	  __clipboard(QApplication::clipboard())
+	  __clipboard(QApplication::clipboard()),
+	  __is_me_trigger(false)
 {
 	QRect rect = QApplication::primaryScreen()->geometry();
 
@@ -102,7 +103,7 @@ MainWindow::MainWindow(QWidget *parent)
 	this->setFocusPolicy(Qt::NoFocus);
 	this->__main_frame->setGeometry(this->geometry());
 	this->__main_frame->setObjectName(QString("MainFrame"));
-	MainWindow::loadStyleSheet(this->__main_frame, ":/stylesheet.qss");
+	MainWindow::loadStyleSheet(this, ":/stylesheet.qss");
 	this->setCentralWidget(this->__main_frame);
 #if !defined Q_OS_LINUX && !defined Q_OS_WIN
 	this->setContentsMargins(0, 10, 0, 0);
@@ -241,37 +242,57 @@ void MainWindow::loadStyleSheet(QWidget *w, const QString &styleSheetFile)
 /* Insert a PasteItem into listwidget */
 PasteItem *MainWindow::insertItemWidget(void)
 {
-	auto *widget = new PasteItem();
-	QObject::connect(widget, SIGNAL(hideWindow()), this, SLOT(hide_window()));
+	auto *widget = new PasteItem(this);
+	QObject::connect(widget, &PasteItem::hideWindow, [this](void) {
+		this->__is_me_trigger = true;
+		this->hide_window();
+	});
 
 	QRect rect = QApplication::primaryScreen()->geometry();
 	auto *item = new QListWidgetItem();
+
 	/* resize item, It's use for pasteitem frame */
-	item->setSizeHint(QSize(rect.width()/6, this->__scroll_widget->height()));
+	item->setSizeHint(QSize(rect.width()/6, 1));
+
 	this->__scroll_widget->addItem(item);
-	widget->resize(item->sizeHint());
 	this->__scroll_widget->setItemWidget(item, widget);
 
 	return widget;
 }
 
+bool MainWindow::isMeTrigger(void)
+{
+	bool ret = false;
+
+	/* Clipboard copy from myself? Yes is 'true', No is 'false' */
+	if (this->__is_me_trigger)
+		ret = true;
+
+	/* Reset */
+	this->__is_me_trigger = false;
+	return ret;
+}
+
 void MainWindow::clipboard_later(void)
 {
 	const QMimeData *mime_data = this->__clipboard->mimeData();
-	QPixmap pixmap = this->getClipboardOwnerIcon();
+	PasteItem *widget = nullptr;
 
-	QLabel *label = new QLabel();
-	label->setPixmap(pixmap);
-	label->show();
+	if (isMeTrigger())
+		return;
 
 	if (mime_data->hasImage()) {
-		auto *widget = this->insertItemWidget();
-		QImage image = qvariant_cast<QImage>(mime_data->imageData());
+		widget = this->insertItemWidget();
+		auto image = qvariant_cast<QImage>(mime_data->imageData());
 		widget->setImage(image);
 	} else if (mime_data->hasText()) {
-		auto widget = this->insertItemWidget();
+		widget = this->insertItemWidget();
 		widget->setPlainText(mime_data->text().trimmed());
 	}
+
+	/* Find and set icon who triggers the clipboard */
+	if (widget)
+		widget->setIcon(this->getClipboardOwnerIcon());
 }
 
 QPixmap MainWindow::getClipboardOwnerIcon(void)

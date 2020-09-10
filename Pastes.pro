@@ -33,12 +33,14 @@ SOURCES += \
     main.cpp \
     mainwindow.cpp \
     pasteitem.cpp \
-    pixmapframe.cpp
+    pasteitembarnner.cpp \
+    pasteitemcontext.cpp
 
 HEADERS += \
     mainwindow.h \
     pasteitem.h \
-    pixmapframe.h
+    pasteitembarnner.h \
+    pasteitemcontext.h
 
 TRANSLATIONS += \
     Pastes_zh_CN.ts

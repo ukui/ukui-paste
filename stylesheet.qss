@@ -1,37 +1,78 @@
 * {
-    border: 0;
-    margin: 0;
+        margin: 0;
+        padding: 0;
 }
 
 QWidget#MainFrame
 {
-    background-color: rgba(244, 249, 255, 50%);
-    border-top: 1px solid rgb(202, 202, 202);
-    border-top-right-radius: 3px;
-    border-top-left-radius: 3px;
+        background-color: rgba(244, 249, 255, 50%);
+        border-top: 1px solid rgb(202, 202, 202);
+        border-top-right-radius: 3px;
+        border-top-left-radius: 3px;
 }
 
 QListWidget
 {
-    padding: 0px;
-    background-color: transparent;
-    outline: 0px;
+        background-color: transparent;
+        outline: 0px;
 }
 
 QListWidget::Item
 {
-    padding: 0px;
-    background-color: transparent;
+        background-color: transparent;
 }
 
 QListWidget::Item:hover
 {
-    background: #A3ABBD;
-    border-radius: 8px;
+        background: #A3ABBD;
+        border-radius: 8px;
 }
 
 QListWidget::Item:selected
 {
-    background: #4A9CF5;
-    border-radius: 8px;
+        background: #4A9CF5;
+        border-radius: 8px;
+}
+
+#PasteItemFrame
+{
+        margin: 5px;
+        padding: 0px;
+        background-color: white;
+        border-radius: 8px;
+        color: #000;
+}
+
+#ContextTextFrame
+{
+        padding: 10px;
+        border-bottom-right-radius: 8px;
+        border-bottom-left-radius: 8px;
+}
+
+#ContextPixmapFrame
+{
+        background-image: url(:/background.jpg);
+        background-repeat: repeat-xy;
+        background-position: top left;
+        background-color: transparent;
+        padding: 0px;
+        border-bottom-right-radius: 8px;
+        border-bottom-left-radius: 8px;
+}
+
+#Context
+{
+        padding: 0px;
+        border: 0px;
+        border-radius: 0px;
+        border-bottom-right-radius: 8px;
+        border-bottom-left-radius: 8px;
+        background-color: white;
+}
+
+#Barnner
+{
+        border-top-right-radius: 8px;
+        border-top-left-radius: 8px;
 }

@@ -33,6 +33,7 @@ private:
 	static void loadStyleSheet(QWidget *, const QString &);
 	QPixmap getClipboardOwnerIcon(void);
 	void enabledGlassEffect(void);
+	bool isMeTrigger(void);
 
 public Q_SLOTS:
 	void hide_window(void);
@@ -53,5 +54,7 @@ private:
 	QListWidget			*__scroll_widget;
 
 	QClipboard			*__clipboard;
+
+	bool				__is_me_trigger;
 };
 #endif // MAINWINDOW_H
