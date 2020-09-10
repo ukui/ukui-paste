@@ -11,6 +11,7 @@
 #include <QImage>
 #include <QFileInfo>
 #include <QFileIconProvider>
+#include <QUrl>
 #include <QDebug>
 
 #ifdef Q_OS_WIN
@@ -285,6 +286,14 @@ void MainWindow::clipboard_later(void)
 		widget = this->insertItemWidget();
 		auto image = qvariant_cast<QImage>(mime_data->imageData());
 		widget->setImage(image);
+	} else if (mime_data->hasUrls()) {
+		QList<QUrl> urls = mime_data->urls();
+		widget = this->insertItemWidget();
+		QString s;
+		foreach(QUrl url, urls) {
+			s += url.toLocalFile() + "\n";
+		}
+		widget->setPlainText(s.trimmed());
 	} else if (mime_data->hasText()) {
 		widget = this->insertItemWidget();
 		widget->setPlainText(mime_data->text().trimmed());
@@ -335,8 +344,8 @@ QPixmap MainWindow::getClipboardOwnerIcon(void)
 	int i = 0;
 	Display *display = XOpenDisplay(NULL);
 	Atom clipboard_atom = XInternAtom(display, "CLIPBOARD", False);
-	Window old_clipboard_owner_win;
-	Window clipboard_owner_win = old_clipboard_owner_win = XGetSelectionOwner(display, clipboard_atom);
+	/* Search from [-100, 100] */
+	Window clipboard_owner_win = XGetSelectionOwner(display, clipboard_atom) - 100;
 
 	unsigned long nitems, bytesafter;
 	unsigned char *ret;
@@ -363,17 +372,13 @@ again:
 		 * I didn't find out what happened, but he seems to be working.
 		 * if anyone finds a good way, please let me know.
 		 */
-		if (i >= 0 && i < 100)
-			clipboard_owner_win++;
-		if (i == 100)
-			clipboard_owner_win = old_clipboard_owner_win;
-		if (i < 200 && i > 100)
-			clipboard_owner_win--;
-		if (i > 200) {
+		clipboard_owner_win++;
+		if (i++ > 200) {
 			XCloseDisplay(display);
+			qDebug() << "Not found icon, Use default Linux logo";
+			pixmap.convertFromImage(QImage(":/ubuntu.png"));
 			return pixmap;
 		}
-		i++;
 
 		goto again;
 	}

@@ -50,7 +50,7 @@ void PasteItem::resizeEvent(QResizeEvent *event)
 {
 	QSize size = event->size();
 	m_frame->resize(size);
-	m_barnner->setFixedHeight(size.height()/6);
+	m_barnner->setFixedHeight(size.height()/5);
 
 	QWidget::resizeEvent(event);
 }

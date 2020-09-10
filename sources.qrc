@@ -2,5 +2,6 @@
     <qresource prefix="/">
         <file>stylesheet.qss</file>
         <file>background.jpg</file>
+        <file>ubuntu.png</file>
     </qresource>
 </RCC>
