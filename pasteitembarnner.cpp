@@ -9,6 +9,7 @@ Barnner::Barnner(QWidget *parent) : QWidget(parent),
 	m_icon(new QLabel(this))
 {
 	this->m_icon->setAttribute(Qt::WA_TranslucentBackground);
+	this->m_icon->setAlignment(Qt::AlignCenter);
 	this->setAttribute(Qt::WA_StyledBackground, true);
 	QHBoxLayout *hboxlayout = new QHBoxLayout();
 	hboxlayout->addStretch();
@@ -61,7 +62,12 @@ void Barnner::resizeEvent(QResizeEvent *event)
 
 	if (!this->m_pixmap.isNull()) {
 		m_icon->setFixedHeight(size.height());
+#ifdef Q_OS_LINUX
 		m_icon->setFixedWidth(size.height()*1.45);
+#endif
+#ifdef Q_OS_WIN
+		m_icon->setFixedWidth(size.height()*0.8);
+#endif
 		this->m_pixmap.scaledToHeight(size.height()*1.5,
 					      Qt::SmoothTransformation);
 		this->setBackground(Barnner::averageColor(&this->m_pixmap));
