@@ -3,10 +3,20 @@
 #include <QResizeEvent>
 #include <QDebug>
 
-PixmapFrame::PixmapFrame(QWidget *parent) : QLabel(parent)
+PixmapFrame::PixmapFrame(QWidget *parent) : QLabel(parent),
+	m_label(new QLabel(this))
 {
 	this->setObjectName("ContextPixmapFrame");
 	this->setAlignment(Qt::AlignCenter);
+
+	this->m_label->setAlignment(Qt::AlignCenter);
+	this->m_label->setContentsMargins(0, 3, 0, 3);
+}
+
+void PixmapFrame::setText(QString s)
+{
+	this->m_label->setText(s);
+	this->m_label->show();
 }
 
 void PixmapFrame::resizeEvent(QResizeEvent *event)
@@ -19,6 +29,8 @@ void PixmapFrame::resizeEvent(QResizeEvent *event)
 						Qt::SmoothTransformation));
 	}
 
+	this->m_label->setGeometry(0, this->height()-LABEL_HEIGHT,
+				   this->width(), LABEL_HEIGHT);
 	QLabel::resizeEvent(event);
 }
 
@@ -39,6 +51,9 @@ void StackedWidget::setPixmap(QPixmap &pixmap)
 {
 	m_pixmap_frame->setStorePixmap(pixmap);
 	this->setCurrentIndex(0);
+
+	QString s = QString("%1x%2 ").arg(pixmap.width()).arg(pixmap.height()) + QObject::tr("px");
+	m_pixmap_frame->setText(s);
 }
 
 const QPixmap *StackedWidget::pixmap(void)

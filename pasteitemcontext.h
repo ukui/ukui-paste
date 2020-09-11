@@ -8,17 +8,23 @@
 #include <QPainter>
 #include <QStyleOption>
 
+#define LABEL_HEIGHT	30
+
 class PixmapFrame : public QLabel
 {
 public:
 	PixmapFrame(QWidget *parent = nullptr);
+
 	void setStorePixmap(QPixmap pixmap)
 	{
 		m_pixmap = pixmap;
 	}
 
+	void setText(QString);
+
 private:
 	QPixmap		m_pixmap;
+	QLabel		*m_label;
 
 protected:
 	void resizeEvent(QResizeEvent *event);

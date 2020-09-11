@@ -258,8 +258,20 @@ PasteItem *MainWindow::insertItemWidget(void)
 	this->__scroll_widget->insertItem(0, item);
 	this->__scroll_widget->setCurrentRow(0);
 	this->__scroll_widget->setItemWidget(item, widget);
+	this->resetItemTabOrder();
 
 	return widget;
+}
+
+void MainWindow::resetItemTabOrder(void)
+{
+	int count = this->__scroll_widget->count();
+
+	for (int i = 1; i < count; i++) {
+		QWidget *first = this->__scroll_widget->itemWidget(this->__scroll_widget->item(i));
+		QWidget *second = this->__scroll_widget->itemWidget(this->__scroll_widget->item(i+1));
+		QWidget::setTabOrder(first, second);
+	}
 }
 
 bool MainWindow::isMeTrigger(void)
