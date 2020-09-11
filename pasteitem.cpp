@@ -86,12 +86,11 @@ void PasteItem::copyData(void)
 
 	/* That is image, copy it */
 	if (itemData.type == ItemData::IMAGE) {
-		clipboard->setImage(m_context->pixmap()->toImage());
+		clipboard->setImage(itemData.image);
 	}
 	/* That is html, copy it */
 	if (itemData.type == ItemData::HTML) {
 		QMimeData *mimeData = new QMimeData;
-		qDebug() << itemData.text;
 		mimeData->setHtml(itemData.html);
 		mimeData->setText(itemData.text);
 		clipboard->setMimeData(mimeData);
@@ -104,7 +103,7 @@ void PasteItem::copyData(void)
 	}
 	/* That is text, copy it */
 	if (itemData.type == ItemData::TEXT) {
-		clipboard->setText(m_context->text());
+		clipboard->setText(itemData.text);
 	}
 
 	emit this->hideWindow();
