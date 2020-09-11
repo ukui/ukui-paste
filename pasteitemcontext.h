@@ -10,7 +10,21 @@
 
 #define LABEL_HEIGHT	30
 
-class PixmapFrame : public QLabel
+class TextFrame : public QLabel
+{
+public:
+	TextFrame(QWidget *parent = nullptr);
+
+	void setMaskFrameText(QString);
+
+protected:
+	void resizeEvent(QResizeEvent *event);
+
+private:
+	QLabel	*m_mask_label;
+};
+
+class PixmapFrame : public TextFrame
 {
 public:
 	PixmapFrame(QWidget *parent = nullptr);
@@ -20,11 +34,8 @@ public:
 		m_pixmap = pixmap;
 	}
 
-	void setText(QString);
-
 private:
 	QPixmap		m_pixmap;
-	QLabel		*m_label;
 
 protected:
 	void resizeEvent(QResizeEvent *event);
@@ -46,7 +57,7 @@ public:
 
 private:
 	PixmapFrame	*m_pixmap_frame;
-	QLabel		*m_text_frame;
+	TextFrame	*m_text_frame;
 };
 
 #endif // PASTEITEMCONTEXT_H

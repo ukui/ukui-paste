@@ -3,46 +3,53 @@
 #include <QResizeEvent>
 #include <QDebug>
 
-PixmapFrame::PixmapFrame(QWidget *parent) : QLabel(parent),
-	m_label(new QLabel(this))
+TextFrame::TextFrame(QWidget *parent) : QLabel(parent),
+	m_mask_label(new QLabel(this))
+{
+	this->setObjectName("ContextTextFrame");
+	this->setAlignment(Qt::AlignTop | Qt::AlignLeft);
+	this->setWordWrap(true);
+
+	this->m_mask_label->setAlignment(Qt::AlignCenter);
+	this->m_mask_label->setContentsMargins(0, 3, 0, 3);
+}
+
+void TextFrame::setMaskFrameText(QString s)
+{
+	this->m_mask_label->setText(s);
+	this->m_mask_label->show();
+}
+
+void TextFrame::resizeEvent(QResizeEvent *event)
+{
+	this->m_mask_label->setGeometry(0, this->height()-LABEL_HEIGHT,
+					this->width(), LABEL_HEIGHT);
+
+	QLabel::resizeEvent(event);
+}
+
+PixmapFrame::PixmapFrame(QWidget *parent) : TextFrame(parent)
 {
 	this->setObjectName("ContextPixmapFrame");
 	this->setAlignment(Qt::AlignCenter);
-
-	this->m_label->setAlignment(Qt::AlignCenter);
-	this->m_label->setContentsMargins(0, 3, 0, 3);
-}
-
-void PixmapFrame::setText(QString s)
-{
-	this->m_label->setText(s);
-	this->m_label->show();
 }
 
 void PixmapFrame::resizeEvent(QResizeEvent *event)
 {
-	QSize size = event->size();
-
 	if (!m_pixmap.isNull()) {
-		this->setPixmap(m_pixmap.scaled(size,
+		this->setPixmap(m_pixmap.scaled(event->size(),
 						Qt::KeepAspectRatio,
 						Qt::SmoothTransformation));
 	}
 
-	this->m_label->setGeometry(0, this->height()-LABEL_HEIGHT,
-				   this->width(), LABEL_HEIGHT);
-	QLabel::resizeEvent(event);
+	TextFrame::resizeEvent(event);
 }
 
 StackedWidget::StackedWidget(QWidget *parent) : QStackedWidget(parent),
 	m_pixmap_frame(new PixmapFrame(this)),
-	m_text_frame(new QLabel(this))
+	m_text_frame(new TextFrame(this))
 {
-	m_text_frame->setObjectName("ContextTextFrame");
-	m_text_frame->setWordWrap(true);
-	m_text_frame->setAlignment(Qt::AlignTop | Qt::AlignLeft);
 	this->setObjectName("Context");
-
 	this->addWidget(m_pixmap_frame);
 	this->addWidget(m_text_frame);
 }
@@ -53,7 +60,7 @@ void StackedWidget::setPixmap(QPixmap &pixmap)
 	this->setCurrentIndex(0);
 
 	QString s = QString("%1x%2 ").arg(pixmap.width()).arg(pixmap.height()) + QObject::tr("px");
-	m_pixmap_frame->setText(s);
+	m_pixmap_frame->setMaskFrameText(s);
 }
 
 const QPixmap *StackedWidget::pixmap(void)
@@ -64,6 +71,7 @@ const QPixmap *StackedWidget::pixmap(void)
 void StackedWidget::setText(QString &s)
 {
 	m_text_frame->setText(s);
+	m_text_frame->setMaskFrameText(QString("%1 ").arg(s.count()) + QObject::tr("characters"));
 	this->setCurrentIndex(1);
 }
 

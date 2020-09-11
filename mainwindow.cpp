@@ -243,7 +243,7 @@ void MainWindow::loadStyleSheet(QWidget *w, const QString &styleSheetFile)
 /* Insert a PasteItem into listwidget */
 PasteItem *MainWindow::insertItemWidget(void)
 {
-	auto *widget = new PasteItem(this);
+	auto *widget = new PasteItem();
 	QObject::connect(widget, &PasteItem::hideWindow, [this](void) {
 		this->__is_me_trigger = true;
 		this->hide_window();
