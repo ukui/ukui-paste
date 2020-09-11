@@ -1,18 +1,38 @@
 #include "pasteitembarnner.h"
 
 #include <QHBoxLayout>
+#include <QVBoxLayout>
 #include <QResizeEvent>
 
 #include <QDebug>
 
 Barnner::Barnner(QWidget *parent) : QWidget(parent),
-	m_icon(new QLabel(this))
+	m_icon(new QLabel(this)),
+	m_text(new QLabel(this)),
+	m_time(new QLabel("222222", this))
 {
 	this->m_icon->setAttribute(Qt::WA_TranslucentBackground);
+	this->m_text->setAttribute(Qt::WA_TranslucentBackground);
+	this->m_text->setAlignment(Qt::AlignVCenter|Qt::AlignLeft);
+	this->m_time->setAttribute(Qt::WA_TranslucentBackground);
+	this->m_time->setAlignment(Qt::AlignVCenter|Qt::AlignLeft);
 	this->m_icon->setScaledContents(false);
+	this->m_text->setScaledContents(true);
+	this->m_time->setScaledContents(true);
 
+	this->m_text->setFont(QFont("Microsoft YaHei", 16, 75));
 	this->setAttribute(Qt::WA_StyledBackground, true);
+
+	QVBoxLayout *vboxlayout = new QVBoxLayout();
+	vboxlayout->setSpacing(5);
+	vboxlayout->addStretch();
+	vboxlayout->setContentsMargins(20, 0, 0, 0);
+	vboxlayout->addWidget(this->m_text);
+	vboxlayout->addWidget(this->m_time);
+	vboxlayout->addStretch();
+
 	QHBoxLayout *hboxlayout = new QHBoxLayout();
+	hboxlayout->addLayout(vboxlayout);
 	hboxlayout->addStretch();
 	hboxlayout->addWidget(this->m_icon);
 	hboxlayout->setSpacing(0);

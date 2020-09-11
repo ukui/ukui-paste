@@ -304,7 +304,7 @@ void MainWindow::clipboard_later(void)
 	widget = this->insertItemWidget(&item);
 	ItemData itemData;
 
-	if (mime_data->hasHtml()) {
+	if (mime_data->hasHtml() && !mime_data->text().isEmpty()) {
 		widget->setPlainText(mime_data->text().trimmed());
 		itemData.type = ItemData::HTML;
 		itemData.html = mime_data->html();

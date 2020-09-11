@@ -36,11 +36,13 @@ void PasteItem::setImage(QImage &image)
 {
 	QPixmap pixmap = QPixmap::fromImage(image);
 	m_context->setPixmap(pixmap);
+	this->m_barnner->setTitle(QObject::tr("Image"));
 }
 
 void PasteItem::setPlainText(QString s)
 {
 	m_context->setText(s);
+	this->m_barnner->setTitle(QObject::tr("PlainText"));
 }
 
 void PasteItem::setIcon(QPixmap pixmap)
@@ -94,12 +96,14 @@ void PasteItem::copyData(void)
 		mimeData->setHtml(itemData.html);
 		mimeData->setText(itemData.text);
 		clipboard->setMimeData(mimeData);
+//		this->m_barnner->setTitle(QObject::tr("RichText"));
 	}
 	/* That is urls, copy it */
 	if (itemData.type == ItemData::URLS) {
 		QMimeData *mimeData = new QMimeData;
 		mimeData->setUrls(itemData.urls);
 		clipboard->setMimeData(mimeData);
+//		this->m_barnner->setTitle(QObject::tr("Files"));
 	}
 	/* That is text, copy it */
 	if (itemData.type == ItemData::TEXT) {
