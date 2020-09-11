@@ -255,7 +255,8 @@ PasteItem *MainWindow::insertItemWidget(void)
 	/* resize item, It's use for pasteitem frame */
 	item->setSizeHint(QSize(rect.width()/6, 1));
 
-	this->__scroll_widget->addItem(item);
+	this->__scroll_widget->insertItem(0, item);
+	this->__scroll_widget->setCurrentRow(0);
 	this->__scroll_widget->setItemWidget(item, widget);
 
 	return widget;

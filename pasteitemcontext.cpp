@@ -6,6 +6,7 @@
 PixmapFrame::PixmapFrame(QWidget *parent) : QLabel(parent)
 {
 	this->setObjectName("ContextPixmapFrame");
+	this->setAlignment(Qt::AlignCenter);
 }
 
 void PixmapFrame::resizeEvent(QResizeEvent *event)
