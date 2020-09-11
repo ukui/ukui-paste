@@ -26,6 +26,8 @@ StackedWidget::StackedWidget(QWidget *parent) : QStackedWidget(parent),
 	m_text_frame(new QLabel(this))
 {
 	m_text_frame->setObjectName("ContextTextFrame");
+	m_text_frame->setWordWrap(true);
+	m_text_frame->setAlignment(Qt::AlignTop | Qt::AlignLeft);
 	this->setObjectName("Context");
 
 	this->addWidget(m_pixmap_frame);
