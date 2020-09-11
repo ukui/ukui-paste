@@ -247,23 +247,22 @@ void MainWindow::loadStyleSheet(QWidget *w, const QString &styleSheetFile)
 }
 
 /* Insert a PasteItem into listwidget */
-PasteItem *MainWindow::insertItemWidget(void)
+PasteItem *MainWindow::insertItemWidget(QListWidgetItem **item)
 {
-	auto *widget = new PasteItem();
+	(*item) = new QListWidgetItem();
+	auto *widget = new PasteItem(nullptr, *item);
 	QObject::connect(widget, &PasteItem::hideWindow, [this](void) {
 		this->__is_me_trigger = true;
 		this->hide_window();
 	});
 
 	QRect rect = QApplication::primaryScreen()->geometry();
-	auto *item = new QListWidgetItem();
-
 	/* resize item, It's use for pasteitem frame */
-	item->setSizeHint(QSize(rect.width()/6, 1));
+	(*item)->setSizeHint(QSize(rect.width()/6, 1));
 
-	this->__scroll_widget->insertItem(0, item);
+	this->__scroll_widget->insertItem(0, *item);
 	this->__scroll_widget->setCurrentRow(0);
-	this->__scroll_widget->setItemWidget(item, widget);
+	this->__scroll_widget->setItemWidget(*item, widget);
 	this->resetItemTabOrder();
 
 	return widget;
@@ -297,30 +296,45 @@ void MainWindow::clipboard_later(void)
 {
 	const QMimeData *mime_data = this->__clipboard->mimeData();
 	PasteItem *widget = nullptr;
+	QListWidgetItem *item;
 
 	if (isMeTrigger())
 		return;
 
-	if (mime_data->hasImage()) {
-		widget = this->insertItemWidget();
-		auto image = qvariant_cast<QImage>(mime_data->imageData());
+	widget = this->insertItemWidget(&item);
+	ItemData itemData;
+
+	if (mime_data->hasHtml()) {
+		widget->setPlainText(mime_data->text().trimmed());
+		itemData.type = ItemData::HTML;
+		itemData.html = mime_data->html();
+		itemData.text = mime_data->text();
+	} else if (mime_data->hasImage()) {
+		QImage image = qvariant_cast<QImage>(mime_data->imageData());
 		widget->setImage(image);
+		itemData.type = ItemData::IMAGE;
+		itemData.image = image;
 	} else if (mime_data->hasUrls()) {
 		QList<QUrl> urls = mime_data->urls();
-		widget = this->insertItemWidget();
 		QString s;
 		foreach(QUrl url, urls) {
 			s += url.toLocalFile() + "\n";
 		}
 		widget->setPlainText(s.trimmed());
+		itemData.type = ItemData::URLS;
+		itemData.urls = urls;
 	} else if (mime_data->hasText()) {
-		widget = this->insertItemWidget();
 		widget->setPlainText(mime_data->text().trimmed());
+		itemData.type = ItemData::TEXT;
+		itemData.text = mime_data->text();
+	} else {
+		/* No data, remove it */
+		this->__scroll_widget->removeItemWidget(item);
 	}
 
 	/* Find and set icon who triggers the clipboard */
-	if (widget)
-		widget->setIcon(this->getClipboardOwnerIcon());
+	widget->setIcon(this->getClipboardOwnerIcon());
+	item->setData(Qt::UserRole, QVariant::fromValue(itemData));
 }
 
 QPixmap MainWindow::getClipboardOwnerIcon(void)

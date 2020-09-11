@@ -3,13 +3,15 @@
 #include <QClipboard>
 #include <QApplication>
 #include <QVBoxLayout>
+#include <QMimeData>
 #include <QDebug>
 
-PasteItem::PasteItem(QWidget *parent) : QWidget(parent),
+PasteItem::PasteItem(QWidget *parent, QListWidgetItem *item) : QWidget(parent),
 	m_frame(new QWidget(this)),
 	m_frame_effect(new QGraphicsDropShadowEffect(this)),
 	m_barnner(new Barnner(this->m_frame)),
-	m_context(new StackedWidget(this->m_frame))
+	m_context(new StackedWidget(this->m_frame)),
+	m_listwidget_item(item)
 {
 	this->setFocusPolicy(Qt::StrongFocus);
 	this->setAttribute(Qt::WA_TranslucentBackground);
@@ -80,13 +82,30 @@ void PasteItem::keyPressEvent(QKeyEvent *event)
 void PasteItem::copyData(void)
 {
 	QClipboard *clipboard = QApplication::clipboard();
+	ItemData itemData = this->m_listwidget_item->data(Qt::UserRole).value<ItemData>();
 
 	/* That is image, copy it */
-	if (m_context->currentIndex() == StackedWidget::IMAGE)
+	if (itemData.type == ItemData::IMAGE) {
 		clipboard->setImage(m_context->pixmap()->toImage());
+	}
+	/* That is html, copy it */
+	if (itemData.type == ItemData::HTML) {
+		QMimeData *mimeData = new QMimeData;
+		qDebug() << itemData.text;
+		mimeData->setHtml(itemData.html);
+		mimeData->setText(itemData.text);
+		clipboard->setMimeData(mimeData);
+	}
+	/* That is urls, copy it */
+	if (itemData.type == ItemData::URLS) {
+		QMimeData *mimeData = new QMimeData;
+		mimeData->setUrls(itemData.urls);
+		clipboard->setMimeData(mimeData);
+	}
 	/* That is text, copy it */
-	if (m_context->currentIndex() == StackedWidget::TEXT)
+	if (itemData.type == ItemData::TEXT) {
 		clipboard->setText(m_context->text());
+	}
 
 	emit this->hideWindow();
 }
