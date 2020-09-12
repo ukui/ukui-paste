@@ -2,62 +2,17 @@
 
 #include "shortcut.h"
 
-EventMonitor::EventMonitor(QObject *parent) : QThread(parent),
-	m_isPress(false),
-	m_display(nullptr)
+Shortcut::Shortcut(QObject *parent) : QObject(parent)
 {
-}
+#ifdef Q_OS_LINUX
+	this->m_timer = new QTimer;
 
-void EventMonitor::run(void)
-{
-	Display *display = XOpenDisplay(nullptr);
-	XRecordClientSpec clients = XRecordAllClients;
-	XRecordRange *range = XRecordAllocRange();
+	QObject::connect(this->m_timer, &QTimer::timeout, [this](void) {
+		this->m_isActive = false;
+	});
 
-	memset(range, 0, sizeof(XRecordRange));
-	range->device_events.first = KeyPress;
-	range->device_events.last = KeyPress;
-
-	m_context = XRecordCreateContext(display, 0, &clients, 1, &range, 1);
-	XFree(range);
-	XSync(display, True);
-
-	this->m_display = XOpenDisplay(nullptr);
-	XRecordEnableContext(this->m_display, m_context, &EventMonitor::callback, reinterpret_cast<XPointer>(this));
-}
-
-void EventMonitor::stop()
-{
-	XRecordDisableContext(this->m_display, this->m_context);
-	XFlush(this->m_display);
-}
-
-void EventMonitor::callback(XPointer ptr, XRecordInterceptData *data)
-{
-	reinterpret_cast<EventMonitor*>(ptr)->handleRecordEvent(data);
-}
-
-void EventMonitor::handleRecordEvent(XRecordInterceptData *data)
-{
-	if (data->category == XRecordFromServer) {
-		xEvent *event = reinterpret_cast<xEvent*>(data->data);
-		switch (event->u.u.type) {
-		case KeyPress:
-			emit keyPress(static_cast<unsigned char*>(data->data)[1]);
-			qDebug() << (data->data)[1] << (int)Qt::Key_Control;
-			break;
-		default:
-			break;
-		}
-	}
-
-	XRecordFreeData(data);
-}
-
-Shortcut::Shortcut(QObject *parent) : QObject(parent),
-	m_timer(new QTimer)
-{
-	auto slot_onKeyPressed = [this](void) {
+	this->m_eventMonitor = new EventMonitor();
+	QObject::connect(this->m_eventMonitor, &EventMonitor::keyPress, this, [this](void) {
 		if (this->m_isActive) {
 			emit this->activated();
 		}
@@ -68,17 +23,22 @@ Shortcut::Shortcut(QObject *parent) : QObject(parent),
 
 		/* Record Press */
 		this->m_timer->start(400);
-	};
-	this->m_eventMonitor = new EventMonitor(this);
-	QObject::connect(this->m_eventMonitor, &EventMonitor::keyPress, this, slot_onKeyPressed);
-	QObject::connect(this->m_timer, &QTimer::timeout, [this](void) {
-		this->m_isActive = false;
 	});
 	this->m_eventMonitor->start();
+#endif
+#ifdef Q_OS_WIN
+	this->m_shortcut = new QxtGlobalShortcut(this);
+	this->m_shortcut->setShortcut(QKeySequence("Ctrl+Shift+v"));
+	QObject::connect(this->m_shortcut, &QxtGlobalShortcut::activated, this, [this](void) {
+		emit this->activated();
+	});
+#endif
 }
 
 Shortcut::~Shortcut()
 {
+#ifdef Q_OS_LINUX
 	this->m_eventMonitor->stop();
 	this->m_eventMonitor->deleteLater();
+#endif
 }

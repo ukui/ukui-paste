@@ -1,7 +1,6 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include "3rd/qxtglobalshortcut5/gui/qxtglobalshortcut.h"
 #include "pasteitem.h"
 #include "shortcut.h"
 

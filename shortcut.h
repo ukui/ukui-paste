@@ -3,34 +3,13 @@
 
 #include <QTimer>
 
-#include <QThread>
-#include <X11/Xlib.h>
-#include <X11/extensions/record.h>
-#include <X11/Xlibint.h>
+#ifdef Q_OS_LINUX
+#include "shortcut_x11.h"
+#endif
 
-class EventMonitor : public QThread
-{
-	Q_OBJECT
-
-public:
-	EventMonitor(QObject *parent = nullptr);
-
-signals:
-	void keyPress(int code);
-
-protected:
-	static void callback(XPointer trash, XRecordInterceptData *data);
-	void handleRecordEvent(XRecordInterceptData *);
-	void run();
-
-public slots:
-	void stop();
-
-private:
-	bool		m_isPress;
-	Display		*m_display;
-	XRecordContext	m_context;
-};
+#ifdef Q_OS_WIN
+#include "3rd/qxtglobalshortcut5/gui/qxtglobalshortcut.h"
+#endif
 
 class Shortcut : public QObject
 {
@@ -44,9 +23,14 @@ signals:
 	void activated(void);
 
 private:
-	EventMonitor	*m_eventMonitor;
-	QTimer		*m_timer;
-	bool		m_isActive;
+#ifdef Q_OS_LINUX
+	EventMonitor		*m_eventMonitor;
+	QTimer			*m_timer;
+	bool			m_isActive;
+#endif
+#ifdef Q_OS_WIN
+	QxtGlobalShortcut	*m_shortcut;
+#endif
 };
 
 #endif // SHORTCUT_H

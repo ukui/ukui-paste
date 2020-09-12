@@ -1,11 +1,13 @@
 QT       += core gui
 
-unix {
+unix:!macx {
         QT += KWindowSystem
         LIBS += -lXtst
+        HEADERS += shortcut_x11.h
+        SOURCES += shortcut_x11.cpp
 }
 
-win32 {
+win32: {
         QT += winextras
         LIBS += -lpsapi
 }
