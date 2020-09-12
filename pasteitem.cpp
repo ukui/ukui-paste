@@ -50,6 +50,11 @@ void PasteItem::setIcon(QPixmap pixmap)
 	m_barnner->setIcon(pixmap);
 }
 
+void PasteItem::setTime(QDateTime &dateTime)
+{
+	m_barnner->setTime(dateTime);
+}
+
 void PasteItem::resizeEvent(QResizeEvent *event)
 {
 	QSize size = event->size();

@@ -20,6 +20,9 @@ struct ItemData : QObjectUserData
 	QList<QUrl>	urls;
 	QString		html;
 	QString		text;
+
+	/* The time of data create */
+	QDateTime	time;
 };
 Q_DECLARE_METATYPE(ItemData);
 
@@ -31,6 +34,7 @@ public:
 	void setImage(QImage &);
 	void setPlainText(QString s);
 	void setIcon(QPixmap);
+	void setTime(QDateTime &);
 
 private:
 	void copyData(void);

@@ -9,22 +9,17 @@
 Barnner::Barnner(QWidget *parent) : QWidget(parent),
 	m_icon(new QLabel(this)),
 	m_text(new QLabel(this)),
-	m_time(new QLabel("222222", this))
+	m_time(new QLabel(this))
 {
-	this->m_icon->setAttribute(Qt::WA_TranslucentBackground);
-	this->m_text->setAttribute(Qt::WA_TranslucentBackground);
-	this->m_text->setAlignment(Qt::AlignVCenter|Qt::AlignLeft);
-	this->m_time->setAttribute(Qt::WA_TranslucentBackground);
-	this->m_time->setAlignment(Qt::AlignVCenter|Qt::AlignLeft);
-	this->m_icon->setScaledContents(false);
-	this->m_text->setScaledContents(true);
-	this->m_time->setScaledContents(true);
-
-	this->m_text->setFont(QFont("Microsoft YaHei", 16, 75));
+	this->setObjectName("Barnner");
 	this->setAttribute(Qt::WA_StyledBackground, true);
 
+	this->m_icon->setScaledContents(false);
+	this->m_text->setStyleSheet(this->m_text->styleSheet()+"font-size: 22px;");
+	this->m_time->setStyleSheet(this->m_time->styleSheet()+"color: rgba(255, 255, 255, 0.7);");
+
 	QVBoxLayout *vboxlayout = new QVBoxLayout();
-	vboxlayout->setSpacing(5);
+	vboxlayout->setSpacing(0);
 	vboxlayout->addStretch();
 	vboxlayout->setContentsMargins(20, 0, 0, 0);
 	vboxlayout->addWidget(this->m_text);
@@ -38,7 +33,6 @@ Barnner::Barnner(QWidget *parent) : QWidget(parent),
 	hboxlayout->setSpacing(0);
 	hboxlayout->setContentsMargins(0, 0, 0, 0);
 	this->setLayout(hboxlayout);
-	this->setObjectName("Barnner");
 }
 
 void Barnner::setBackground(QRgb rgb)
@@ -99,4 +93,34 @@ void Barnner::resizeEvent(QResizeEvent *event)
 	}
 
 	QWidget::resizeEvent(event);
+}
+
+void Barnner::showEvent(QShowEvent *event)
+{
+	if (!this->m_datetime.isNull()) {
+		qint64 currntSecs = QDateTime::currentDateTime().toSecsSinceEpoch();
+		qint64 createSecs = this->m_datetime.toSecsSinceEpoch();
+		qint64 period = currntSecs - createSecs;
+		if (period > 0) {
+			int months  = period / (30 * 24 * 60 * 60);
+			int days    = period / (24 * 60 * 60);
+			int hours   = period / (60 * 60);
+			int minutes = period / 60;
+			int secs    = period;
+
+			if (months) {
+				this->m_time->setText(QString("%1 months ago").arg(months));
+			} else if (days) {
+				this->m_time->setText(QString("%1 days ago").arg(days));
+			} else if (hours) {
+				this->m_time->setText(QString("%1 hours ago").arg(hours));
+			} else if (minutes) {
+				this->m_time->setText(QString("%1 minutes ago").arg(minutes));
+			} else if (secs) {
+				this->m_time->setText(QString("%1 secs ago").arg(secs));
+			}
+		}
+	}
+
+	QWidget::showEvent(event);
 }

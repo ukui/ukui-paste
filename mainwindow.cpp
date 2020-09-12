@@ -332,6 +332,9 @@ void MainWindow::clipboard_later(void)
 		this->__scroll_widget->removeItemWidget(item);
 	}
 
+	itemData.time = QDateTime::currentDateTime();
+	widget->setTime(itemData.time);
+
 	/* Find and set icon who triggers the clipboard */
 	widget->setIcon(this->getClipboardOwnerIcon());
 	item->setData(Qt::UserRole, QVariant::fromValue(itemData));

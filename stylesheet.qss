@@ -94,3 +94,11 @@ QListWidget::Item:selected
         border-top-right-radius: 8px;
         border-top-left-radius: 8px;
 }
+
+#Barnner > QLabel
+{
+        background-color: transparent;
+        padding: 0px;
+        margin: 0px;
+        color: white;
+}

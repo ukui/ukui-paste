@@ -20,13 +20,11 @@ public:
 	void setTitle(QString s)
 	{
 		this->m_text->setText(s);
-		this->m_text->show();
 	}
 
 	void setTime(QDateTime &dateTime)
 	{
-		this->m_time->setText(dateTime.toString());
-		this->m_text->show();
+		this->m_datetime = dateTime;
 	}
 
 	void setBackground(QRgb rgb);
@@ -34,13 +32,19 @@ public:
 
 protected:
 	void resizeEvent(QResizeEvent *event);
+	void showEvent(QShowEvent *);
 
 private:
 	QLabel		*m_icon;
+	/* The type text for Barnner */
 	QLabel		*m_text;
+	/* label for show date time */
 	QLabel		*m_time;
 
+	/* icon data */
 	QPixmap		m_pixmap;
+	/* date time */
+	QDateTime	m_datetime;
 };
 
 #endif // BARNNER_H
