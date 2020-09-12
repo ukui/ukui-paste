@@ -3,6 +3,7 @@
 
 #include "3rd/qxtglobalshortcut5/gui/qxtglobalshortcut.h"
 #include "pasteitem.h"
+#include "shortcut.h"
 
 #include <QMainWindow>
 #include <QPropertyAnimation>
@@ -45,7 +46,8 @@ private:
 	QWidget				*__main_frame;
 	QGraphicsDropShadowEffect	*__main_frame_shadow;
 	QPropertyAnimation		*__hide_animation;
-	QxtGlobalShortcut		*__shortcut;
+//	QxtGlobalShortcut		*__shortcut;
+	Shortcut			*__shortcut;
 	/* That is a workaround for hide window */
 	bool				__hide_state;
 

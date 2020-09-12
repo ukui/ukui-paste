@@ -1,5 +1,3 @@
-#include "mainwindow.h"
-
 #include <QApplication>
 #include <QScreen>
 #include <QLabel>
@@ -13,6 +11,8 @@
 #include <QFileIconProvider>
 #include <QUrl>
 #include <QDebug>
+
+#include "mainwindow.h"
 
 #ifdef Q_OS_WIN
 #include <windows.h>
@@ -91,7 +91,7 @@ MainWindow::MainWindow(QWidget *parent)
 	  __main_frame(new QWidget(this)),
 	  __main_frame_shadow(new QGraphicsDropShadowEffect(this)),
 	  __hide_animation(new QPropertyAnimation(this, "pos")),
-	  __shortcut(new QxtGlobalShortcut(this)),
+	  __shortcut(new Shortcut(this)),
 	  __hide_state(true),
 	  __clipboard(QApplication::clipboard()),
 	  __is_me_trigger(false)
@@ -135,14 +135,14 @@ MainWindow::MainWindow(QWidget *parent)
 	this->__hide_animation->setEndValue(QPoint(0, QApplication::primaryScreen()->geometry().height()));
 	this->__hide_animation->setEasingCurve(QEasingCurve::OutQuad);
 
-#ifdef Q_OS_WIN
-	QKeySequence key = QKeySequence("Ctrl+Shift+v");
-#endif
-#ifdef Q_OS_LINUX
-	QKeySequence key = QKeySequence("Ctrl+Alt+v");
-#endif
-	this->__shortcut->setShortcut(key);
-	QObject::connect(this->__shortcut, &QxtGlobalShortcut::activated, [this](void) {
+//#ifdef Q_OS_WIN
+//	QKeySequence key = QKeySequence("Ctrl+Shift+v");
+//#endif
+//#ifdef Q_OS_LINUX
+//	QKeySequence key = QKeySequence("Ctrl+Alt+v");
+//#endif
+//	this->__shortcut->setShortcut(key);
+	QObject::connect(this->__shortcut, &Shortcut::activated, [this](void) {
 		if (!this->isVisible())
 			this->show_window();
 	});

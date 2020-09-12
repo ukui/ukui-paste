@@ -1,8 +1,8 @@
-#include "mainwindow.h"
-
 #include <QApplication>
 #include <QGuiApplication>
 #include <SingleApplication>
+
+#include "mainwindow.h"
 
 #ifdef Q_OS_LINUX
 #include <X11/Xlib.h>

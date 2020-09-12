@@ -2,6 +2,7 @@ QT       += core gui
 
 unix {
         QT += KWindowSystem
+        LIBS += -lXtst
 }
 
 win32 {
@@ -34,13 +35,15 @@ SOURCES += \
     mainwindow.cpp \
     pasteitem.cpp \
     pasteitembarnner.cpp \
-    pasteitemcontext.cpp
+    pasteitemcontext.cpp \
+    shortcut.cpp
 
 HEADERS += \
     mainwindow.h \
     pasteitem.h \
     pasteitembarnner.h \
-    pasteitemcontext.h
+    pasteitemcontext.h \
+    shortcut.h
 
 TRANSLATIONS += \
     Pastes_zh_CN.ts
