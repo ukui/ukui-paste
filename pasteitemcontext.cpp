@@ -14,6 +14,11 @@ TextFrame::TextFrame(QWidget *parent) : QLabel(parent),
 	this->m_mask_label->setContentsMargins(0, 3, 0, 3);
 }
 
+TextFrame::~TextFrame()
+{
+	delete m_mask_label;
+}
+
 void TextFrame::setMaskFrameText(QString s)
 {
 	this->m_mask_label->setText(s);
@@ -52,6 +57,12 @@ StackedWidget::StackedWidget(QWidget *parent) : QStackedWidget(parent),
 	this->setObjectName("Context");
 	this->addWidget(m_pixmap_frame);
 	this->addWidget(m_text_frame);
+}
+
+StackedWidget::~StackedWidget()
+{
+	delete m_pixmap_frame;
+	delete m_text_frame;
 }
 
 void StackedWidget::setPixmap(QPixmap &pixmap)

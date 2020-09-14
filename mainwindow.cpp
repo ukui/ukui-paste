@@ -6,6 +6,7 @@
 #include <QFile>
 #include <QMessageBox>
 #include <QMimeData>
+#include <QCryptographicHash>
 #include <QImage>
 #include <QFileInfo>
 #include <QFileIconProvider>
@@ -292,6 +293,7 @@ void MainWindow::clipboard_later(void)
 	const QMimeData *mime_data = this->__clipboard->mimeData();
 	PasteItem *widget = nullptr;
 	QListWidgetItem *item;
+	QByteArray md5_data;
 
 	if (isMeTrigger())
 		return;
@@ -306,16 +308,19 @@ void MainWindow::clipboard_later(void)
 		itemData.text = mime_data->text();
 		if (mime_data->hasImage())
 			itemData.image = qvariant_cast<QImage>(mime_data->imageData());
+		md5_data = itemData.html.toLocal8Bit();
 	} else if (mime_data->hasImage()) {
 		QImage image = qvariant_cast<QImage>(mime_data->imageData());
 		widget->setImage(image);
 		itemData.type = ItemData::IMAGE;
 		itemData.image = image;
+		md5_data = mime_data->imageData().toByteArray();
 	} else if (mime_data->hasUrls()) {
 		QList<QUrl> urls = mime_data->urls();
 		QString s;
 		foreach(QUrl url, urls) {
 			s += url.toLocalFile() + "\n";
+			md5_data += url.toEncoded();
 		}
 		widget->setPlainText(s.trimmed());
 		itemData.type = ItemData::URLS;
@@ -324,9 +329,24 @@ void MainWindow::clipboard_later(void)
 		widget->setPlainText(mime_data->text().trimmed());
 		itemData.type = ItemData::TEXT;
 		itemData.text = mime_data->text();
+		md5_data = itemData.text.toLocal8Bit();
 	} else {
 		/* No data, remove it */
 		this->__scroll_widget->removeItemWidget(item);
+		delete item;
+		return;
+	}
+
+	itemData.md5 = QCryptographicHash::hash(md5_data, QCryptographicHash::Md5);
+	/* Remove dup item */
+	for (int i = 0; i < this->__scroll_widget->count(); i++) {
+		QListWidgetItem *tmp_item = this->__scroll_widget->item(i);
+		ItemData tmp_itemData = tmp_item->data(Qt::UserRole).value<ItemData>();
+		/* They have same md5 and not himself, remove it */
+		if ((itemData.md5 == tmp_itemData.md5) && (tmp_item != item)) {
+			this->__scroll_widget->removeItemWidget(tmp_item);
+			delete tmp_item;
+		}
 	}
 
 	itemData.time = QDateTime::currentDateTime();

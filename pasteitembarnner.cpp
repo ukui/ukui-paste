@@ -35,6 +35,13 @@ Barnner::Barnner(QWidget *parent) : QWidget(parent),
 	this->setLayout(hboxlayout);
 }
 
+Barnner::~Barnner()
+{
+	delete m_time;
+	delete m_text;
+	delete m_icon;
+}
+
 void Barnner::setBackground(QRgb rgb)
 {
 	QString s = QString("background-color: rgb(%1, %2, %3);")

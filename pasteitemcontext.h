@@ -14,6 +14,7 @@ class TextFrame : public QLabel
 {
 public:
 	TextFrame(QWidget *parent = nullptr);
+	~TextFrame();
 
 	void setMaskFrameText(QString);
 
@@ -45,6 +46,7 @@ class StackedWidget : public QStackedWidget
 {
 public:
 	StackedWidget(QWidget *parent = nullptr);
+	~StackedWidget();
 
 	void setPixmap(QPixmap &);
 	void setText(QString &);

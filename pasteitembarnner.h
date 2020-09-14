@@ -11,6 +11,7 @@ class Barnner : public QWidget
 	Q_OBJECT
 public:
 	explicit Barnner(QWidget *parent = nullptr);
+	~Barnner();
 
 	void setIcon(QPixmap &pixmap)
 	{

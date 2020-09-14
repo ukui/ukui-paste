@@ -8,6 +8,7 @@
 #include <QWidget>
 #include <QResizeEvent>
 #include <QLabel>
+#include <QByteArray>
 #include <QGraphicsDropShadowEffect>
 
 struct ItemData : QObjectUserData
@@ -20,6 +21,7 @@ struct ItemData : QObjectUserData
 	QList<QUrl>	urls;
 	QString		html;
 	QString		text;
+	QByteArray	md5;
 
 	/* The time of data create */
 	QDateTime	time;
