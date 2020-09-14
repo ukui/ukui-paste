@@ -1,7 +1,7 @@
 #ifndef SHORTCUT_H
 #define SHORTCUT_H
 
-#include <QTimer>
+#include <QObject>
 
 #ifdef Q_OS_LINUX
 #include "shortcut_x11.h"
@@ -17,16 +17,13 @@ class Shortcut : public QObject
 
 public:
 	Shortcut(QObject *parent = nullptr);
-	~Shortcut();
 
 signals:
 	void activated(void);
 
 private:
 #ifdef Q_OS_LINUX
-	EventMonitor		*m_eventMonitor;
-	QTimer			*m_timer;
-	bool			m_isActive;
+	DoubleCtrlShortcut	*m_shortcut;
 #endif
 #ifdef Q_OS_WIN
 	QxtGlobalShortcut	*m_shortcut;

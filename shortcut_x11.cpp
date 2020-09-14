@@ -1,12 +1,43 @@
+#include <QKeySequence>
+#include <QDebug>
+
 #include "shortcut_x11.h"
 
-EventMonitor::EventMonitor(QObject *parent) : QThread(parent),
-	m_isPress(false),
-	m_display(nullptr)
+DoubleCtrlShortcut::DoubleCtrlShortcut(QObject *parent) : QThread(parent),
+	m_display(nullptr),
+	m_timer(new QTimer)
 {
+	QObject::connect(this->m_timer, &QTimer::timeout, [this](void) {
+		this->m_isActive = false;
+		this->m_timer->stop();
+	});
+
+	QObject::connect(this, &DoubleCtrlShortcut::keyPress, this, [this](int keyCode) {
+		if (keyCode != 37 /* Left Control */)
+			return;
+
+		if (this->m_isActive) {
+			emit this->activated();
+		}
+
+		this->m_isActive = true;
+		if (this->m_timer->isActive())
+			this->m_timer->stop();
+
+		/* Record Press */
+		this->m_timer->start(400);
+	});
+
+	this->start();
 }
 
-void EventMonitor::run(void)
+DoubleCtrlShortcut::~DoubleCtrlShortcut()
+{
+	this->stop();
+	this->deleteLater();
+}
+
+void DoubleCtrlShortcut::run(void)
 {
 	Display *display = XOpenDisplay(nullptr);
 	XRecordClientSpec clients = XRecordAllClients;
@@ -21,27 +52,22 @@ void EventMonitor::run(void)
 	XSync(display, True);
 
 	this->m_display = XOpenDisplay(nullptr);
-	XRecordEnableContext(this->m_display, m_context, &EventMonitor::callback, reinterpret_cast<XPointer>(this));
+	XRecordEnableContext(this->m_display, m_context, &DoubleCtrlShortcut::callback, reinterpret_cast<XPointer>(this));
 }
 
-void EventMonitor::stop()
+void DoubleCtrlShortcut::stop()
 {
 	XRecordDisableContext(this->m_display, this->m_context);
 	XFlush(this->m_display);
 }
 
-void EventMonitor::callback(XPointer ptr, XRecordInterceptData *data)
-{
-	reinterpret_cast<EventMonitor*>(ptr)->handleRecordEvent(data);
-}
-
-void EventMonitor::handleRecordEvent(XRecordInterceptData *data)
+void DoubleCtrlShortcut::callback(XPointer ptr, XRecordInterceptData *data)
 {
 	if (data->category == XRecordFromServer) {
 		xEvent *event = reinterpret_cast<xEvent*>(data->data);
 		switch (event->u.u.type) {
 		case KeyPress:
-			emit keyPress(static_cast<unsigned char*>(data->data)[1]);
+			emit reinterpret_cast<DoubleCtrlShortcut*>(ptr)->keyPress(static_cast<unsigned char*>(data->data)[1]);
 			break;
 		default:
 			break;
