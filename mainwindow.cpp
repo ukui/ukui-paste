@@ -138,6 +138,8 @@ MainWindow::MainWindow(QWidget *parent)
 	QObject::connect(this->__shortcut, &Shortcut::activated, [this](void) {
 		if (!this->isVisible())
 			this->show_window();
+		else
+			this->hide_window();
 	});
 
 	this->initUI();

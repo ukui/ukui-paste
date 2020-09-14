@@ -13,8 +13,10 @@ DoubleCtrlShortcut::DoubleCtrlShortcut(QObject *parent) : QThread(parent),
 	});
 
 	QObject::connect(this, &DoubleCtrlShortcut::keyPress, this, [this](int keyCode) {
-		if (keyCode != 37 /* Left Control */)
+		if (keyCode != 37 /* Left Control */) {
+			this->m_isActive = false;
 			return;
+		}
 
 		if (this->m_isActive) {
 			emit this->activated();
@@ -25,7 +27,7 @@ DoubleCtrlShortcut::DoubleCtrlShortcut(QObject *parent) : QThread(parent),
 			this->m_timer->stop();
 
 		/* Record Press */
-		this->m_timer->start(400);
+		this->m_timer->start(300);
 	});
 
 	this->start();
