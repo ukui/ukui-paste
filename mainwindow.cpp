@@ -126,9 +126,6 @@ MainWindow::MainWindow(QWidget *parent)
 		if (this->__hide_animation->direction() == QAbstractAnimation::Forward) {
 			/* Hidden stage */
 			this->hide();
-		} else {
-			/* Show stage */
-			this->activateWindow();
 		}
 	});
 	this->__hide_animation->setDuration(200);
@@ -170,8 +167,6 @@ void MainWindow::showEvent(QShowEvent *event)
 	if(lists.length() > 0) {
 		auto *widget = this->__scroll_widget->itemWidget(lists.value(0));
 		widget->setFocus();
-		widget->activateWindow();
-		widget->show();
 	}
 
 	QWidget::showEvent(event);
@@ -182,6 +177,7 @@ void MainWindow::show_window(void)
 	this->__hide_animation->setDirection(QAbstractAnimation::Backward);
 	this->__hide_animation->start();
 	this->__hide_state = false;
+	this->activateWindow();
 	this->show();
 }
 
