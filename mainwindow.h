@@ -29,7 +29,7 @@ protected:
 
 private:
 	void initUI(void);
-	PasteItem *insertItemWidget(QListWidgetItem **);
+	PasteItem *insertItemWidget(void);
 	void resetItemTabOrder(void);
 	static void loadStyleSheet(QWidget *, const QString &);
 	QPixmap getClipboardOwnerIcon(void);

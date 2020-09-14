@@ -239,22 +239,37 @@ void MainWindow::loadStyleSheet(QWidget *w, const QString &styleSheetFile)
 }
 
 /* Insert a PasteItem into listwidget */
-PasteItem *MainWindow::insertItemWidget(QListWidgetItem **item)
+PasteItem *MainWindow::insertItemWidget(void)
 {
-	(*item) = new QListWidgetItem();
-	auto *widget = new PasteItem(nullptr, *item);
+	QListWidgetItem *item = new QListWidgetItem;
+	auto *widget = new PasteItem(nullptr, item);
+
 	QObject::connect(widget, &PasteItem::hideWindow, [this](void) {
 		this->__is_me_trigger = true;
 		this->hide_window();
 	});
 
+	QObject::connect(widget, &PasteItem::dataCopyed, this, [this, widget](void) {
+		int currentRow = this->__scroll_widget->currentRow();
+		if (currentRow != 0) {
+			ItemData itemData =  this->__scroll_widget->currentItem()->data(Qt::UserRole).value<ItemData>();
+			itemData.time = QDateTime::currentDateTime();
+
+			this->__scroll_widget->takeItem(currentRow);
+			PasteItem *p_item = this->insertItemWidget();
+			this->__scroll_widget->item(0)->setData(Qt::UserRole, QVariant::fromValue(itemData));
+		}
+
+		emit widget->hideWindow();
+	});
+
 	QRect rect = QApplication::primaryScreen()->geometry();
 	/* resize item, It's use for pasteitem frame */
-	(*item)->setSizeHint(QSize(rect.width()/6, 1));
+	item->setSizeHint(QSize(rect.width()/6, 1));
 
-	this->__scroll_widget->insertItem(0, *item);
+	this->__scroll_widget->insertItem(0, item);
 	this->__scroll_widget->setCurrentRow(0);
-	this->__scroll_widget->setItemWidget(*item, widget);
+	this->__scroll_widget->setItemWidget(item, widget);
 	this->resetItemTabOrder();
 
 	return widget;
@@ -288,13 +303,12 @@ void MainWindow::clipboard_later(void)
 {
 	const QMimeData *mime_data = this->__clipboard->mimeData();
 	PasteItem *widget = nullptr;
-	QListWidgetItem *item;
 	QByteArray md5_data;
 
 	if (isMeTrigger())
 		return;
 
-	widget = this->insertItemWidget(&item);
+	widget = this->insertItemWidget();
 	ItemData itemData;
 
 	if (mime_data->hasHtml() && !mime_data->text().isEmpty()) {
@@ -328,18 +342,17 @@ void MainWindow::clipboard_later(void)
 		md5_data = itemData.text.toLocal8Bit();
 	} else {
 		/* No data, remove it */
-		this->__scroll_widget->removeItemWidget(item);
-		delete item;
+		this->__scroll_widget->takeItem(0);
 		return;
 	}
 
 	itemData.md5 = QCryptographicHash::hash(md5_data, QCryptographicHash::Md5);
 	/* Remove dup item */
-	for (int i = 0; i < this->__scroll_widget->count(); i++) {
+	for (int i = 1; i < this->__scroll_widget->count(); i++) {
 		QListWidgetItem *tmp_item = this->__scroll_widget->item(i);
 		ItemData tmp_itemData = tmp_item->data(Qt::UserRole).value<ItemData>();
 		/* They have same md5 and not himself, remove it */
-		if ((itemData.md5 == tmp_itemData.md5) && (tmp_item != item)) {
+		if (itemData.md5 == tmp_itemData.md5) {
 			this->__scroll_widget->removeItemWidget(tmp_item);
 			delete tmp_item;
 		}
@@ -350,7 +363,7 @@ void MainWindow::clipboard_later(void)
 
 	/* Find and set icon who triggers the clipboard */
 	widget->setIcon(this->getClipboardOwnerIcon());
-	item->setData(Qt::UserRole, QVariant::fromValue(itemData));
+	this->__scroll_widget->item(0)->setData(Qt::UserRole, QVariant::fromValue(itemData));
 }
 
 QPixmap MainWindow::getClipboardOwnerIcon(void)

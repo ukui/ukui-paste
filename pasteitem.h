@@ -58,6 +58,7 @@ private:
 	QListWidgetItem			*m_listwidget_item;
 
 Q_SIGNALS:
+	void dataCopyed(void);
 	void hideWindow(void);
 };
 

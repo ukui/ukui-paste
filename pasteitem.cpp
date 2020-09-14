@@ -115,5 +115,5 @@ void PasteItem::copyData(void)
 		clipboard->setText(itemData.text);
 	}
 
-	emit this->hideWindow();
+	emit this->dataCopyed();
 }
