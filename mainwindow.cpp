@@ -302,6 +302,8 @@ void MainWindow::clipboard_later(void)
 		itemData.type = ItemData::HTML;
 		itemData.html = mime_data->html();
 		itemData.text = mime_data->text();
+		if (mime_data->hasImage())
+			itemData.image = qvariant_cast<QImage>(mime_data->imageData());
 	} else if (mime_data->hasImage()) {
 		QImage image = qvariant_cast<QImage>(mime_data->imageData());
 		widget->setImage(image);
