@@ -45,6 +45,12 @@ void PasteItem::setPlainText(QString s)
 	this->m_barnner->setTitle(QObject::tr("PlainText"));
 }
 
+void PasteItem::setRichText(QString s, int count)
+{
+	m_context->setRichText(s, count);
+	this->m_barnner->setTitle(QObject::tr("RichText"));
+}
+
 void PasteItem::setIcon(QPixmap pixmap)
 {
 	m_barnner->setIcon(pixmap);

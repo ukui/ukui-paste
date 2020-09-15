@@ -19,7 +19,7 @@ Barnner::Barnner(QWidget *parent) : QWidget(parent),
 	this->m_time->setStyleSheet(this->m_time->styleSheet()+"font-size: 11px; color: rgba(255, 255, 255, 0.7);");
 
 	QVBoxLayout *vboxlayout = new QVBoxLayout();
-	vboxlayout->setSpacing(0);
+	vboxlayout->setSpacing(3);
 	vboxlayout->addStretch();
 	vboxlayout->setContentsMargins(20, 0, 0, 0);
 	vboxlayout->addWidget(this->m_text);

@@ -50,16 +50,18 @@ public:
 
 	void setPixmap(QPixmap &);
 	void setText(QString &);
+	void setRichText(QString &, int);
 
 	const QPixmap *pixmap(void);
 	QString text(void);
 
-	enum V { IMAGE, TEXT };
+	enum V { IMAGE, TEXT, RICHTEXT, URLS };
 	Q_ENUM(V)
 
 private:
 	PixmapFrame	*m_pixmap_frame;
 	TextFrame	*m_text_frame;
+	TextFrame	*m_richtext_frame;
 };
 
 #endif // PASTEITEMCONTEXT_H

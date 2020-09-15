@@ -34,7 +34,8 @@ class PasteItem : public QWidget
 public:
 	explicit PasteItem(QWidget *parent = nullptr, QListWidgetItem *item = nullptr);
 	void setImage(QImage &);
-	void setPlainText(QString s);
+	void setPlainText(QString);
+	void setRichText(QString, int);
 	void setIcon(QPixmap);
 	void setTime(QDateTime &);
 

@@ -11,15 +11,21 @@
     <message>
         <location filename="pasteitem.cpp" line="45"/>
         <source>PlainText</source>
-        <translation type="unfinished">文本</translation>
+        <translation>文本</translation>
     </message>
     <message>
-        <location filename="pasteitemcontext.cpp" line="73"/>
+        <location filename="pasteitem.cpp" line="51"/>
+        <source>RichText</source>
+        <translation>富文本</translation>
+    </message>
+    <message>
+        <location filename="pasteitemcontext.cpp" line="76"/>
         <source>px</source>
         <translation>像素</translation>
     </message>
     <message>
-        <location filename="pasteitemcontext.cpp" line="85"/>
+        <location filename="pasteitemcontext.cpp" line="88"/>
+        <location filename="pasteitemcontext.cpp" line="97"/>
         <source>characters</source>
         <translation>字节</translation>
     </message>

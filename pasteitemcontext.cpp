@@ -52,23 +52,26 @@ void PixmapFrame::resizeEvent(QResizeEvent *event)
 
 StackedWidget::StackedWidget(QWidget *parent) : QStackedWidget(parent),
 	m_pixmap_frame(new PixmapFrame(this)),
-	m_text_frame(new TextFrame(this))
+	m_text_frame(new TextFrame(this)),
+	m_richtext_frame(new TextFrame(this))
 {
 	this->setObjectName("Context");
 	this->addWidget(m_pixmap_frame);
 	this->addWidget(m_text_frame);
+	this->addWidget(m_richtext_frame);
 }
 
 StackedWidget::~StackedWidget()
 {
 	delete m_pixmap_frame;
 	delete m_text_frame;
+	delete m_richtext_frame;
 }
 
 void StackedWidget::setPixmap(QPixmap &pixmap)
 {
 	m_pixmap_frame->setStorePixmap(pixmap);
-	this->setCurrentIndex(0);
+	this->setCurrentIndex(StackedWidget::IMAGE);
 
 	QString s = QString("%1x%2 ").arg(pixmap.width()).arg(pixmap.height()) + QObject::tr("px");
 	m_pixmap_frame->setMaskFrameText(s);
@@ -82,8 +85,17 @@ const QPixmap *StackedWidget::pixmap(void)
 void StackedWidget::setText(QString &s)
 {
 	m_text_frame->setText(s);
+	m_text_frame->setIndent(4);
 	m_text_frame->setMaskFrameText(QString("%1 ").arg(s.count()) + QObject::tr("characters"));
-	this->setCurrentIndex(1);
+	this->setCurrentIndex(StackedWidget::TEXT);
+}
+
+void StackedWidget::setRichText(QString &s, int count)
+{
+	m_richtext_frame->setText(s);
+	m_richtext_frame->setTextFormat(Qt::RichText);
+	m_richtext_frame->setMaskFrameText(QString("%1 ").arg(count) + QObject::tr("characters"));
+	this->setCurrentIndex(StackedWidget::RICHTEXT);
 }
 
 QString StackedWidget::text(void)

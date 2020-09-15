@@ -282,7 +282,7 @@ void MainWindow::clipboard_later(void)
 	ItemData itemData;
 
 	if (mime_data->hasHtml() && !mime_data->text().isEmpty()) {
-		widget->setPlainText(mime_data->text().trimmed());
+		widget->setRichText(mime_data->html().trimmed(), mime_data->text().count());
 		itemData.type = ItemData::HTML;
 		itemData.html = mime_data->html();
 		itemData.text = mime_data->text();
@@ -321,7 +321,7 @@ void MainWindow::clipboard_later(void)
 	for (int i = 1; i < this->__scroll_widget->count(); i++) {
 		QListWidgetItem *tmp_item = this->__scroll_widget->item(i);
 		ItemData tmp_itemData = tmp_item->data(Qt::UserRole).value<ItemData>();
-		/* They have same md5 and not himself, remove it */
+		/* They have same md5, remove it */
 		if (itemData.md5 == tmp_itemData.md5) {
 			this->__scroll_widget->removeItemWidget(tmp_item);
 			delete tmp_item;
