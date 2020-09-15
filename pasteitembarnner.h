@@ -18,6 +18,11 @@ public:
 		m_pixmap = pixmap;
 	}
 
+	QPixmap icon(void)
+	{
+		return m_pixmap;
+	}
+
 	void setTitle(QString s)
 	{
 		this->m_text->setText(s);

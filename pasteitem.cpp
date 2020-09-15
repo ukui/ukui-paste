@@ -50,6 +50,11 @@ void PasteItem::setIcon(QPixmap pixmap)
 	m_barnner->setIcon(pixmap);
 }
 
+QPixmap PasteItem::icon(void)
+{
+	return m_barnner->icon();
+}
+
 void PasteItem::setTime(QDateTime &dateTime)
 {
 	m_barnner->setTime(dateTime);
@@ -79,7 +84,7 @@ void PasteItem::keyPressEvent(QKeyEvent *event)
 		this->copyData();
 		break;
 	case Qt::Key_Escape:
-		emit this->hideWindow();
+		emit this->hideWindow(false);
 		break;
 	}
 
@@ -115,5 +120,5 @@ void PasteItem::copyData(void)
 		clipboard->setText(itemData.text);
 	}
 
-	emit this->dataCopyed();
+	emit this->hideWindow(true);
 }

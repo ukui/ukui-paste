@@ -34,7 +34,6 @@ private:
 	static void loadStyleSheet(QWidget *, const QString &);
 	QPixmap getClipboardOwnerIcon(void);
 	void enabledGlassEffect(void);
-	bool isMeTrigger(void);
 
 public Q_SLOTS:
 	void hide_window(void);
@@ -45,7 +44,6 @@ private:
 	QWidget				*__main_frame;
 	QGraphicsDropShadowEffect	*__main_frame_shadow;
 	QPropertyAnimation		*__hide_animation;
-//	QxtGlobalShortcut		*__shortcut;
 	Shortcut			*__shortcut;
 	/* That is a workaround for hide window */
 	bool				__hide_state;
@@ -57,6 +55,7 @@ private:
 
 	QClipboard			*__clipboard;
 
-	bool				__is_me_trigger;
+	/* It's copyed from myself, We need save icon */
+	QPixmap				m_pasteitem_icon;
 };
 #endif // MAINWINDOW_H

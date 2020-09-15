@@ -94,8 +94,7 @@ MainWindow::MainWindow(QWidget *parent)
 	  __hide_animation(new QPropertyAnimation(this, "pos")),
 	  __shortcut(new Shortcut(this)),
 	  __hide_state(true),
-	  __clipboard(QApplication::clipboard()),
-	  __is_me_trigger(false)
+	  __clipboard(QApplication::clipboard())
 {
 	QRect rect = QApplication::primaryScreen()->geometry();
 
@@ -244,23 +243,10 @@ PasteItem *MainWindow::insertItemWidget(void)
 	QListWidgetItem *item = new QListWidgetItem;
 	auto *widget = new PasteItem(nullptr, item);
 
-	QObject::connect(widget, &PasteItem::hideWindow, [this](void) {
-		this->__is_me_trigger = true;
+	QObject::connect(widget, &PasteItem::hideWindow, [this, widget](bool copyed) {
+		if (copyed)
+			this->m_pasteitem_icon = widget->icon();
 		this->hide_window();
-	});
-
-	QObject::connect(widget, &PasteItem::dataCopyed, this, [this, widget](void) {
-		int currentRow = this->__scroll_widget->currentRow();
-		if (currentRow != 0) {
-			ItemData itemData =  this->__scroll_widget->currentItem()->data(Qt::UserRole).value<ItemData>();
-			itemData.time = QDateTime::currentDateTime();
-
-			this->__scroll_widget->takeItem(currentRow);
-			PasteItem *p_item = this->insertItemWidget();
-			this->__scroll_widget->item(0)->setData(Qt::UserRole, QVariant::fromValue(itemData));
-		}
-
-		emit widget->hideWindow();
 	});
 
 	QRect rect = QApplication::primaryScreen()->geometry();
@@ -286,27 +272,11 @@ void MainWindow::resetItemTabOrder(void)
 	}
 }
 
-bool MainWindow::isMeTrigger(void)
-{
-	bool ret = false;
-
-	/* Clipboard copy from myself? Yes is 'true', No is 'false' */
-	if (this->__is_me_trigger)
-		ret = true;
-
-	/* Reset */
-	this->__is_me_trigger = false;
-	return ret;
-}
-
 void MainWindow::clipboard_later(void)
 {
 	const QMimeData *mime_data = this->__clipboard->mimeData();
 	PasteItem *widget = nullptr;
 	QByteArray md5_data;
-
-	if (isMeTrigger())
-		return;
 
 	widget = this->insertItemWidget();
 	ItemData itemData;
@@ -361,8 +331,13 @@ void MainWindow::clipboard_later(void)
 	itemData.time = QDateTime::currentDateTime();
 	widget->setTime(itemData.time);
 
-	/* Find and set icon who triggers the clipboard */
-	widget->setIcon(this->getClipboardOwnerIcon());
+	if (this->m_pasteitem_icon.isNull()) {
+		/* Find and set icon who triggers the clipboard */
+		widget->setIcon(this->getClipboardOwnerIcon());
+	} else {
+		widget->setIcon(this->m_pasteitem_icon);
+		this->m_pasteitem_icon = QPixmap();
+	}
 	this->__scroll_widget->item(0)->setData(Qt::UserRole, QVariant::fromValue(itemData));
 }
 
