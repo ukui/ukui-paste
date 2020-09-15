@@ -1,6 +1,8 @@
 #include <QApplication>
 #include <QGuiApplication>
 #include <SingleApplication>
+#include <QTranslator>
+#include <QLocale>
 
 #include "mainwindow.h"
 
@@ -30,6 +32,17 @@ out:
 
 #endif
 
+void LoadTranlateFile(SingleApplication *app)
+{
+	QTranslator *translator = new QTranslator;
+
+	QLocale locale = QLocale::system();
+	if (locale.language() == QLocale::Chinese) {
+		translator->load(":/Pastes_zh_CN.qm");
+		app->installTranslator(translator);
+	}
+}
+
 int main(int argc, char *argv[])
 {
 #ifdef Q_OS_LINUX
@@ -46,6 +59,7 @@ int main(int argc, char *argv[])
 		w.hide();
 	});
 
+	LoadTranlateFile(&a);
 	a.setQuitOnLastWindowClosed(false);
 	return a.exec();
 }

@@ -16,7 +16,7 @@ Barnner::Barnner(QWidget *parent) : QWidget(parent),
 
 	this->m_icon->setScaledContents(false);
 	this->m_text->setStyleSheet(this->m_text->styleSheet()+"font-size: 22px;");
-	this->m_time->setStyleSheet(this->m_time->styleSheet()+"color: rgba(255, 255, 255, 0.7);");
+	this->m_time->setStyleSheet(this->m_time->styleSheet()+"font-size: 11px; color: rgba(255, 255, 255, 0.7);");
 
 	QVBoxLayout *vboxlayout = new QVBoxLayout();
 	vboxlayout->setSpacing(0);
@@ -116,15 +116,15 @@ void Barnner::showEvent(QShowEvent *event)
 			int secs    = period;
 
 			if (months) {
-				this->m_time->setText(QString("%1 months ago").arg(months));
+				this->m_time->setText(QString("%1 ").arg(months) + QObject::tr("months ago"));
 			} else if (days) {
-				this->m_time->setText(QString("%1 days ago").arg(days));
+				this->m_time->setText(QString("%1 ").arg(days) + QObject::tr("days ago"));
 			} else if (hours) {
-				this->m_time->setText(QString("%1 hours ago").arg(hours));
+				this->m_time->setText(QString("%1 ").arg(hours) + QObject::tr("hours ago"));
 			} else if (minutes) {
-				this->m_time->setText(QString("%1 minutes ago").arg(minutes));
+				this->m_time->setText(QString("%1 ").arg(minutes) + QObject::tr("minutes ago"));
 			} else if (secs) {
-				this->m_time->setText(QString("%1 secs ago").arg(secs));
+				this->m_time->setText(QString("%1 ").arg(secs) + QObject::tr("secs ago"));
 			}
 		}
 	}

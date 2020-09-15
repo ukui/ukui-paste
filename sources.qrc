@@ -3,5 +3,6 @@
         <file>stylesheet.qss</file>
         <file>background.jpg</file>
         <file>ubuntu.png</file>
+        <file>Pastes_zh_CN.qm</file>
     </qresource>
 </RCC>

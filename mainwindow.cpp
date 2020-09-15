@@ -233,7 +233,7 @@ void MainWindow::loadStyleSheet(QWidget *w, const QString &styleSheetFile)
 		w->setStyleSheet(styleSheet);
 		file.close();
 	} else {
-		QMessageBox::information(nullptr, "tip", "cannot find qss file");
+		QMessageBox::information(nullptr, QObject::tr("tips"), QObject::tr("cannot find qss file"));
 	}
 }
 
