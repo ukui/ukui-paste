@@ -123,8 +123,10 @@ void Barnner::showEvent(QShowEvent *event)
 				this->m_time->setText(QString("%1 ").arg(hours) + QObject::tr("hours ago"));
 			} else if (minutes) {
 				this->m_time->setText(QString("%1 ").arg(minutes) + QObject::tr("minutes ago"));
-			} else if (secs) {
+			} else if (secs > 10) {
 				this->m_time->setText(QString("%1 ").arg(secs) + QObject::tr("secs ago"));
+			} else {
+				this->m_time->setText(QObject::tr("moment ago"));
 			}
 		}
 	}

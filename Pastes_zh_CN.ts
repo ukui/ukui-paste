@@ -24,7 +24,7 @@
         <translation>像素</translation>
     </message>
     <message>
-        <location filename="pasteitemcontext.cpp" line="88"/>
+        <location filename="pasteitemcontext.cpp" line="89"/>
         <location filename="pasteitemcontext.cpp" line="97"/>
         <source>characters</source>
         <translation>字节</translation>
@@ -63,6 +63,11 @@
         <location filename="pasteitembarnner.cpp" line="127"/>
         <source>secs ago</source>
         <translation>秒前</translation>
+    </message>
+    <message>
+        <location filename="pasteitembarnner.cpp" line="129"/>
+        <source>moment ago</source>
+        <translation>刚刚</translation>
     </message>
 </context>
 </TS>
