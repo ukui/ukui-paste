@@ -51,6 +51,12 @@ void PasteItem::setRichText(QString s, int count)
 	this->m_barnner->setTitle(QObject::tr("RichText"));
 }
 
+void PasteItem::setUrls(QList<QUrl> &urls)
+{
+	m_context->setUrls(urls);
+	this->m_barnner->setTitle(QObject::tr("Files or Directory"));
+}
+
 void PasteItem::setIcon(QPixmap pixmap)
 {
 	m_barnner->setIcon(pixmap);

@@ -1,7 +1,10 @@
-#include "pasteitemcontext.h"
+#include <gio/gdesktopappinfo.h>
 
 #include <QResizeEvent>
+#include <QPixmap>
 #include <QDebug>
+
+#include "pasteitemcontext.h"
 
 TextFrame::TextFrame(QWidget *parent) : QLabel(parent),
 	m_mask_label(new QLabel(this))
@@ -50,15 +53,58 @@ void PixmapFrame::resizeEvent(QResizeEvent *event)
 	TextFrame::resizeEvent(event);
 }
 
+FileFrame::FileFrame(QWidget *parent) : QWidget(parent)
+{
+}
+
+QString FileFrame::getFileIconName(const QString &uri)
+{
+	QString icon_name;
+
+#ifdef Q_OS_LINUX
+	auto file = g_file_new_for_path(uri.toLocal8Bit());
+	auto info = g_file_query_info(file,
+				      G_FILE_ATTRIBUTE_THUMBNAIL_PATH ","
+				      G_FILE_ATTRIBUTE_THUMBNAILING_FAILED ","
+				      G_FILE_ATTRIBUTE_STANDARD_ICON,
+				      G_FILE_QUERY_INFO_NONE,
+				      nullptr,
+				      nullptr);
+	if (!G_IS_FILE_INFO (info))
+		return nullptr;
+	GIcon *g_icon = g_file_info_get_icon (info);
+	//do not unref the GIcon from info.
+	if (G_IS_ICON(g_icon)) {
+		const gchar* const* icon_names = g_themed_icon_get_names(G_THEMED_ICON (g_icon));
+		if (icon_names)
+			icon_name = QString (*icon_names);
+	}
+#endif
+	return icon_name;
+}
+
+void FileFrame::setUrls(QList<QUrl> &urls)
+{
+	for (int i = 0; i < urls.count() && i < 3; i++) {
+		auto url = urls.at(i);
+		auto icon = QIcon::fromTheme(getFileIconName(url.toLocalFile()), QIcon::fromTheme("text-x-generic"));
+		QLabel *label = new QLabel(this);
+		label->setPixmap(icon.pixmap(100, 100));
+		label->show();
+	}
+}
+
 StackedWidget::StackedWidget(QWidget *parent) : QStackedWidget(parent),
 	m_pixmap_frame(new PixmapFrame(this)),
 	m_text_frame(new TextFrame(this)),
-	m_richtext_frame(new TextFrame(this))
+	m_richtext_frame(new TextFrame(this)),
+	m_file_frame(new FileFrame(this))
 {
 	this->setObjectName("Context");
 	this->addWidget(m_pixmap_frame);
 	this->addWidget(m_text_frame);
 	this->addWidget(m_richtext_frame);
+	this->addWidget(m_file_frame);
 }
 
 StackedWidget::~StackedWidget()
@@ -66,6 +112,7 @@ StackedWidget::~StackedWidget()
 	delete m_pixmap_frame;
 	delete m_text_frame;
 	delete m_richtext_frame;
+	delete m_file_frame;
 }
 
 void StackedWidget::setPixmap(QPixmap &pixmap)
@@ -75,11 +122,6 @@ void StackedWidget::setPixmap(QPixmap &pixmap)
 
 	QString s = QString("%1x%2 ").arg(pixmap.width()).arg(pixmap.height()) + QObject::tr("px");
 	m_pixmap_frame->setMaskFrameText(s);
-}
-
-const QPixmap *StackedWidget::pixmap(void)
-{
-	return m_pixmap_frame->pixmap();
 }
 
 void StackedWidget::setText(QString &s)
@@ -98,7 +140,8 @@ void StackedWidget::setRichText(QString &s, int count)
 	this->setCurrentIndex(StackedWidget::RICHTEXT);
 }
 
-QString StackedWidget::text(void)
+void StackedWidget::setUrls(QList<QUrl> &urls)
 {
-	return m_text_frame->text();
+	m_file_frame->setUrls(urls);
+	this->setCurrentIndex(StackedWidget::URLS);
 }

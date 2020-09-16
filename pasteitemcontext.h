@@ -42,6 +42,14 @@ protected:
 	void resizeEvent(QResizeEvent *event);
 };
 
+class FileFrame : public QWidget
+{
+public:
+	FileFrame(QWidget *parent = nullptr);
+	QString getFileIconName(const QString &uri);
+	void setUrls(QList<QUrl> &);
+};
+
 class StackedWidget : public QStackedWidget
 {
 public:
@@ -51,9 +59,7 @@ public:
 	void setPixmap(QPixmap &);
 	void setText(QString &);
 	void setRichText(QString &, int);
-
-	const QPixmap *pixmap(void);
-	QString text(void);
+	void setUrls(QList<QUrl> &);
 
 	enum V { IMAGE, TEXT, RICHTEXT, URLS };
 	Q_ENUM(V)
@@ -62,6 +68,7 @@ private:
 	PixmapFrame	*m_pixmap_frame;
 	TextFrame	*m_text_frame;
 	TextFrame	*m_richtext_frame;
+	FileFrame	*m_file_frame;
 };
 
 #endif // PASTEITEMCONTEXT_H

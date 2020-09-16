@@ -290,13 +290,11 @@ void MainWindow::clipboard_later(void)
 		md5_data = mime_data->imageData().toByteArray();
 	} else if (mime_data->hasUrls()) {
 		QList<QUrl> urls = mime_data->urls();
-		QString s;
 		foreach(QUrl url, urls) {
-			s += url.toLocalFile() + "\n";
 			md5_data += url.toEncoded();
 		}
-		widget->setPlainText(s.trimmed());
-	} else if (mime_data->hasText()) {
+		widget->setUrls(urls);
+	} else if (mime_data->hasText() && !mime_data->text().isEmpty()) {
 		widget->setPlainText(mime_data->text().trimmed());
 		md5_data = mime_data->text().toLocal8Bit();
 	} else {

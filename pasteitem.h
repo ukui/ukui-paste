@@ -31,6 +31,7 @@ public:
 	void setImage(QImage &);
 	void setPlainText(QString);
 	void setRichText(QString, int);
+	void setUrls(QList<QUrl> &);
 	void setIcon(QPixmap);
 	void setTime(QDateTime &);
 

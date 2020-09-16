@@ -2,9 +2,11 @@ QT       += core gui
 
 unix:!macx {
         QT += KWindowSystem
-        LIBS += -lXtst
         HEADERS += shortcut_x11.h
         SOURCES += shortcut_x11.cpp
+        CONFIG += link_pkgconfig
+        PKGCONFIG += gio-2.0 glib-2.0 gio-unix-2.0
+        LIBS +=-lgio-2.0 -lglib-2.0 -lX11 -lXtst
 }
 
 win32: {
