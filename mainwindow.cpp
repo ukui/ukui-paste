@@ -338,27 +338,6 @@ void MainWindow::clipboard_later(void)
 	this->__scroll_widget->item(0)->setData(Qt::UserRole, QVariant::fromValue(itemData));
 }
 
-#ifdef Q_OS_WIN
-static QPixmap pixmapFromShellImageList(int iImageList, const SHFILEINFO &info)
-{
-	QPixmap result;
-	// For MinGW:
-	static const IID iID_IImageList = {0x46eb5926, 0x582e, 0x4017, {0x9f, 0xdf, 0xe8, 0x99, 0x8d, 0xaa, 0x9, 0x50}};
-
-	IImageList *imageList = nullptr;
-	if (FAILED(SHGetImageList(iImageList, iID_IImageList, reinterpret_cast<void **>(&imageList))))
-		return result;
-
-	HICON hIcon = 0;
-	if (SUCCEEDED(imageList->GetIcon(info.iIcon, ILD_TRANSPARENT, &hIcon))) {
-		result = QtWin::fromHICON(hIcon);
-		DestroyIcon(hIcon);
-	}
-
-	return result;
-}
-#endif
-
 QPixmap MainWindow::getClipboardOwnerIcon(void)
 {
 	QPixmap pixmap;

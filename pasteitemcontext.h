@@ -8,7 +8,21 @@
 #include <QPainter>
 #include <QStyleOption>
 
+#ifdef Q_OS_WIN
+#include <QtWin>
+#include <windows.h>
+#include <windowsx.h>
+#include <winuser.h>
+#include <shellapi.h>
+#include <comdef.h>
+#include <commctrl.h>
+#include <objbase.h>
+#include <commoncontrols.h>
+#endif
+
 #define LABEL_HEIGHT	30
+
+QPixmap pixmapFromShellImageList(int iImageList, const SHFILEINFO &info);
 
 class TextFrame : public QLabel
 {
@@ -46,8 +60,14 @@ class FileFrame : public QWidget
 {
 public:
 	FileFrame(QWidget *parent = nullptr);
-	QIcon getFileIcon(const QString &uri);
+	QIcon getIcon(const QString &uri);
 	void setUrls(QList<QUrl> &);
+
+#ifdef Q_OS_WIN
+	static QIcon getFileIcon(const QString &filename);
+	static QIcon getDirIcon(const QString &filename);
+	static QIcon getExecutableIcon(const QString &filename);
+#endif
 };
 
 class StackedWidget : public QStackedWidget
