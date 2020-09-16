@@ -61,6 +61,7 @@ void DoubleCtrlShortcut::stop()
 {
 	XRecordDisableContext(this->m_display, this->m_context);
 	XFlush(this->m_display);
+	XCloseDisplay(this->m_display);
 }
 
 void DoubleCtrlShortcut::callback(XPointer ptr, XRecordInterceptData *data)

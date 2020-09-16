@@ -101,30 +101,9 @@ void PasteItem::copyData(void)
 {
 	QClipboard *clipboard = QApplication::clipboard();
 	ItemData itemData = this->m_listwidget_item->data(Qt::UserRole).value<ItemData>();
+	if (!itemData.image.isNull())
+		itemData.mimeData->setImageData(itemData.image);
 
-	/* That is image, copy it */
-	if (itemData.type == ItemData::IMAGE) {
-		clipboard->setImage(itemData.image);
-	}
-	/* That is html, copy it */
-	if (itemData.type == ItemData::HTML) {
-		QMimeData *mimeData = new QMimeData;
-		mimeData->setHtml(itemData.html);
-		mimeData->setText(itemData.text);
-		if (!itemData.image.isNull())
-			mimeData->setImageData(itemData.image);
-		clipboard->setMimeData(mimeData);
-	}
-	/* That is urls, copy it */
-	if (itemData.type == ItemData::URLS) {
-		QMimeData *mimeData = new QMimeData;
-		mimeData->setUrls(itemData.urls);
-		clipboard->setMimeData(mimeData);
-	}
-	/* That is text, copy it */
-	if (itemData.type == ItemData::TEXT) {
-		clipboard->setText(itemData.text);
-	}
-
+	clipboard->setMimeData(itemData.mimeData);
 	emit this->hideWindow(true);
 }

@@ -10,17 +10,12 @@
 #include <QLabel>
 #include <QByteArray>
 #include <QGraphicsDropShadowEffect>
+#include <QMimeData>
 
 struct ItemData : QObjectUserData
 {
-	enum DATA_TYPE { HTML, IMAGE, URLS, TEXT };
-
-	DATA_TYPE	type;
-
+	QMimeData	*mimeData;
 	QImage		image;
-	QList<QUrl>	urls;
-	QString		html;
-	QString		text;
 	QByteArray	md5;
 
 	/* The time of data create */

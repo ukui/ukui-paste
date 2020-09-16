@@ -46,7 +46,6 @@ QListWidget::Item:selected
 #ContextTextFrame
 {
         padding: 10px;
-        padding-bottom: 30px;
         border-bottom-right-radius: 8px;
         border-bottom-left-radius: 8px;
 }
@@ -56,6 +55,9 @@ QListWidget::Item:selected
         color: rgb(183, 183, 183);
         font-size: 12px;
         font-family: Monospace;
+        background-color: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop: 0 rgba(255,255,255,0), stop: 0.2 rgba(255,255,255,1));
+        border-bottom-right-radius: 8px;
+        border-bottom-left-radius: 8px;
 }
 
 #ContextPixmapFrame

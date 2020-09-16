@@ -277,22 +277,17 @@ void MainWindow::clipboard_later(void)
 	const QMimeData *mime_data = this->__clipboard->mimeData();
 	PasteItem *widget = nullptr;
 	QByteArray md5_data;
+	ItemData itemData;
+	itemData.mimeData = new QMimeData;
 
 	widget = this->insertItemWidget();
-	ItemData itemData;
 
 	if (mime_data->hasHtml() && !mime_data->text().isEmpty()) {
 		widget->setRichText(mime_data->html().trimmed(), mime_data->text().count());
-		itemData.type = ItemData::HTML;
-		itemData.html = mime_data->html();
-		itemData.text = mime_data->text();
-		if (mime_data->hasImage())
-			itemData.image = qvariant_cast<QImage>(mime_data->imageData());
-		md5_data = itemData.html.toLocal8Bit();
+		md5_data = mime_data->html().toLocal8Bit();
 	} else if (mime_data->hasImage()) {
 		QImage image = qvariant_cast<QImage>(mime_data->imageData());
 		widget->setImage(image);
-		itemData.type = ItemData::IMAGE;
 		itemData.image = image;
 		md5_data = mime_data->imageData().toByteArray();
 	} else if (mime_data->hasUrls()) {
@@ -303,17 +298,17 @@ void MainWindow::clipboard_later(void)
 			md5_data += url.toEncoded();
 		}
 		widget->setPlainText(s.trimmed());
-		itemData.type = ItemData::URLS;
-		itemData.urls = urls;
 	} else if (mime_data->hasText()) {
 		widget->setPlainText(mime_data->text().trimmed());
-		itemData.type = ItemData::TEXT;
-		itemData.text = mime_data->text();
-		md5_data = itemData.text.toLocal8Bit();
+		md5_data = mime_data->text().toLocal8Bit();
 	} else {
 		/* No data, remove it */
 		this->__scroll_widget->takeItem(0);
 		return;
+	}
+
+	foreach (QString s, mime_data->formats()) {
+		itemData.mimeData->setData(s, mime_data->data(s));
 	}
 
 	itemData.md5 = QCryptographicHash::hash(md5_data, QCryptographicHash::Md5);
