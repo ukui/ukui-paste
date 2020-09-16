@@ -140,9 +140,6 @@ MainWindow::MainWindow(QWidget *parent)
 	});
 
 	this->initUI();
-
-	/* Let show it, Just for test, Delete in the future */
-	emit this->__shortcut->activated();
 }
 
 MainWindow::~MainWindow()

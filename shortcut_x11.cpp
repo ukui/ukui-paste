@@ -5,7 +5,8 @@
 
 DoubleCtrlShortcut::DoubleCtrlShortcut(QObject *parent) : QThread(parent),
 	m_display(nullptr),
-	m_timer(new QTimer)
+	m_timer(new QTimer),
+	m_isActive(false)
 {
 	QObject::connect(this->m_timer, &QTimer::timeout, [this](void) {
 		this->m_isActive = false;

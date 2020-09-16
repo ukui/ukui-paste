@@ -108,7 +108,7 @@ void Barnner::showEvent(QShowEvent *event)
 		qint64 currntSecs = QDateTime::currentDateTime().toSecsSinceEpoch();
 		qint64 createSecs = this->m_datetime.toSecsSinceEpoch();
 		qint64 period = currntSecs - createSecs;
-		if (period > 0) {
+		if (period >= 0) {
 			int months  = period / (30 * 24 * 60 * 60);
 			int days    = period / (24 * 60 * 60);
 			int hours   = period / (60 * 60);
