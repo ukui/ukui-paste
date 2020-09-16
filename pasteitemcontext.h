@@ -46,7 +46,7 @@ class FileFrame : public QWidget
 {
 public:
 	FileFrame(QWidget *parent = nullptr);
-	QString getFileIconName(const QString &uri);
+	QIcon getFileIcon(const QString &uri);
 	void setUrls(QList<QUrl> &);
 };
 

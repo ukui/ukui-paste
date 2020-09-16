@@ -19,6 +19,11 @@
 #include <windows.h>
 #include <windowsx.h>
 #include <winuser.h>
+#include <shellapi.h>
+#include <comdef.h>
+#include <commctrl.h>
+#include <objbase.h>
+#include <commoncontrols.h>
 #include <psapi.h>
 #include <QOperatingSystemVersion>
 #include <QtWinExtras/QtWinExtras>
@@ -333,6 +338,27 @@ void MainWindow::clipboard_later(void)
 	this->__scroll_widget->item(0)->setData(Qt::UserRole, QVariant::fromValue(itemData));
 }
 
+#ifdef Q_OS_WIN
+static QPixmap pixmapFromShellImageList(int iImageList, const SHFILEINFO &info)
+{
+	QPixmap result;
+	// For MinGW:
+	static const IID iID_IImageList = {0x46eb5926, 0x582e, 0x4017, {0x9f, 0xdf, 0xe8, 0x99, 0x8d, 0xaa, 0x9, 0x50}};
+
+	IImageList *imageList = nullptr;
+	if (FAILED(SHGetImageList(iImageList, iID_IImageList, reinterpret_cast<void **>(&imageList))))
+		return result;
+
+	HICON hIcon = 0;
+	if (SUCCEEDED(imageList->GetIcon(info.iIcon, ILD_TRANSPARENT, &hIcon))) {
+		result = QtWin::fromHICON(hIcon);
+		DestroyIcon(hIcon);
+	}
+
+	return result;
+}
+#endif
+
 QPixmap MainWindow::getClipboardOwnerIcon(void)
 {
 	QPixmap pixmap;
@@ -355,9 +381,22 @@ QPixmap MainWindow::getClipboardOwnerIcon(void)
 		if (processHandle) {
 			if(::EnumProcessModules(processHandle, &hMod, sizeof(hMod), &cbNeeded)) {
 				GetModuleFileNameEx(processHandle, NULL, filename, MAX_PATH);
-				QFileInfo fileInfo(QString::fromWCharArray(filename));
-				QFileIconProvider icon;
-				pixmap = icon.icon(fileInfo).pixmap(32, 32);
+				SHFILEINFO info;
+				ZeroMemory(&info, sizeof(SHFILEINFO));
+				unsigned int flags = SHGFI_ICON | SHGFI_SYSICONINDEX | SHGFI_ICONLOCATION |
+					SHGFI_OPENICON | SHGFI_USEFILEATTRIBUTES;
+				const HRESULT hr = SHGetFileInfo(filename, 0, &info, sizeof(SHFILEINFO), flags);
+				if (FAILED(hr)) {
+					pixmap = QtWin::fromHICON(::LoadIcon(0, IDI_APPLICATION));
+				} else  {
+					pixmap = pixmapFromShellImageList(0x4, info);
+					if (pixmap.isNull())
+						pixmap = pixmapFromShellImageList(0x2, info);
+					if (pixmap.isNull())
+						pixmap = QtWin::fromHICON(info.hIcon);
+					if (pixmap.isNull())
+						pixmap = QtWin::fromHICON(::LoadIcon(0, IDI_APPLICATION));
+				}
 			}
 			::CloseHandle(processHandle);
 		} else {

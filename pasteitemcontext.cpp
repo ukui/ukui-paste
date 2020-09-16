@@ -1,4 +1,8 @@
+#include <qsystemdetection.h>
+
+#ifdef Q_OS_LINUX
 #include <gio/gdesktopappinfo.h>
+#endif
 
 #include <QResizeEvent>
 #include <QPixmap>
@@ -57,7 +61,7 @@ FileFrame::FileFrame(QWidget *parent) : QWidget(parent)
 {
 }
 
-QString FileFrame::getFileIconName(const QString &uri)
+QIcon FileFrame::getFileIcon(const QString &uri)
 {
 	QString icon_name;
 
@@ -80,14 +84,15 @@ QString FileFrame::getFileIconName(const QString &uri)
 			icon_name = QString (*icon_names);
 	}
 #endif
-	return icon_name;
+
+	return QIcon::fromTheme(icon_name, QIcon::fromTheme("text-x-generic"));
 }
 
 void FileFrame::setUrls(QList<QUrl> &urls)
 {
 	for (int i = 0; i < urls.count() && i < 3; i++) {
 		auto url = urls.at(i);
-		auto icon = QIcon::fromTheme(getFileIconName(url.toLocalFile()), QIcon::fromTheme("text-x-generic"));
+		auto icon = this->getFileIcon(url.toLocalFile());
 		QLabel *label = new QLabel(this);
 		label->setPixmap(icon.pixmap(100, 100));
 		label->show();
