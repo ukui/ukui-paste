@@ -94,7 +94,8 @@ MainWindow::MainWindow(QWidget *parent)
 	  __hide_animation(new QPropertyAnimation(this, "pos")),
 	  __shortcut(new Shortcut(this)),
 	  __hide_state(true),
-	  __clipboard(QApplication::clipboard())
+	  __clipboard(QApplication::clipboard()),
+	  __pasteitem_icon(nullptr)
 {
 	QRect rect = QApplication::primaryScreen()->geometry();
 
@@ -242,7 +243,7 @@ PasteItem *MainWindow::insertItemWidget(void)
 
 	QObject::connect(widget, &PasteItem::hideWindow, [this, widget](bool copyed) {
 		if (copyed)
-			this->m_pasteitem_icon = widget->icon();
+			this->__pasteitem_icon = new QPixmap(widget->icon());
 		this->hide_window();
 	});
 
@@ -323,12 +324,13 @@ void MainWindow::clipboard_later(void)
 	itemData.time = QDateTime::currentDateTime();
 	widget->setTime(itemData.time);
 
-	if (this->m_pasteitem_icon.isNull()) {
+	if (!this->__pasteitem_icon) {
 		/* Find and set icon who triggers the clipboard */
 		widget->setIcon(this->getClipboardOwnerIcon());
 	} else {
-		widget->setIcon(this->m_pasteitem_icon);
-		this->m_pasteitem_icon = QPixmap();
+		widget->setIcon(*this->__pasteitem_icon);
+		delete this->__pasteitem_icon;
+		this->__pasteitem_icon = nullptr;
 	}
 	this->__scroll_widget->item(0)->setData(Qt::UserRole, QVariant::fromValue(itemData));
 }
