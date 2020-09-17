@@ -11,6 +11,7 @@
 #include <QFileInfo>
 #include <QFileIconProvider>
 #include <QUrl>
+#include <QBuffer>
 #include <QDebug>
 
 #include "mainwindow.h"
@@ -124,7 +125,7 @@ MainWindow::MainWindow(QWidget *parent)
 	this->__main_frame->setFocusPolicy(Qt::NoFocus);
 
 	QObject::connect(this->__clipboard, &QClipboard::dataChanged, [this](void) {
-		QTimer::singleShot(50, this, SLOT(clipboard_later()));
+		QTimer::singleShot(100, this, SLOT(clipboard_later()));
 	});
 	QObject::connect(this->__hide_animation, &QPropertyAnimation::finished, [this](void) {
 		if (this->__hide_animation->direction() == QAbstractAnimation::Forward) {
@@ -289,7 +290,11 @@ void MainWindow::clipboard_later(void)
 		QImage image = qvariant_cast<QImage>(mime_data->imageData());
 		widget->setImage(image);
 		itemData.image = image;
-		md5_data = mime_data->imageData().toByteArray();
+
+		QBuffer buffer(&md5_data);
+		buffer.open(QIODevice::WriteOnly);
+		image.save(&buffer, "png");
+		buffer.close();
 	} else if (mime_data->hasUrls()) {
 		QList<QUrl> urls = mime_data->urls();
 		foreach(QUrl url, urls) {
@@ -305,8 +310,8 @@ void MainWindow::clipboard_later(void)
 		return;
 	}
 
-	foreach (QString s, mime_data->formats()) {
-		itemData.mimeData->setData(s, mime_data->data(s));
+	foreach (QString format, mime_data->formats()) {
+		itemData.mimeData->setData(format, mime_data->data(format));
 	}
 
 	itemData.md5 = QCryptographicHash::hash(md5_data, QCryptographicHash::Md5);
