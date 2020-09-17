@@ -9,28 +9,34 @@
         <translation>图片</translation>
     </message>
     <message>
-        <location filename="pasteitem.cpp" line="45"/>
+        <location filename="pasteitem.cpp" line="47"/>
+        <location filename="pasteitem.cpp" line="57"/>
+        <source>Link</source>
+        <translation>超链接</translation>
+    </message>
+    <message>
+        <location filename="pasteitem.cpp" line="49"/>
         <source>PlainText</source>
         <translation>文本</translation>
     </message>
     <message>
-        <location filename="pasteitem.cpp" line="51"/>
+        <location filename="pasteitem.cpp" line="59"/>
         <source>RichText</source>
         <translation>富文本</translation>
     </message>
     <message>
-        <location filename="pasteitem.cpp" line="57"/>
+        <location filename="pasteitem.cpp" line="65"/>
         <source>Files</source>
         <translation>个文件</translation>
     </message>
     <message>
-        <location filename="pasteitemcontext.cpp" line="246"/>
+        <location filename="pasteitemcontext.cpp" line="271"/>
         <source>px</source>
         <translation>像素</translation>
     </message>
     <message>
-        <location filename="pasteitemcontext.cpp" line="254"/>
-        <location filename="pasteitemcontext.cpp" line="262"/>
+        <location filename="pasteitemcontext.cpp" line="279"/>
+        <location filename="pasteitemcontext.cpp" line="287"/>
         <source>characters</source>
         <translation>字节</translation>
     </message>

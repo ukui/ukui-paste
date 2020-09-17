@@ -42,13 +42,21 @@ void PasteItem::setImage(QImage &image)
 void PasteItem::setPlainText(QString s)
 {
 	m_context->setText(s);
-	this->m_barnner->setTitle(QObject::tr("PlainText"));
+
+	if (s.startsWith("http://") || s.startsWith("ftp://") || s.startsWith("https://"))
+		this->m_barnner->setTitle(QObject::tr("Link"));
+	else
+		this->m_barnner->setTitle(QObject::tr("PlainText"));
 }
 
-void PasteItem::setRichText(QString s, int count)
+void PasteItem::setRichText(QString s, int count, bool isLink)
 {
 	m_context->setRichText(s, count);
-	this->m_barnner->setTitle(QObject::tr("RichText"));
+
+	if (isLink)
+		this->m_barnner->setTitle(QObject::tr("Link"));
+	else
+		this->m_barnner->setTitle(QObject::tr("RichText"));
 }
 
 void PasteItem::setUrls(QList<QUrl> &urls)

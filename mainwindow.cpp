@@ -284,7 +284,11 @@ void MainWindow::clipboard_later(void)
 	widget = this->insertItemWidget();
 
 	if (mime_data->hasHtml() && !mime_data->text().isEmpty()) {
-		widget->setRichText(mime_data->html().trimmed(), mime_data->text().count());
+		bool isLink = false;
+		QString s = mime_data->text();
+		if (s.startsWith("http://") || s.startsWith("https://") || s.startsWith("ftp://"))
+			isLink = true;
+		widget->setRichText(mime_data->html().trimmed(), mime_data->text().count(), isLink);
 		md5_data = mime_data->html().toLocal8Bit();
 	} else if (mime_data->hasImage()) {
 		QImage image = qvariant_cast<QImage>(mime_data->imageData());

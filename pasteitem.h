@@ -30,7 +30,7 @@ public:
 	explicit PasteItem(QWidget *parent = nullptr, QListWidgetItem *item = nullptr);
 	void setImage(QImage &);
 	void setPlainText(QString);
-	void setRichText(QString, int);
+	void setRichText(QString, int, bool);
 	void setUrls(QList<QUrl> &);
 	void setIcon(QPixmap);
 	void setTime(QDateTime &);
