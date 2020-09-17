@@ -59,7 +59,13 @@ void PixmapFrame::resizeEvent(QResizeEvent *event)
 }
 
 FileFrame::FileFrame(QWidget *parent) : QWidget(parent)
+{}
+
+FileFrame::~FileFrame()
 {
+	for (auto label : this->m_labels) {
+		delete label;
+	}
 }
 
 #ifdef Q_OS_WIN
@@ -213,8 +219,27 @@ void FileFrame::setUrls(QList<QUrl> &urls)
 		auto icon = this->getIcon(url.toLocalFile());
 		QLabel *label = new QLabel(this);
 		label->setPixmap(icon.pixmap(128, 128).scaled(128, 128));
-		label->show();
+		this->m_labels.push_back(label);
 	}
+}
+
+void FileFrame::resizeEvent(QResizeEvent *event)
+{
+	if (this->m_labels.isEmpty())
+		return;
+
+	/* adjust labels location */
+	int start_x = (this->width() - 128 - (20 * this->m_labels.count())) / 2;
+	int start_y = (this->height() - 128 - (20 * this->m_labels.count())) / 2;
+
+	int dist = 0;
+	for (auto label : this->m_labels) {
+		label->setGeometry(start_x + dist, start_y + dist, 128, 128);
+		label->show();
+		dist += 20;
+	}
+
+	QWidget::resizeEvent(event);
 }
 
 StackedWidget::StackedWidget(QWidget *parent) : QStackedWidget(parent),

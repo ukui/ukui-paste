@@ -62,14 +62,21 @@ class FileFrame : public QWidget
 {
 public:
 	FileFrame(QWidget *parent = nullptr);
+	~FileFrame();
 	QIcon getIcon(const QString &uri);
 	void setUrls(QList<QUrl> &);
+
+protected:
+	void resizeEvent(QResizeEvent *event);
 
 #ifdef Q_OS_WIN
 	static QIcon getFileIcon(const QString &filename);
 	static QIcon getDirIcon(const QString &filename);
 	static QIcon getExecutableIcon(const QString &filename);
 #endif
+
+private:
+	QList<QLabel *> m_labels;
 };
 
 class StackedWidget : public QStackedWidget
