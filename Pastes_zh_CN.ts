@@ -30,15 +30,20 @@
         <translation>个文件</translation>
     </message>
     <message>
-        <location filename="pasteitemcontext.cpp" line="271"/>
+        <location filename="pasteitemcontext.cpp" line="292"/>
         <source>px</source>
         <translation>像素</translation>
     </message>
     <message>
-        <location filename="pasteitemcontext.cpp" line="279"/>
-        <location filename="pasteitemcontext.cpp" line="287"/>
+        <location filename="pasteitemcontext.cpp" line="300"/>
+        <location filename="pasteitemcontext.cpp" line="308"/>
         <source>characters</source>
         <translation>字节</translation>
+    </message>
+    <message>
+        <location filename="pasteitemcontext.cpp" line="317"/>
+        <source>MultiPath</source>
+        <translation>多个文件</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="239"/>
