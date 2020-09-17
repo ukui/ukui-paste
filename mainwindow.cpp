@@ -110,7 +110,7 @@ MainWindow::MainWindow(QWidget *parent)
 	this->setFocusPolicy(Qt::NoFocus);
 	this->__main_frame->setGeometry(this->geometry());
 	this->__main_frame->setObjectName(QString("MainFrame"));
-	MainWindow::loadStyleSheet(this, ":/stylesheet.qss");
+	MainWindow::loadStyleSheet(this, ":/resources/stylesheet.qss");
 	this->setCentralWidget(this->__main_frame);
 #if !defined Q_OS_LINUX && !defined Q_OS_WIN
 	this->setContentsMargins(0, 10, 0, 0);
@@ -423,7 +423,7 @@ again:
 		if (i++ > 200) {
 			XCloseDisplay(display);
 			qDebug() << "Not found icon, Use default Linux logo";
-			pixmap.convertFromImage(QImage(":/ubuntu.png"));
+			pixmap.convertFromImage(QImage(":/resources/ubuntu.png"));
 			return pixmap;
 		}
 

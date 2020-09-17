@@ -1,8 +1,8 @@
 <RCC>
     <qresource prefix="/">
-        <file>stylesheet.qss</file>
-        <file>background.jpg</file>
-        <file>ubuntu.png</file>
+        <file>resources/stylesheet.qss</file>
+        <file>resources/background.jpg</file>
+        <file>resources/ubuntu.png</file>
         <file>Pastes_zh_CN.qm</file>
     </qresource>
 </RCC>

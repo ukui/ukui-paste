@@ -62,7 +62,7 @@ QListWidget::Item:selected
 
 #ContextPixmapFrame
 {
-        background-image: url(:/background.jpg);
+        background-image: url(:/resources/background.jpg);
         background-repeat: repeat-xy;
         background-position: top left;
         background-color: transparent;

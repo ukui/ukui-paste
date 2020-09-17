@@ -173,7 +173,7 @@ QIcon FileFrame::getIcon(const QString &uri)
 				      nullptr,
 				      nullptr);
 	if (!G_IS_FILE_INFO (info))
-		return nullptr;
+		return QIcon();
 	GIcon *g_icon = g_file_info_get_icon (info);
 	//do not unref the GIcon from info.
 	if (G_IS_ICON(g_icon)) {

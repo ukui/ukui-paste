@@ -22,7 +22,9 @@
 
 #define LABEL_HEIGHT	30
 
+#ifdef Q_OS_WIN
 QPixmap pixmapFromShellImageList(int iImageList, const SHFILEINFO &info);
+#endif
 
 class TextFrame : public QLabel
 {
