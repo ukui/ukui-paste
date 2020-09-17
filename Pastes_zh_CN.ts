@@ -19,23 +19,28 @@
         <translation>富文本</translation>
     </message>
     <message>
-        <location filename="pasteitemcontext.cpp" line="76"/>
+        <location filename="pasteitem.cpp" line="57"/>
+        <source>Files</source>
+        <translation>个文件</translation>
+    </message>
+    <message>
+        <location filename="pasteitemcontext.cpp" line="246"/>
         <source>px</source>
         <translation>像素</translation>
     </message>
     <message>
-        <location filename="pasteitemcontext.cpp" line="89"/>
-        <location filename="pasteitemcontext.cpp" line="97"/>
+        <location filename="pasteitemcontext.cpp" line="254"/>
+        <location filename="pasteitemcontext.cpp" line="262"/>
         <source>characters</source>
         <translation>字节</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="236"/>
+        <location filename="mainwindow.cpp" line="239"/>
         <source>tips</source>
         <translation>提示</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="236"/>
+        <location filename="mainwindow.cpp" line="239"/>
         <source>cannot find qss file</source>
         <translation>没有找到 QSS 文件</translation>
     </message>
