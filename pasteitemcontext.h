@@ -58,13 +58,19 @@ protected:
 	void resizeEvent(QResizeEvent *event);
 };
 
-class FileFrame : public QWidget
+class FileFrame : public TextFrame
 {
 public:
 	FileFrame(QWidget *parent = nullptr);
 	~FileFrame();
+
 	QIcon getIcon(const QString &uri);
 	void setUrls(QList<QUrl> &);
+
+	void setFilename(QString filename)
+	{
+		this->m_filename = filename;
+	}
 
 protected:
 	void resizeEvent(QResizeEvent *event);
@@ -77,6 +83,7 @@ protected:
 
 private:
 	QList<QLabel *> m_labels;
+	QString		m_filename;
 };
 
 class StackedWidget : public QStackedWidget

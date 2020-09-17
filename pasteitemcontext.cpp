@@ -6,6 +6,7 @@
 
 #include <QResizeEvent>
 #include <QFileInfo>
+#include <QDir>
 #include <QPixmap>
 #include <QDebug>
 
@@ -58,7 +59,7 @@ void PixmapFrame::resizeEvent(QResizeEvent *event)
 	TextFrame::resizeEvent(event);
 }
 
-FileFrame::FileFrame(QWidget *parent) : QWidget(parent)
+FileFrame::FileFrame(QWidget *parent) : TextFrame(parent)
 {}
 
 FileFrame::~FileFrame()
@@ -176,6 +177,7 @@ QIcon FileFrame::getIcon(const QString &uri)
 		QIcon icon = QIcon::fromTheme(_icon_string, QIcon::fromTheme("text-x-generic"));
 		g_free(_icon_string);
 		g_object_unref(_desktop_file);
+		return icon;
 	} else {
 		auto file = g_file_new_for_path(uri.toLocal8Bit());
 		auto info = g_file_query_info(file,
@@ -218,6 +220,7 @@ void FileFrame::setUrls(QList<QUrl> &urls)
 		auto url = urls.at(i);
 		auto icon = this->getIcon(url.toLocalFile());
 		QLabel *label = new QLabel(this);
+		label->setAttribute(Qt::WA_TranslucentBackground);
 		label->setPixmap(icon.pixmap(128, 128).scaled(128, 128));
 		this->m_labels.push_back(label);
 	}
@@ -225,21 +228,39 @@ void FileFrame::setUrls(QList<QUrl> &urls)
 
 void FileFrame::resizeEvent(QResizeEvent *event)
 {
-	if (this->m_labels.isEmpty())
-		return;
+	if (!this->m_labels.isEmpty()) {
+		/* adjust labels location */
+		int start_x = (this->width() - 128 - (20 * this->m_labels.count())) / 2;
+		int start_y = (this->height() - 128 - (20 * this->m_labels.count())) / 2;
 
-	/* adjust labels location */
-	int start_x = (this->width() - 128 - (20 * this->m_labels.count())) / 2;
-	int start_y = (this->height() - 128 - (20 * this->m_labels.count())) / 2;
-
-	int dist = 0;
-	for (auto label : this->m_labels) {
-		label->setGeometry(start_x + dist, start_y + dist, 128, 128);
-		label->show();
-		dist += 20;
+		int dist = 0;
+		for (auto label : this->m_labels) {
+			label->setGeometry(start_x + dist, start_y + dist, 128, 128);
+			label->show();
+			dist += 20;
+		}
 	}
 
-	QWidget::resizeEvent(event);
+	if (!this->m_filename.isEmpty()) {
+		QFontMetrics font(this->font());
+		QString filename = this->m_filename;
+		QFileInfo fileinfo(this->m_filename);
+		QString basename = fileinfo.completeBaseName();
+		QString dirname = fileinfo.absoluteDir().path() + "/";
+
+		if (!fileinfo.suffix().isEmpty())
+			basename += "." + fileinfo.suffix();
+		int basename_size = font.width(basename);
+		int dirname_size = font.width(dirname);
+
+		if (dirname_size > this->width() - 20 - basename_size) {
+			 dirname = font.elidedText(dirname, Qt::ElideLeft, this->width() - 20 - basename_size);
+		}
+
+		this->setMaskFrameText(dirname + "<font color=black>" + basename + "</font>");
+	}
+
+	TextFrame::resizeEvent(event);
 }
 
 StackedWidget::StackedWidget(QWidget *parent) : QStackedWidget(parent),
@@ -291,5 +312,12 @@ void StackedWidget::setRichText(QString &s, int count)
 void StackedWidget::setUrls(QList<QUrl> &urls)
 {
 	m_file_frame->setUrls(urls);
+
+	if (urls.count() > 1)
+		m_file_frame->setMaskFrameText(QObject::tr("MultiPath"));
+	else {
+		m_file_frame->setFilename(urls[0].toLocalFile());
+	}
+
 	this->setCurrentIndex(StackedWidget::URLS);
 }
