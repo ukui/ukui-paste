@@ -96,7 +96,7 @@ void PasteItem::keyPressEvent(QKeyEvent *event)
 		this->copyData();
 		break;
 	case Qt::Key_Escape:
-		emit this->hideWindow(false);
+		emit this->hideWindow();
 		break;
 	}
 
@@ -111,5 +111,5 @@ void PasteItem::copyData(void)
 		itemData.mimeData->setImageData(itemData.image);
 
 	clipboard->setMimeData(itemData.mimeData);
-	emit this->hideWindow(true);
+	emit this->hideWindow();
 }

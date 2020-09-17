@@ -56,6 +56,6 @@ private:
 	QClipboard			*__clipboard;
 
 	/* It's copyed from myself, We need save icon */
-	QPixmap				*__pasteitem_icon;
+	QPixmap				__pasteitem_icon;
 };
 #endif // MAINWINDOW_H

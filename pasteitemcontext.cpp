@@ -212,7 +212,7 @@ void FileFrame::setUrls(QList<QUrl> &urls)
 		auto url = urls.at(i);
 		auto icon = this->getIcon(url.toLocalFile());
 		QLabel *label = new QLabel(this);
-		label->setPixmap(icon.pixmap(100, 100));
+		label->setPixmap(icon.pixmap(128, 128).scaled(128, 128));
 		label->show();
 	}
 }

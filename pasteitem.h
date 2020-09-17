@@ -57,7 +57,7 @@ private:
 	QListWidgetItem			*m_listwidget_item;
 
 Q_SIGNALS:
-	void hideWindow(bool);
+	void hideWindow(void);
 };
 
 #endif // PASTEITEM_H

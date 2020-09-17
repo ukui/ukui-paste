@@ -99,8 +99,7 @@ MainWindow::MainWindow(QWidget *parent)
 	  __hide_animation(new QPropertyAnimation(this, "pos")),
 	  __shortcut(new Shortcut(this)),
 	  __hide_state(true),
-	  __clipboard(QApplication::clipboard()),
-	  __pasteitem_icon(nullptr)
+	  __clipboard(QApplication::clipboard())
 {
 	QRect rect = QApplication::primaryScreen()->geometry();
 
@@ -246,9 +245,7 @@ PasteItem *MainWindow::insertItemWidget(void)
 	QListWidgetItem *item = new QListWidgetItem;
 	auto *widget = new PasteItem(nullptr, item);
 
-	QObject::connect(widget, &PasteItem::hideWindow, [this, widget](bool copyed) {
-		if (copyed)
-			this->__pasteitem_icon = new QPixmap(widget->icon());
+	QObject::connect(widget, &PasteItem::hideWindow, [this](void) {
 		this->hide_window();
 	});
 
@@ -319,21 +316,23 @@ void MainWindow::clipboard_later(void)
 		ItemData tmp_itemData = tmp_item->data(Qt::UserRole).value<ItemData>();
 		/* They have same md5, remove it */
 		if (itemData.md5 == tmp_itemData.md5) {
+			PasteItem *widget = reinterpret_cast<PasteItem *>(this->__scroll_widget->itemWidget(tmp_item));
+			this->__pasteitem_icon = widget->icon();
 			this->__scroll_widget->removeItemWidget(tmp_item);
 			delete tmp_item;
+			break;
 		}
 	}
 
 	itemData.time = QDateTime::currentDateTime();
 	widget->setTime(itemData.time);
 
-	if (!this->__pasteitem_icon) {
+	if (this->__pasteitem_icon.isNull()) {
 		/* Find and set icon who triggers the clipboard */
 		widget->setIcon(this->getClipboardOwnerIcon());
 	} else {
-		widget->setIcon(*this->__pasteitem_icon);
-		delete this->__pasteitem_icon;
-		this->__pasteitem_icon = nullptr;
+		widget->setIcon(this->__pasteitem_icon);
+		this->__pasteitem_icon = QPixmap();
 	}
 	this->__scroll_widget->item(0)->setData(Qt::UserRole, QVariant::fromValue(itemData));
 }
