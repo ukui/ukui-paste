@@ -83,8 +83,8 @@ protected:
 #endif
 
 private:
-	QList<QLabel *> m_labels;
-	QString		m_filename;
+	QList<QPair<QLabel *, QPixmap>> m_labels;
+	QString				m_filename;
 };
 
 class StackedWidget : public QStackedWidget

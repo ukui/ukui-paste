@@ -8,6 +8,9 @@
 #include <QFileInfo>
 #include <QDir>
 #include <QPixmap>
+#include <QPair>
+#include <QList>
+#include <QMimeDatabase>
 #include <QDebug>
 
 #include "pasteitemcontext.h"
@@ -69,7 +72,8 @@ FileFrame::FileFrame(QWidget *parent) : TextFrame(parent)
 
 FileFrame::~FileFrame()
 {
-	for (auto label : this->m_labels) {
+	for (auto pair : this->m_labels) {
+		QLabel *label = pair.first;
 		delete label;
 	}
 }
@@ -222,26 +226,45 @@ QIcon FileFrame::getIcon(const QString &uri)
 void FileFrame::setUrls(QList<QUrl> &urls)
 {
 	for (int i = 0; i < urls.count() && i < 3; i++) {
+		QPixmap pixmap;
 		auto url = urls.at(i);
-		auto icon = this->getIcon(url.toLocalFile());
+		QMimeDatabase db;
+		QMimeType mime = db.mimeTypeForUrl(url);
+		if (mime.name().startsWith("image/")) {
+			pixmap = QPixmap(url.toLocalFile());
+		} else {
+			auto icon = this->getIcon(url.toLocalFile());
+			pixmap = icon.pixmap(256, 256);
+		}
 		QLabel *label = new QLabel(this);
 		label->setAttribute(Qt::WA_TranslucentBackground);
-		label->setPixmap(icon.pixmap(128, 128).scaled(128, 128));
-		this->m_labels.push_back(label);
+		QPair<QLabel *, QPixmap> pair(label, pixmap);
+		this->m_labels.push_back(pair);
 	}
 }
 
 void FileFrame::resizeEvent(QResizeEvent *event)
 {
 	if (!this->m_labels.isEmpty()) {
+		float label_width = (3.0/4) * this->width();
+		float label_height = (3.0/4) * this->height();
+		int label_size = std::min((int)label_width, (int)label_height);
+
 		/* adjust labels location */
-		int start_x = (this->width() - 128 - (20 * this->m_labels.count())) / 2;
-		int start_y = (this->height() - 128 - (20 * this->m_labels.count())) / 2;
+		int fix = 0;
+		if (this->m_labels.count() >= 3 || this->m_labels.count() == 1)
+			fix = 20;
+		float start_x = (this->width()-label_size-20*this->m_labels.count()+fix)/2;
+		float start_y = (this->height()-label_size-20*this->m_labels.count()+fix)/2;
 
 		int dist = 0;
-		for (auto label : this->m_labels) {
-			label->setGeometry(start_x + dist, start_y + dist, 128, 128);
+		for (auto pair : this->m_labels) {
+			QLabel *label = pair.first;
+			QPixmap pixmap = pair.second;
+			label->setGeometry(start_x + dist, start_y + dist, label_size, label_size);
+			label->setPixmap(pixmap.scaled(label_size, label_size, Qt::KeepAspectRatio, Qt::SmoothTransformation));
 			label->show();
+			label->raise();
 			dist += 20;
 		}
 	}
