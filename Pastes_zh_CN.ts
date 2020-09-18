@@ -10,38 +10,44 @@
     </message>
     <message>
         <location filename="pasteitem.cpp" line="47"/>
-        <location filename="pasteitem.cpp" line="57"/>
+        <location filename="pasteitem.cpp" line="59"/>
         <source>Link</source>
         <translation>超链接</translation>
     </message>
     <message>
         <location filename="pasteitem.cpp" line="49"/>
+        <location filename="pasteitem.cpp" line="61"/>
+        <source>Color</source>
+        <translation>颜色</translation>
+    </message>
+    <message>
+        <location filename="pasteitem.cpp" line="51"/>
         <source>PlainText</source>
         <translation>文本</translation>
     </message>
     <message>
-        <location filename="pasteitem.cpp" line="59"/>
+        <location filename="pasteitem.cpp" line="63"/>
         <source>RichText</source>
         <translation>富文本</translation>
     </message>
     <message>
-        <location filename="pasteitem.cpp" line="65"/>
+        <location filename="pasteitem.cpp" line="69"/>
         <source>Files</source>
         <translation>个文件</translation>
     </message>
     <message>
-        <location filename="pasteitemcontext.cpp" line="292"/>
+        <location filename="pasteitemcontext.cpp" line="301"/>
         <source>px</source>
         <translation>像素</translation>
     </message>
     <message>
-        <location filename="pasteitemcontext.cpp" line="300"/>
-        <location filename="pasteitemcontext.cpp" line="308"/>
+        <location filename="pasteitemcontext.cpp" line="313"/>
+        <location filename="pasteitemcontext.cpp" line="327"/>
         <source>characters</source>
         <translation>字节</translation>
     </message>
     <message>
-        <location filename="pasteitemcontext.cpp" line="317"/>
+        <location filename="pasteitemcontext.cpp" line="338"/>
         <source>MultiPath</source>
         <translation>多个文件</translation>
     </message>

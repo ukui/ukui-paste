@@ -33,6 +33,7 @@ public:
 	~TextFrame();
 
 	void setMaskFrameText(QString);
+	void setBackgroundColor(QString);
 
 protected:
 	void resizeEvent(QResizeEvent *event);

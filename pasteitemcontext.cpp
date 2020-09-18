@@ -34,6 +34,11 @@ void TextFrame::setMaskFrameText(QString s)
 	this->m_mask_label->show();
 }
 
+void TextFrame::setBackgroundColor(QString colorName)
+{
+	this->setStyleSheet(QString("background-color: %1;").arg(colorName));
+}
+
 void TextFrame::resizeEvent(QResizeEvent *event)
 {
 	this->m_mask_label->setGeometry(0, this->height()-LABEL_HEIGHT,
@@ -299,17 +304,29 @@ void StackedWidget::setPixmap(QPixmap &pixmap)
 
 void StackedWidget::setText(QString &s)
 {
-	m_text_frame->setText(s);
-	m_text_frame->setIndent(4);
-	m_text_frame->setMaskFrameText(QString("%1 ").arg(s.count()) + QObject::tr("characters"));
+	if (QColor::isValidColor(s)) {
+		m_text_frame->setBackgroundColor(s);
+		m_text_frame->setMaskFrameText(s);
+	} else {
+		m_text_frame->setText(s);
+		m_text_frame->setIndent(4);
+		m_text_frame->setMaskFrameText(QString("%1 ").arg(s.count()) + QObject::tr("characters"));
+	}
+
 	this->setCurrentIndex(StackedWidget::TEXT);
 }
 
 void StackedWidget::setRichText(QString &s, int count)
 {
-	m_richtext_frame->setText(s);
-	m_richtext_frame->setTextFormat(Qt::RichText);
-	m_richtext_frame->setMaskFrameText(QString("%1 ").arg(count) + QObject::tr("characters"));
+	if (QColor::isValidColor(s)) {
+		m_richtext_frame->setBackgroundColor(s);
+		m_richtext_frame->setMaskFrameText(s);
+	} else {
+		m_richtext_frame->setText(s);
+		m_richtext_frame->setTextFormat(Qt::RichText);
+		m_richtext_frame->setMaskFrameText(QString("%1 ").arg(count) + QObject::tr("characters"));
+	}
+
 	this->setCurrentIndex(StackedWidget::RICHTEXT);
 }
 
