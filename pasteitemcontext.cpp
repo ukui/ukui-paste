@@ -316,15 +316,15 @@ void StackedWidget::setText(QString &s)
 	this->setCurrentIndex(StackedWidget::TEXT);
 }
 
-void StackedWidget::setRichText(QString &s, int count)
+void StackedWidget::setRichText(QString &richText, QString &plainText)
 {
-	if (QColor::isValidColor(s)) {
-		m_richtext_frame->setBackgroundColor(s);
-		m_richtext_frame->setMaskFrameText(s);
+	if (QColor::isValidColor(plainText.simplified().trimmed())) {
+		m_richtext_frame->setBackgroundColor(plainText);
+		m_richtext_frame->setMaskFrameText(plainText);
 	} else {
-		m_richtext_frame->setText(s);
+		m_richtext_frame->setText(richText);
 		m_richtext_frame->setTextFormat(Qt::RichText);
-		m_richtext_frame->setMaskFrameText(QString("%1 ").arg(count) + QObject::tr("characters"));
+		m_richtext_frame->setMaskFrameText(QString("%1 ").arg(plainText.count()) + QObject::tr("characters"));
 	}
 
 	this->setCurrentIndex(StackedWidget::RICHTEXT);

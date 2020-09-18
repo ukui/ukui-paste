@@ -95,7 +95,7 @@ public:
 
 	void setPixmap(QPixmap &);
 	void setText(QString &);
-	void setRichText(QString &, int);
+	void setRichText(QString &richText, QString &plainText);
 	void setUrls(QList<QUrl> &);
 
 	enum V { IMAGE, TEXT, RICHTEXT, URLS };

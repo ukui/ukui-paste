@@ -51,13 +51,13 @@ void PasteItem::setPlainText(QString s)
 		this->m_barnner->setTitle(QObject::tr("PlainText"));
 }
 
-void PasteItem::setRichText(QString s, int count, bool isLink)
+void PasteItem::setRichText(QString richText, QString plainText)
 {
-	m_context->setRichText(s, count);
+	m_context->setRichText(richText, plainText);
 
-	if (isLink)
+	if (plainText.startsWith("http://") || plainText.startsWith("ftp://") || plainText.startsWith("https://"))
 		this->m_barnner->setTitle(QObject::tr("Link"));
-	else if (QColor::isValidColor(s))
+	else if (QColor::isValidColor(plainText.simplified().trimmed()))
 		this->m_barnner->setTitle(QObject::tr("Color"));
 	else
 		this->m_barnner->setTitle(QObject::tr("RichText"));
