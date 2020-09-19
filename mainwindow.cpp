@@ -454,7 +454,7 @@ again:
 			   &ret);
 	if (!ret) {
 		/* FIXME: In fact, Get clipboard window id from XLIB is not the
-		 * actual window id, but it is strange that But his actual ID is
+		 * actual window id, but it is strange that his actual ID is
 		 * near this, between -100 and +100.
 		 *
 		 * I didn't find out what happened, but he seems to be working.
