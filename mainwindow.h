@@ -50,9 +50,8 @@ private:
 	bool				__hide_state;
 
 	/* widgets */
-	QHBoxLayout			*__hlayout;
-	QVBoxLayout			*__vlayout;
 	SearchBar			*__searchbar;
+	PushButton			*__menu_button;
 	QListWidget			*__scroll_widget;
 
 	QClipboard			*__clipboard;

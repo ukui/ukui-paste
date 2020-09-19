@@ -6,6 +6,7 @@
 LineEdit::LineEdit(QWidget *parent, int parent_width, int parent_height) : QLineEdit(parent),
 	m_zoom_animation(new QPropertyAnimation(this, "minimumWidth"))
 {
+	this->setFocusPolicy(Qt::ClickFocus);
 	this->setContextMenuPolicy(Qt::NoContextMenu);
 	this->setFixedHeight(parent_height);
 	this->setMaximumWidth(parent_width-parent_height*1.2);
@@ -50,18 +51,33 @@ void LineEdit::hideEvent(QHideEvent *event)
 }
 
 PushButton::PushButton(QWidget *parent) : QPushButton(parent),
-	m_label(new QLabel(this))
+	m_label(new QLabel(this)),
+	m_pixmap(QPixmap(":/resources/search_white.png"))
 {
 	this->setObjectName("PushButton");
+	this->setAttribute(Qt::WA_StyledBackground);
+	this->setFocusPolicy(Qt::ClickFocus);
 	m_label->setAlignment(Qt::AlignCenter);
+}
+
+void PushButton::updatePixmap(void)
+{
+	if (!m_pixmap.isNull()) {
+		QPixmap pixmap = m_pixmap.scaled(this->size()*0.8, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+		m_label->setPixmap(pixmap);
+	}
+}
+
+void PushButton::setPixmap(QPixmap pixmap)
+{
+	m_pixmap = pixmap;
+	this->updatePixmap();
 }
 
 void PushButton::resizeEvent(QResizeEvent *event)
 {
 	m_label->setGeometry(QRect(0, 0, event->size().width(), event->size().height()));
-	QPixmap pixmap = QPixmap(":/resources/search_white.png").scaled(this->size()*0.8, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-	m_label->setPixmap(pixmap);
-
+	this->updatePixmap();
 	QPushButton::resizeEvent(event);
 }
 

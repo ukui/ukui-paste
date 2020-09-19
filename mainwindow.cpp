@@ -12,6 +12,8 @@
 #include <QFileIconProvider>
 #include <QUrl>
 #include <QBuffer>
+#include <QMenu>
+#include <QAction>
 #include <QDebug>
 
 #include "mainwindow.h"
@@ -211,6 +213,27 @@ void MainWindow::initUI(void)
 		}
 	});
 
+	this->__menu_button = new PushButton(this->__main_frame);
+	this->__menu_button->setPixmap(QPixmap(":/resources/points.png"));
+	this->__menu_button->setFixedSize(30, 30);
+	this->__menu_button->setFlat(true);
+	QObject::connect(this->__menu_button, &PushButton::clicked, [this](void) {
+		QMenu *menu = new QMenu();
+		QAction *about_me = new QAction(QObject::tr("About me"), this);
+		QObject::connect(about_me, &QAction::triggered, [this](void) {
+			QMessageBox::about(this, QObject::tr("About me"), "Powered by Jackie Liu <liuyun01@kylinos.cn>");
+		});
+
+		menu->addAction(about_me);
+
+		menu->exec(this->cursor().pos());
+		QList<QAction *> actions = menu->actions();
+		for(auto action : actions) {
+			delete action;
+		}
+		delete menu;
+	});
+
 	this->__scroll_widget = new QListWidget(this->__main_frame);
 	this->__scroll_widget->setSelectionMode(QAbstractItemView::SingleSelection);
 	this->__scroll_widget->setHorizontalScrollMode(QListWidget::ScrollPerPixel);
@@ -225,16 +248,17 @@ void MainWindow::initUI(void)
 	this->__scroll_widget->setFocusPolicy(Qt::NoFocus);
 	QScroller::grabGesture(this->__scroll_widget, QScroller::LeftMouseButtonGesture);
 
-	this->__hlayout = new QHBoxLayout();
-	this->__hlayout->addStretch();
-	this->__hlayout->addWidget(this->__searchbar);
-	this->__hlayout->addStretch();
+	QHBoxLayout *hlayout = new QHBoxLayout();
+	hlayout->addStretch();
+	hlayout->addWidget(this->__searchbar);
+	hlayout->addStretch();
+	hlayout->addWidget(this->__menu_button);
 
-	this->__vlayout = new QVBoxLayout();
-	this->__vlayout->addLayout(this->__hlayout);
-	this->__vlayout->addWidget(this->__scroll_widget);
+	QVBoxLayout *vlayout = new QVBoxLayout();
+	vlayout->addLayout(hlayout);
+	vlayout->addWidget(this->__scroll_widget);
 
-	this->__main_frame->setLayout(this->__vlayout);
+	this->__main_frame->setLayout(vlayout);
 	/* need this for resize this->__scroll_widget size */
 	this->__main_frame->show();
 }
