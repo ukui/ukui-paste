@@ -34,11 +34,14 @@ public:
 	void setUrls(QList<QUrl> &);
 	void setIcon(QPixmap);
 	void setTime(QDateTime &);
+	void copyData(void);
 
 	QPixmap icon(void);
 
-private:
-	void copyData(void);
+	const QString &text(void)
+	{
+		return m_text;
+	}
 
 protected:
 	void resizeEvent(QResizeEvent *event);
@@ -55,6 +58,9 @@ private:
 
 	/* scroll list widget item */
 	QListWidgetItem			*m_listwidget_item;
+
+	/* text for search */
+	QString				m_text;
 
 Q_SIGNALS:
 	void hideWindow(void);

@@ -195,8 +195,21 @@ void MainWindow::hide_window(void)
 
 void MainWindow::initUI(void)
 {
-	auto *label = new QLabel(QString("HelloWord"));
-	label->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+	this->__searchbar = new SearchBar(this->__main_frame, 2*this->width()/5, 40);
+	QObject::connect(this->__searchbar, &SearchBar::hideWindow, [this](void) {
+		this->hide_window();
+	});
+	QObject::connect(this->__searchbar, &SearchBar::textChanged, [this](const QString &text) {
+		for (int i = 0; i < this->__scroll_widget->count(); i++) {
+			QListWidgetItem *item = this->__scroll_widget->item(i);
+			PasteItem *widget = reinterpret_cast<PasteItem *>(this->__scroll_widget->itemWidget(item));
+			if (!widget->text().contains(text)) {
+				item->setHidden(true);
+			} else {
+				item->setHidden(false);
+			}
+		}
+	});
 
 	this->__scroll_widget = new QListWidget(this->__main_frame);
 	this->__scroll_widget->setSelectionMode(QAbstractItemView::SingleSelection);
@@ -214,7 +227,7 @@ void MainWindow::initUI(void)
 
 	this->__hlayout = new QHBoxLayout();
 	this->__hlayout->addStretch();
-	this->__hlayout->addWidget(label);
+	this->__hlayout->addWidget(this->__searchbar);
 	this->__hlayout->addStretch();
 
 	this->__vlayout = new QVBoxLayout();

@@ -40,6 +40,7 @@ SOURCES += \
     pasteitem.cpp \
     pasteitembarnner.cpp \
     pasteitemcontext.cpp \
+    searchbar.cpp \
     shortcut.cpp
 
 HEADERS += \
@@ -47,6 +48,7 @@ HEADERS += \
     pasteitem.h \
     pasteitembarnner.h \
     pasteitemcontext.h \
+    searchbar.h \
     shortcut.h
 
 TRANSLATIONS += \

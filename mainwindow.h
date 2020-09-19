@@ -3,6 +3,7 @@
 
 #include "pasteitem.h"
 #include "shortcut.h"
+#include "searchbar.h"
 
 #include <QMainWindow>
 #include <QPropertyAnimation>
@@ -51,6 +52,7 @@ private:
 	/* widgets */
 	QHBoxLayout			*__hlayout;
 	QVBoxLayout			*__vlayout;
+	SearchBar			*__searchbar;
 	QListWidget			*__scroll_widget;
 
 	QClipboard			*__clipboard;

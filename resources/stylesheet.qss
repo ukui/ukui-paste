@@ -104,3 +104,34 @@ QListWidget::Item:selected
         margin: 0px;
         color: white;
 }
+
+
+#SearchBar
+{
+        padding: 0;
+        margin: 0;
+        border: 0;
+}
+
+#PushButton
+{
+        background-color: rgb(170, 170, 170);
+        border-top-right-radius: 3px;
+        border-bottom-right-radius: 3px;
+}
+
+#SearchBar > QLineEdit
+{
+        font-family: Monospace;
+        font-size: 14px;
+        color: rgb(184, 184, 184);
+        border: 1px solid rgb(170, 170, 170);
+        border-top-left-radius: 3px;
+        border-bottom-left-radius: 3px;
+}
+
+#SearchBar > QLineEdit:focus
+{
+        color: rgb(79, 79, 79);
+        border-color: rgb(79, 79, 79);
+}

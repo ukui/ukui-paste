@@ -42,6 +42,7 @@ void PasteItem::setImage(QImage &image)
 void PasteItem::setPlainText(QString s)
 {
 	m_context->setText(s);
+	m_text = s;
 
 	if (s.startsWith("http://") || s.startsWith("ftp://") || s.startsWith("https://"))
 		this->m_barnner->setTitle(QObject::tr("Link"));
@@ -54,6 +55,7 @@ void PasteItem::setPlainText(QString s)
 void PasteItem::setRichText(QString richText, QString plainText)
 {
 	m_context->setRichText(richText, plainText);
+	m_text = plainText;
 
 	if (plainText.startsWith("http://") || plainText.startsWith("ftp://") || plainText.startsWith("https://"))
 		this->m_barnner->setTitle(QObject::tr("Link"));
@@ -65,6 +67,9 @@ void PasteItem::setRichText(QString richText, QString plainText)
 
 void PasteItem::setUrls(QList<QUrl> &urls)
 {
+	for (auto url : urls) {
+		m_text += url.toString();
+	}
 	m_context->setUrls(urls);
 	this->m_barnner->setTitle(QString("%1 ").arg(urls.count()) + QObject::tr("Files"));
 }
