@@ -343,7 +343,7 @@ void MainWindow::resetItemTabOrder(void)
 {
 	int count = this->__scroll_widget->count();
 
-	for (int i = 1; i < count; i++) {
+	for (int i = 0; i < count-1; i++) {
 		QWidget *first = this->__scroll_widget->itemWidget(this->__scroll_widget->item(i));
 		QWidget *second = this->__scroll_widget->itemWidget(this->__scroll_widget->item(i+1));
 		QWidget::setTabOrder(first, second);
