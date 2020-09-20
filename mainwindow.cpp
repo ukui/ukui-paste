@@ -362,6 +362,9 @@ void MainWindow::clipboard_later(void)
 	if (mime_data->hasHtml() && !mime_data->text().isEmpty()) {
 		widget->setRichText(mime_data->html(), mime_data->text());
 		md5_data = mime_data->html().toLocal8Bit();
+		if (mime_data->hasImage()) {
+			itemData.image = qvariant_cast<QImage>(mime_data->imageData());
+		}
 	} else if (mime_data->hasImage()) {
 		QImage image = qvariant_cast<QImage>(mime_data->imageData());
 		widget->setImage(image);

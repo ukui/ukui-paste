@@ -151,6 +151,9 @@ QList<ItemData *> Database::loadData(void)
 			itemData->mimeData->setData(mimeType, data);
 		}
 
+		if (!itemData->image.isNull())
+			itemData->mimeData->setImageData(itemData->image);
+
 		list.push_back(itemData);
 	}
 
