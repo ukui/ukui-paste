@@ -16,6 +16,7 @@ struct ItemData : QObjectUserData
 {
 	QMimeData	*mimeData;
 	QImage		image;
+	QPixmap		icon;
 	QByteArray	md5;
 
 	/* The time of data create */
@@ -35,8 +36,6 @@ public:
 	void setIcon(QPixmap);
 	void setTime(QDateTime &);
 	void copyData(void);
-
-	QPixmap icon(void);
 
 	const QString &text(void)
 	{

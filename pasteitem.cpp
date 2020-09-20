@@ -79,11 +79,6 @@ void PasteItem::setIcon(QPixmap pixmap)
 	m_barnner->setIcon(pixmap);
 }
 
-QPixmap PasteItem::icon(void)
-{
-	return m_barnner->icon();
-}
-
 void PasteItem::setTime(QDateTime &dateTime)
 {
 	m_barnner->setTime(dateTime);

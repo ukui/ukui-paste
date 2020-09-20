@@ -274,6 +274,12 @@ void MainWindow::reloadData()
 	}
 
 	for (auto itemData : this->__db.loadData()) {
+		/* remove the data if it's too old (than a week) */
+		if (QDateTime::currentDateTime().toSecsSinceEpoch() - itemData->time.toSecsSinceEpoch() > (60 * 60 * 24 * 7)) {
+			this->__db.delelePasteItem(itemData->md5);
+			continue;
+		}
+
 		PasteItem *widget = this->insertItemWidget();
 
 		if (itemData->mimeData->hasHtml() && !itemData->mimeData->text().isEmpty()) {
@@ -291,7 +297,7 @@ void MainWindow::reloadData()
 			continue;
 		}
 		widget->setTime(itemData->time);
-		widget->setIcon(this->getClipboardOwnerIcon());
+		widget->setIcon(itemData->icon);
 
 		this->__scroll_widget->item(0)->setData(Qt::UserRole, QVariant::fromValue(*itemData));
 	}
@@ -392,24 +398,29 @@ void MainWindow::clipboard_later(void)
 		ItemData tmp_itemData = tmp_item->data(Qt::UserRole).value<ItemData>();
 		/* They have same md5, remove it */
 		if (itemData.md5 == tmp_itemData.md5) {
-			PasteItem *widget = reinterpret_cast<PasteItem *>(this->__scroll_widget->itemWidget(tmp_item));
-			this->__pasteitem_icon = widget->icon();
+			/* move icon from old data */
+			itemData.icon = tmp_itemData.icon;
+			this->__db.delelePasteItem(tmp_itemData.md5);
 			this->__scroll_widget->removeItemWidget(tmp_item);
 			delete tmp_item;
-			break;
+			continue;
+		}
+		/* remove the data if it's too old (than a week) */
+		if (QDateTime::currentDateTime().toSecsSinceEpoch() - tmp_itemData.time.toSecsSinceEpoch() >= (60 * 60 * 24 * 7)) {
+			this->__db.delelePasteItem(tmp_itemData.md5);
+			this->__scroll_widget->removeItemWidget(tmp_item);
+			delete tmp_item;
 		}
 	}
 
 	itemData.time = QDateTime::currentDateTime();
 	widget->setTime(itemData.time);
 
-	if (this->__pasteitem_icon.isNull()) {
+	if (itemData.icon.isNull()) {
 		/* Find and set icon who triggers the clipboard */
-		widget->setIcon(this->getClipboardOwnerIcon());
-	} else {
-		widget->setIcon(this->__pasteitem_icon);
-		this->__pasteitem_icon = QPixmap();
+		itemData.icon = this->getClipboardOwnerIcon();
 	}
+	widget->setIcon(itemData.icon);
 	this->__scroll_widget->item(0)->setData(Qt::UserRole, QVariant::fromValue(itemData));
 	this->__db.insertPasteItem(&itemData);
 }

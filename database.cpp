@@ -1,11 +1,11 @@
 #include "database.h"
 
-#include <QDebug>
 #include <QApplication>
 #include <QSqlError>
 #include <QBuffer>
 #include <QSqlRecord>
 #include <QDateTime>
+#include <QThread>
 
 Database::Database(QObject *parent) : QObject(parent)
 {
@@ -13,10 +13,10 @@ Database::Database(QObject *parent) : QObject(parent)
 	this->m_db.setUserName("root");
 	this->m_db.setPassword("QeErTyUiOp{]");
 	this->m_db.setDatabaseName(QCoreApplication::applicationDirPath() + "/" + ".PasteDatabase.db");
-	qDebug() << this->m_db.databaseName();
+	DEBUG() << this->m_db.databaseName();
 
 	if (!this->m_db.open())
-		qDebug() << this->m_db.lastError();
+		DEBUG() << this->m_db.lastError();
 }
 
 Database::~Database()
@@ -38,43 +38,82 @@ void Database::createTable()
 {
 	QSqlQuery query(this->m_db);
 
-	if (!query.exec("create table if not exists item(id integer primary key autoincrement, md5 blob, imagedata blob, time integer)"))
-		qDebug() << query.lastError();
+	if (!query.exec("create table if not exists item(id integer primary key autoincrement, md5 blob, imagedata blob, icondata blob, time integer)"))
+		DEBUG() << query.lastError();
 
 	if (!query.exec("create table if not exists data(id integer primary key autoincrement, md5 blob, formats text, format_data blob)"))
-		qDebug() << query.lastError();
+		DEBUG() << query.lastError();
 }
+
+QByteArray Database::convertImage2Array(QImage image)
+{
+	QByteArray imagedata;
+	QBuffer buffer(&imagedata);
+
+	buffer.open(QIODevice::WriteOnly);
+	image.save(&buffer, "png");
+	buffer.close();
+
+	return imagedata;
+}
+
+QMutex mutex;
 
 void Database::insertPasteItem(ItemData *itemData)
 {
-	QSqlQuery query(this->m_db);
-
-	query.prepare("insert into item (md5, imagedata, time) values (:md5, :imagedata, :time);");
-	query.bindValue(":md5", itemData->md5);
-	if (!itemData->image.isNull()) {
-		QByteArray imagedata;
-		QBuffer buffer(&imagedata);
-		buffer.open(QIODevice::WriteOnly);
-		itemData->image.save(&buffer, "png");
-		buffer.close();
-
-		query.bindValue(":imagedata", imagedata);
+	ItemData *itd = new ItemData(*itemData);
+	itd->mimeData = new QMimeData;
+	for (auto formats : itemData->mimeData->formats()) {
+		itd->mimeData->setData(formats, itemData->mimeData->data(formats));
 	}
-	query.bindValue(":time", itemData->time.toSecsSinceEpoch());
 
-	if (!query.exec())
-		qDebug() << query.lastError();
-
-	for (QString format : itemData->mimeData->formats()) {
+	QThread *insert_thread = QThread::create([this, itd](void){
 		QSqlQuery query(this->m_db);
-		query.prepare("insert into data (md5, formats, format_data) values (:md5, :formats, :format_data);");
-		query.bindValue(":md5", itemData->md5);
-		query.bindValue(":formats", format);
-		query.bindValue(":format_data", itemData->mimeData->data(format));
+		QMutexLocker locker(&mutex);
+
+		query.prepare("insert into item (md5, imagedata, icondata, time) values (:md5, :imagedata, :icondata, :time);");
+		query.bindValue(":md5", itd->md5);
+		if (!itd->image.isNull()) {
+			query.bindValue(":imagedata", Database::convertImage2Array(itd->image));
+		}
+		query.bindValue(":icondata", Database::convertImage2Array(itd->icon.toImage()));
+		query.bindValue(":time", itd->time.toSecsSinceEpoch());
 
 		if (!query.exec())
-			qDebug() << query.lastError();
-	}
+			DEBUG() << query.lastError();
+
+		for (QString format : itd->mimeData->formats()) {
+			QSqlQuery query(this->m_db);
+			query.prepare("insert into data (md5, formats, format_data) values (:md5, :formats, :format_data);");
+			query.bindValue(":md5", itd->md5);
+			query.bindValue(":formats", format);
+			query.bindValue(":format_data", itd->mimeData->data(format));
+
+			if (!query.exec())
+				DEBUG() << query.lastError();
+		}
+
+		delete itd;
+	});
+
+	insert_thread->start();
+}
+
+void Database::delelePasteItem(QByteArray md5)
+{
+	QThread *delete_thread = QThread::create([this, md5](void){
+		QSqlQuery query(this->m_db);
+		QMutexLocker locker(&mutex);
+
+		query.prepare("delete from item where md5 = x'" + md5.toHex() + "'");
+		if (!query.exec())
+			DEBUG() << query.lastError();
+		query.prepare("delete from data where md5 = x'" + md5.toHex() + "'");
+		if (!query.exec())
+			DEBUG() << query.lastError();
+	});
+
+	delete_thread->start();
 }
 
 QList<ItemData *> Database::loadData(void)
@@ -83,25 +122,25 @@ QList<ItemData *> Database::loadData(void)
 	QSqlQuery query(this->m_db);
 
 	query.prepare("select * from item;");
-	query.exec();
+	if (!query.exec())
+		DEBUG() << query.lastError();
 
 	while (query.next()) {
 		ItemData *itemData = new ItemData;
 		itemData->md5 = query.value("md5").toByteArray();
 		itemData->image = QImage::fromData(query.value("imagedata").toByteArray());
+		itemData->icon = QPixmap::fromImage(QImage::fromData(query.value("icondata").toByteArray()));
 		itemData->time = QDateTime::fromSecsSinceEpoch(query.value("time").toUInt());
-
-		qDebug() << itemData->md5 << itemData->time;
 
 		itemData->mimeData = new QMimeData;
 		QSqlQuery query_data(this->m_db);
-		query_data.prepare("select * from data where md5 = x'" + itemData->md5.toHex()+"'");
-		query_data.exec();
+		query_data.prepare("select * from data where md5 = x'" + itemData->md5.toHex() + "'");
+		if (!query_data.exec())
+			DEBUG() << query.lastError();
 
 		while (query_data.next()) {
 			QString mimeType = query_data.value("formats").toString();
 			QByteArray data = query_data.value("format_data").toByteArray();
-			qDebug() << mimeType << data;
 			itemData->mimeData->setData(mimeType, data);
 		}
 
