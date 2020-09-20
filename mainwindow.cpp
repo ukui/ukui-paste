@@ -19,6 +19,7 @@
 #include "mainwindow.h"
 
 #ifdef Q_OS_WIN
+#include <QtWin>
 #include <windows.h>
 #include <windowsx.h>
 #include <winuser.h>
@@ -29,8 +30,6 @@
 #include <commoncontrols.h>
 #include <psapi.h>
 #include <QOperatingSystemVersion>
-#include <QtWinExtras/QtWinExtras>
-#include <QtWinExtras/QtWin>
 #endif
 
 #ifdef Q_OS_LINUX
