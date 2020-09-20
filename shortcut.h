@@ -2,13 +2,14 @@
 #define SHORTCUT_H
 
 #include <QObject>
+#include <QTimer>
 
 #ifdef Q_OS_LINUX
 #include "shortcut_x11.h"
 #endif
 
 #ifdef Q_OS_WIN
-#include "3rd/qxtglobalshortcut5/gui/qxtglobalshortcut.h"
+#include "shortcut_win.h"
 #endif
 
 class Shortcut : public QObject
@@ -26,8 +27,10 @@ private:
 	DoubleCtrlShortcut	*m_shortcut;
 #endif
 #ifdef Q_OS_WIN
-	QxtGlobalShortcut	*m_shortcut;
+	ShortcutPrivate		*m_shortcut;
 #endif
+	QTimer			*m_timer;
+	bool			m_isActive;
 };
 
 #endif // SHORTCUT_H

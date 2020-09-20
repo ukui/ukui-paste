@@ -11,6 +11,8 @@ unix:!macx {
 
 win32: {
         QT += winextras
+        HEADERS += shortcut_win.h
+        SOURCES += shortcut_win.cpp
         LIBS += -lpsapi
 }
 
@@ -19,7 +21,6 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 CONFIG += c++11
 
 # 3rd library
-include(3rd/qxtglobalshortcut5/qxt.pri)
 include(3rd/SingleApplication/singleapplication.pri)
 
 # The following define makes your compiler emit warnings if you use
