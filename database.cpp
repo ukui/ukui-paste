@@ -57,10 +57,16 @@ QByteArray Database::convertImage2Array(QImage image)
 	return imagedata;
 }
 
+/* Used for lock database */
 QMutex mutex;
 
 void Database::insertPasteItem(ItemData *itemData)
 {
+	/*
+	 * We need copy an new itemdata for thread, because QImage or QPixmap
+	 * and others is an private data for Class, can't share for another
+	 * thread, That is an workaround.
+	 */
 	ItemData *itd = new ItemData(*itemData);
 	itd->mimeData = new QMimeData;
 	for (auto formats : itemData->mimeData->formats()) {
@@ -93,6 +99,7 @@ void Database::insertPasteItem(ItemData *itemData)
 				DEBUG() << query.lastError();
 		}
 
+		delete itd->mimeData;
 		delete itd;
 	});
 

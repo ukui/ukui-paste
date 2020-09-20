@@ -55,13 +55,13 @@ int main(int argc, char *argv[])
 	QGuiApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
 
 	SingleApplication a(argc, argv);
+	LoadTranlateFile(&a);
 
 	MainWindow w;
 	QObject::connect(&a, &SingleApplication::instanceStarted, [&w](void) {
 		w.hide();
 	});
 
-	LoadTranlateFile(&a);
 	a.setQuitOnLastWindowClosed(false);
 	return a.exec();
 }
