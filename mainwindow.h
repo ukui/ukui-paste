@@ -4,6 +4,7 @@
 #include "pasteitem.h"
 #include "shortcut.h"
 #include "searchbar.h"
+#include "database.h"
 
 #include <QMainWindow>
 #include <QPropertyAnimation>
@@ -30,6 +31,7 @@ protected:
 
 private:
 	void initUI(void);
+	void reloadData(void);
 	PasteItem *insertItemWidget(void);
 	void resetItemTabOrder(void);
 	static void loadStyleSheet(QWidget *, const QString &);
@@ -48,6 +50,7 @@ private:
 	Shortcut			*__shortcut;
 	/* That is a workaround for hide window */
 	bool				__hide_state;
+	Database			__db;
 
 	/* widgets */
 	SearchBar			*__searchbar;

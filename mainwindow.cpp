@@ -261,6 +261,40 @@ void MainWindow::initUI(void)
 	this->__main_frame->setLayout(vlayout);
 	/* need this for resize this->__scroll_widget size */
 	this->__main_frame->show();
+
+	/* load data from database */
+	this->reloadData();
+}
+
+void MainWindow::reloadData()
+{
+	if (!this->__db.isTableExist()) {
+		this->__db.createTable();
+		return;
+	}
+
+	for (auto itemData : this->__db.loadData()) {
+		PasteItem *widget = this->insertItemWidget();
+
+		if (itemData->mimeData->hasHtml() && !itemData->mimeData->text().isEmpty()) {
+			widget->setRichText(itemData->mimeData->html(), itemData->mimeData->text());
+		} else if (itemData->mimeData->hasImage()) {
+			widget->setImage(itemData->image);
+		} else if (itemData->mimeData->hasUrls()) {
+			QList<QUrl> urls = itemData->mimeData->urls();
+			widget->setUrls(urls);
+		} else if (itemData->mimeData->hasText() && !itemData->mimeData->text().isEmpty()) {
+			widget->setPlainText(itemData->mimeData->text().trimmed());
+		} else {
+			/* No data, remove it */
+			this->__scroll_widget->takeItem(0);
+			continue;
+		}
+		widget->setTime(itemData->time);
+		widget->setIcon(this->getClipboardOwnerIcon());
+
+		this->__scroll_widget->item(0)->setData(Qt::UserRole, QVariant::fromValue(*itemData));
+	}
 }
 
 void MainWindow::loadStyleSheet(QWidget *w, const QString &styleSheetFile)
@@ -377,6 +411,7 @@ void MainWindow::clipboard_later(void)
 		this->__pasteitem_icon = QPixmap();
 	}
 	this->__scroll_widget->item(0)->setData(Qt::UserRole, QVariant::fromValue(itemData));
+	this->__db.insertPasteItem(&itemData);
 }
 
 QPixmap MainWindow::getClipboardOwnerIcon(void)
