@@ -6,7 +6,9 @@
 
 #ifdef Q_OS_LINUX
 #include "shortcut_x11.h"
-#elif Q_OS_WIN
+#endif
+
+#ifdef Q_OS_WIN
 #include "shortcut_win.h"
 #endif
 
@@ -24,7 +26,8 @@ private:
 
 #ifdef Q_OS_LINUX
 	ShortcutPrivateX11	*m_shortcut;
-#elif Q_OS_WIN
+#endif
+#ifdef Q_OS_WIN
 	ShortcutPrivateWin	*m_shortcut;
 #endif
 	QTimer			*m_timer;

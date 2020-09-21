@@ -10,7 +10,8 @@ DoubleCtrlShortcut::DoubleCtrlShortcut(QObject *parent) : QObject(parent),
 #ifdef Q_OS_LINUX
 	this->m_shortcut = new ShortcutPrivateX11();
 	auto signal_address = &ShortcutPrivateX11::activated;
-#elif Q_OS_WIN
+#endif
+#ifdef Q_OS_WIN
 	this->m_shortcut = new ShortcutPrivateWin();
 	auto signal_address = &ShortcutPrivateWin::activated;
 #endif
