@@ -7,22 +7,21 @@
 #include <X11/extensions/record.h>
 #include <X11/Xlibint.h>
 
-class DoubleCtrlShortcut : public QThread
+class ShortcutPrivateX11 : public QThread
 {
 	Q_OBJECT
 
 public:
-	DoubleCtrlShortcut(QObject *parent = nullptr);
-	~DoubleCtrlShortcut();
+	ShortcutPrivateX11(QObject *parent = nullptr);
+	~ShortcutPrivateX11();
 
-private: signals:
-	void keyPress(int code);
-
-public: signals:
+Q_SIGNALS:
 	void activated(void);
 
-protected:
+private:
 	static void callback(XPointer trash, XRecordInterceptData *data);
+
+protected:
 	void run();
 
 public slots:
@@ -31,9 +30,6 @@ public slots:
 private:
 	Display		*m_display;
 	XRecordContext	m_context;
-
-	QTimer		*m_timer;
-	bool		m_isActive;
 };
 
 

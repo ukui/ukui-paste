@@ -48,7 +48,7 @@ private:
 	QWidget				*__main_frame;
 	QGraphicsDropShadowEffect	*__main_frame_shadow;
 	QPropertyAnimation		*__hide_animation;
-	Shortcut			*__shortcut;
+	DoubleCtrlShortcut		*__shortcut;
 	/* That is a workaround for hide window */
 	bool				__hide_state;
 	Database			__db;

@@ -3,12 +3,12 @@
 
 #include <QThread>
 
-class ShortcutPrivate : public QThread
+class ShortcutPrivateWin : public QThread
 {
 	Q_OBJECT
 public:
-	ShortcutPrivate();
-	~ShortcutPrivate();
+	ShortcutPrivateWin();
+	~ShortcutPrivateWin();
 
 	void stop(void);
 

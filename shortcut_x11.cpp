@@ -3,44 +3,19 @@
 
 #include "shortcut_x11.h"
 
-DoubleCtrlShortcut::DoubleCtrlShortcut(QObject *parent) : QThread(parent),
-	m_display(nullptr),
-	m_timer(new QTimer),
-	m_isActive(false)
+ShortcutPrivateX11::ShortcutPrivateX11(QObject *parent) : QThread(parent),
+	m_display(nullptr)
 {
-	QObject::connect(this->m_timer, &QTimer::timeout, [this](void) {
-		this->m_isActive = false;
-		this->m_timer->stop();
-	});
-
-	QObject::connect(this, &DoubleCtrlShortcut::keyPress, this, [this](int keyCode) {
-		if (keyCode != 37 /* Left Control */) {
-			this->m_isActive = false;
-			return;
-		}
-
-		if (this->m_isActive) {
-			emit this->activated();
-		}
-
-		this->m_isActive = true;
-		if (this->m_timer->isActive())
-			this->m_timer->stop();
-
-		/* Record Press */
-		this->m_timer->start(300);
-	});
-
 	this->start();
 }
 
-DoubleCtrlShortcut::~DoubleCtrlShortcut()
+ShortcutPrivateX11::~ShortcutPrivateX11()
 {
 	this->stop();
 	this->deleteLater();
 }
 
-void DoubleCtrlShortcut::run(void)
+void ShortcutPrivateX11::run(void)
 {
 	Display *display = XOpenDisplay(nullptr);
 	XRecordClientSpec clients = XRecordAllClients;
@@ -55,23 +30,25 @@ void DoubleCtrlShortcut::run(void)
 	XSync(display, True);
 
 	this->m_display = XOpenDisplay(nullptr);
-	XRecordEnableContext(this->m_display, m_context, &DoubleCtrlShortcut::callback, reinterpret_cast<XPointer>(this));
+	XRecordEnableContext(this->m_display, m_context, &ShortcutPrivateX11::callback, reinterpret_cast<XPointer>(this));
 }
 
-void DoubleCtrlShortcut::stop()
+void ShortcutPrivateX11::stop()
 {
 	XRecordDisableContext(this->m_display, this->m_context);
 	XFlush(this->m_display);
 	XCloseDisplay(this->m_display);
 }
 
-void DoubleCtrlShortcut::callback(XPointer ptr, XRecordInterceptData *data)
+void ShortcutPrivateX11::callback(XPointer ptr, XRecordInterceptData *data)
 {
 	if (data->category == XRecordFromServer) {
 		xEvent *event = reinterpret_cast<xEvent*>(data->data);
 		switch (event->u.u.type) {
 		case KeyPress:
-			emit reinterpret_cast<DoubleCtrlShortcut*>(ptr)->keyPress(static_cast<unsigned char*>(data->data)[1]);
+			if (static_cast<unsigned char*>(data->data)[1] == 37 ||
+			    static_cast<unsigned char*>(data->data)[1] == 48)
+				emit reinterpret_cast<ShortcutPrivateX11*>(ptr)->activated();
 			break;
 		default:
 			break;

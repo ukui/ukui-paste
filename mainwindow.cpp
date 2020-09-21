@@ -101,7 +101,7 @@ MainWindow::MainWindow(QWidget *parent)
 	  __main_frame(new QWidget(this)),
 	  __main_frame_shadow(new QGraphicsDropShadowEffect(this)),
 	  __hide_animation(new QPropertyAnimation(this, "pos")),
-	  __shortcut(new Shortcut(this)),
+	  __shortcut(new DoubleCtrlShortcut(this)),
 	  __hide_state(true),
 	  __clipboard(QApplication::clipboard())
 {
@@ -141,7 +141,7 @@ MainWindow::MainWindow(QWidget *parent)
 	this->__hide_animation->setEndValue(QPoint(0, QApplication::primaryScreen()->geometry().height()));
 	this->__hide_animation->setEasingCurve(QEasingCurve::OutQuad);
 
-	QObject::connect(this->__shortcut, &Shortcut::activated, [this](void) {
+	QObject::connect(this->__shortcut, &DoubleCtrlShortcut::activated, [this](void) {
 		if (!this->isVisible())
 			this->show_window();
 		else
