@@ -28,6 +28,7 @@ public:
 protected:
 	bool event(QEvent *e);
 	void showEvent(QShowEvent *event);
+	void hideEvent(QHideEvent *event);
 
 private:
 	void initUI(void);

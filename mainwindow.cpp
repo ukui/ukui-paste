@@ -171,10 +171,24 @@ void MainWindow::showEvent(QShowEvent *event)
 	auto lists = this->__scroll_widget->selectedItems();
 	if(lists.length() > 0) {
 		auto *widget = this->__scroll_widget->itemWidget(lists.value(0));
+		/* That is a workaround for QListWidget pixel scroll */
+		lists.value(0)->setHidden(false);
+		/* Let the selected item has focus */
 		widget->setFocus();
 	}
 
 	QWidget::showEvent(event);
+}
+
+void MainWindow::hideEvent(QHideEvent *event)
+{
+	auto lists = this->__scroll_widget->selectedItems();
+	if(lists.length() > 0) {
+		/* That is a workaround for QListWidget pixel scroll */
+		lists.value(0)->setHidden(true);
+	}
+
+	QWidget::hideEvent(event);
 }
 
 void MainWindow::show_window(void)
