@@ -6,6 +6,9 @@
 #include <QSqlRecord>
 #include <QDateTime>
 #include <QThread>
+#include <QDebug>
+
+#define DEBUG() qDebug()<<__FILE__<<__func__<<__LINE__
 
 Database::Database(QObject *parent) : QObject(parent)
 {

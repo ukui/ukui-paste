@@ -5,11 +5,8 @@
 #include <QSqlQuery>
 #include <QObject>
 #include <QMutex>
-#include <QDebug>
 
 #include "pasteitem.h"
-
-#define DEBUG() qDebug()<<__FILE__<<__func__<<__LINE__
 
 class Database : public QObject
 {

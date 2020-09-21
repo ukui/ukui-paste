@@ -14,6 +14,8 @@
 #include <QBuffer>
 #include <QMenu>
 #include <QAction>
+#include <QMutex>
+#include <QMutexLocker>
 #include <QDebug>
 
 #include "mainwindow.h"
@@ -349,48 +351,51 @@ void MainWindow::resetItemTabOrder(void)
 	}
 }
 
+QMutex clipboard_mutex;
 void MainWindow::clipboard_later(void)
 {
+	QMutexLocker locker(&clipboard_mutex);
 	const QMimeData *mime_data = this->__clipboard->mimeData();
 	PasteItem *widget = nullptr;
 	QByteArray md5_data;
 	ItemData itemData;
 	itemData.mimeData = new QMimeData;
 
+	foreach (QString format, mime_data->formats()) {
+		itemData.mimeData->setData(format, mime_data->data(format));
+	}
+	if (mime_data->hasImage()) {
+		itemData.image = qvariant_cast<QImage>(mime_data->imageData());
+	}
+
 	widget = this->insertItemWidget();
 
-	if (mime_data->hasHtml() && !mime_data->text().isEmpty()) {
-		widget->setRichText(mime_data->html(), mime_data->text());
-		md5_data = mime_data->html().toLocal8Bit();
-		if (mime_data->hasImage()) {
-			itemData.image = qvariant_cast<QImage>(mime_data->imageData());
-		}
-	} else if (mime_data->hasImage()) {
-		QImage image = qvariant_cast<QImage>(mime_data->imageData());
-		widget->setImage(image);
-		itemData.image = image;
+	if (itemData.mimeData->hasHtml() && !itemData.mimeData->text().isEmpty()) {
+		widget->setRichText(itemData.mimeData->html(), itemData.mimeData->text());
+		md5_data = itemData.mimeData->text().toLocal8Bit();
+
+	} else if (itemData.mimeData->hasImage()) {
+		widget->setImage(itemData.image);
 
 		QBuffer buffer(&md5_data);
 		buffer.open(QIODevice::WriteOnly);
-		image.save(&buffer, "png");
+		itemData.image.save(&buffer, "png");
 		buffer.close();
-	} else if (mime_data->hasUrls()) {
-		QList<QUrl> urls = mime_data->urls();
+	} else if (itemData.mimeData->hasUrls()) {
+		QList<QUrl> urls = itemData.mimeData->urls();
 		foreach(QUrl url, urls) {
 			md5_data += url.toEncoded();
 		}
 		widget->setUrls(urls);
-	} else if (mime_data->hasText() && !mime_data->text().isEmpty()) {
-		widget->setPlainText(mime_data->text().trimmed());
-		md5_data = mime_data->text().toLocal8Bit();
+	} else if (itemData.mimeData->hasText() && !itemData.mimeData->text().isEmpty()) {
+		widget->setPlainText(itemData.mimeData->text().trimmed());
+		md5_data = itemData.mimeData->text().toLocal8Bit();
 	} else {
 		/* No data, remove it */
-		this->__scroll_widget->takeItem(0);
+		QListWidgetItem *tmp_item = this->__scroll_widget->item(0);
+		this->__scroll_widget->removeItemWidget(tmp_item);
+		delete tmp_item;
 		return;
-	}
-
-	foreach (QString format, mime_data->formats()) {
-		itemData.mimeData->setData(format, mime_data->data(format));
 	}
 
 	itemData.md5 = QCryptographicHash::hash(md5_data, QCryptographicHash::Md5);

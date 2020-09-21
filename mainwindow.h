@@ -1,11 +1,6 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include "pasteitem.h"
-#include "shortcut.h"
-#include "searchbar.h"
-#include "database.h"
-
 #include <QMainWindow>
 #include <QPropertyAnimation>
 #include <QGraphicsDropShadowEffect>
@@ -16,6 +11,11 @@
 #include <QListWidgetItem>
 #include <QClipboard>
 #include <QTimer>
+
+#include "pasteitem.h"
+#include "shortcut.h"
+#include "searchbar.h"
+#include "database.h"
 
 class MainWindow : public QMainWindow
 {
