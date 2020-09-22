@@ -46,8 +46,8 @@ void ShortcutPrivateX11::callback(XPointer ptr, XRecordInterceptData *data)
 		xEvent *event = reinterpret_cast<xEvent*>(data->data);
 		switch (event->u.u.type) {
 		case KeyPress:
-			if (static_cast<unsigned char*>(data->data)[1] == 37 ||
-			    static_cast<unsigned char*>(data->data)[1] == 48)
+			if (static_cast<unsigned char*>(data->data)[1] == 37  /* Left  Control */||
+			    static_cast<unsigned char*>(data->data)[1] == 105 /* Right Control */)
 				emit reinterpret_cast<ShortcutPrivateX11*>(ptr)->activated();
 			break;
 		default:
