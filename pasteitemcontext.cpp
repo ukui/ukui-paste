@@ -97,82 +97,6 @@ QPixmap pixmapFromShellImageList(int iImageList, const SHFILEINFO &info)
 
 	return result;
 }
-
-QIcon FileFrame::getFileIcon(const QString &filename)
-{
-	QIcon icon;
-
-	if (!filename.isEmpty()) {
-		std::string str = "file";
-		int index = filename.lastIndexOf(".");
-		if (index >= 0) {
-			QString suffix = filename.mid(index);
-
-			str = suffix.toUtf8().constData();
-		}
-
-		LPCSTR name = str.c_str();
-		SHFILEINFOA info;
-		if(SHGetFileInfoA(name,
-				  FILE_ATTRIBUTE_NORMAL,
-				  &info,
-				  sizeof(info),
-				  SHGFI_SYSICONINDEX| SHGFI_ICON | SHGFI_USEFILEATTRIBUTES))
-		{
-			icon = QIcon(QtWin::fromHICON(info.hIcon));
-		}
-	}
-
-	return icon;
-}
-
-QIcon FileFrame::getExecutableIcon(const QString &filename)
-{
-	QIcon icon;
-
-	if (!filename.isEmpty()) {
-		TCHAR filename1[MAX_PATH];
-		filename.toWCharArray(filename1);
-		QPixmap pixmap;
-		SHFILEINFO info;
-		ZeroMemory(&info, sizeof(SHFILEINFO));
-		unsigned int flags = SHGFI_ICON | SHGFI_SYSICONINDEX | SHGFI_ICONLOCATION |
-			SHGFI_OPENICON | SHGFI_USEFILEATTRIBUTES;
-		const HRESULT hr = SHGetFileInfo(filename1, 0, &info, sizeof(SHFILEINFO), flags);
-		if (FAILED(hr)) {
-			pixmap = QtWin::fromHICON(::LoadIcon(0, IDI_APPLICATION));
-		} else  {
-			pixmap = pixmapFromShellImageList(0x4, info);
-			if (pixmap.isNull())
-				pixmap = pixmapFromShellImageList(0x2, info);
-			if (pixmap.isNull())
-				pixmap = QtWin::fromHICON(info.hIcon);
-			if (pixmap.isNull())
-				pixmap = QtWin::fromHICON(::LoadIcon(0, IDI_APPLICATION));
-		}
-		icon = QIcon(pixmap);
-	}
-
-	return icon;
-}
-
-QIcon FileFrame::getDirIcon(const QString &dirname)
-{
-	QIcon folder_icon;
-
-	SHFILEINFOA info;
-	if(SHGetFileInfoA(dirname.toUtf8().constData(),
-			  FILE_ATTRIBUTE_DIRECTORY,
-			  &info,
-			  sizeof(info),
-			  SHGFI_SYSICONINDEX | SHGFI_ICON| SHGFI_USEFILEATTRIBUTES))
-	{
-		folder_icon = QIcon(QtWin::fromHICON(info.hIcon));
-	}
-
-	return folder_icon;
-}
-
 #endif
 
 QIcon FileFrame::getIcon(const QString &uri)
@@ -212,13 +136,26 @@ QIcon FileFrame::getIcon(const QString &uri)
 	}
 #endif
 #ifdef Q_OS_WIN
-	QFileInfo fileinfo(uri);
-	if (fileinfo.isExecutable())
-		return FileFrame::getExecutableIcon(uri);
-	else if (fileinfo.isFile())
-		return FileFrame::getFileIcon(uri);
-	else if (fileinfo.isDir())
-		return FileFrame::getDirIcon(uri);
+	if (!uri.isEmpty()) {
+		const QString nativeName = QDir::toNativeSeparators(uri);
+		const wchar_t *sourceFileC = reinterpret_cast<const wchar_t *>(nativeName.utf16());
+
+		SHFILEINFO  info;
+		if(SHGetFileInfo(sourceFileC,
+				 0,
+				 &info,
+				 sizeof(info),
+				 SHGFI_SYSICONINDEX| SHGFI_ICON |  SHGFI_LARGEICON))
+		{
+			QIcon icon;
+
+			const QPixmap extraLarge = pixmapFromShellImageList(0x4, info);
+			icon.addPixmap(extraLarge);
+
+			return icon;
+		}
+	}
+
 #endif
 	return QIcon();
 }
@@ -246,26 +183,28 @@ void FileFrame::setUrls(QList<QUrl> &urls)
 void FileFrame::resizeEvent(QResizeEvent *event)
 {
 	if (!this->m_labels.isEmpty()) {
-		float label_width = (3.0/4) * this->width();
-		float label_height = (3.0/4) * this->height();
-		int label_size = std::min((int)label_width, (int)label_height);
+		int width = this->width() - 40;
+		int height = this->height() - 80;
+		int label_size = std::min(width, height);
+		int start_x = (this->width() - label_size)/2;
+		int start_y = (this->height() - label_size)/2;
 
-		/* adjust labels location */
-		int fix = 0;
-		if (this->m_labels.count() >= 3 || this->m_labels.count() == 1)
-			fix = 20;
-		float start_x = (this->width()-label_size-20*this->m_labels.count()+fix)/2;
-		float start_y = (this->height()-label_size-20*this->m_labels.count()+fix)/2;
-
-		int dist = 0;
 		for (auto pair : this->m_labels) {
 			QLabel *label = pair.first;
 			QPixmap pixmap = pair.second;
-			label->setGeometry(start_x + dist, start_y + dist, label_size, label_size);
+			label->setGeometry(start_x, start_y, label_size, label_size);
 			label->setPixmap(pixmap.scaled(label_size, label_size, Qt::KeepAspectRatio, Qt::SmoothTransformation));
-			label->show();
-			label->raise();
-			dist += 20;
+		}
+
+		if (this->m_labels.count() == 2) {
+			this->m_labels[0].first->move(this->m_labels[0].first->pos()-QPoint(10, 10));
+			this->m_labels[1].first->move(this->m_labels[1].first->pos()+QPoint(10, 10));
+			this->m_labels[1].first->raise();
+		} else if (this->m_labels.count() == 3) {
+			this->m_labels[0].first->move(this->m_labels[1].first->pos()-QPoint(20, 20));
+			this->m_labels[1].first->raise();
+			this->m_labels[2].first->move(this->m_labels[1].first->pos()+QPoint(20, 20));
+			this->m_labels[2].first->raise();
 		}
 	}
 
