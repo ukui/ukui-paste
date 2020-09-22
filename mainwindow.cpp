@@ -274,6 +274,9 @@ void MainWindow::initUI(void)
 	this->__scroll_widget->setWrapping(false);
 	this->__scroll_widget->setFocusPolicy(Qt::NoFocus);
 	QScroller::grabGesture(this->__scroll_widget, QScroller::LeftMouseButtonGesture);
+	QObject::connect(this->__scroll_widget, &QListWidget::currentItemChanged, [this](void) {
+		this->__scroll_widget->update();
+	});
 
 	QHBoxLayout *hlayout = new QHBoxLayout();
 	hlayout->addStretch();
