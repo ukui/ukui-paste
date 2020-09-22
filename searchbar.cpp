@@ -15,6 +15,9 @@ LineEdit::LineEdit(QWidget *parent, int parent_width, int parent_height) : QLine
 	m_zoom_animation->setDuration(100);
 	m_zoom_animation->setStartValue(parent_width/2);
 	m_zoom_animation->setEndValue(parent_width-parent_height*1.2);
+	QObject::connect(this->m_zoom_animation, &QAbstractAnimation::finished, [parent](void){
+		parent->update();
+	});
 }
 
 void LineEdit::focusInEvent(QFocusEvent *event)
@@ -101,13 +104,11 @@ SearchBar::SearchBar(QWidget *parent, int width, int height) : QWidget(parent),
 		this->m_search_button->setStyleSheet("background-color: rgb(170, 170, 170);"
 						     "border-top-right-radius: 3px;"
 						     "border-bottom-right-radius: 3px;");
-		this->update();
 	});
 	QObject::connect(m_search_edit, &LineEdit::focusIn, [this](void) {
 		this->m_search_button->setStyleSheet("background-color: rgb(79, 79, 79);"
 						     "border-top-right-radius: 3px;"
 						     "border-bottom-right-radius: 3px;");
-		this->update();
 	});
 	QObject::connect(m_search_edit, &LineEdit::hideWindow, [this](void) {
 		emit this->hideWindow();
