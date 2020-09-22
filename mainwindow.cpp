@@ -16,6 +16,7 @@
 #include <QAction>
 #include <QMutex>
 #include <QMutexLocker>
+#include <QShortcut>
 #include <QDebug>
 
 #include "mainwindow.h"
@@ -146,6 +147,13 @@ MainWindow::MainWindow(QWidget *parent)
 			this->show_window();
 		else
 			this->hide_window();
+	});
+
+	QShortcut *shortcut_search = new QShortcut(this);
+	shortcut_search->setKey(QKeySequence("Ctrl+f"));
+	QObject::connect(shortcut_search, &QShortcut::activated, [this](void) {
+		LineEdit *lineedit = this->__searchbar->findChild<LineEdit *>("", Qt::FindDirectChildrenOnly);
+		lineedit->setFocus();
 	});
 
 	this->initUI();
