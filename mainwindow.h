@@ -62,5 +62,8 @@ private:
 
 	/* It's copyed from myself, We need save icon */
 	QPixmap				__pasteitem_icon;
+
+	/* Use for store current row when searching */
+	int				__current_row;
 };
 #endif // MAINWINDOW_H

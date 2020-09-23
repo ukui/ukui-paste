@@ -39,6 +39,10 @@ void LineEdit::focusOutEvent(QFocusEvent *event)
 void LineEdit::keyPressEvent(QKeyEvent *event)
 {
 	switch (event->key()) {
+	case Qt::Key_Return:
+	case Qt::Key_Enter:
+		emit this->selectItem();
+		break;
 	case Qt::Key_Escape:
 		emit this->hideWindow();
 		break;
@@ -115,6 +119,9 @@ SearchBar::SearchBar(QWidget *parent, int width, int height) : QWidget(parent),
 	});
 	QObject::connect(m_search_edit, &LineEdit::textChanged, [this](const QString &text) {
 		emit this->textChanged(text);
+	});
+	QObject::connect(m_search_edit, &LineEdit::selectItem, [this]() {
+		emit this->selectItem();
 	});
 
 	QHBoxLayout *layout = new QHBoxLayout();

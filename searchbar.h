@@ -23,6 +23,7 @@ Q_SIGNALS:
 	void focusIn(void);
 	void focusOut(void);
 	void hideWindow(void);
+	void selectItem(void);
 
 private:
 	QPropertyAnimation	*m_zoom_animation;
@@ -54,6 +55,7 @@ private:
 	PushButton		*m_search_button;
 
 Q_SIGNALS:
+	void selectItem(void);
 	void hideWindow(void);
 	void textChanged(const QString &);
 };
