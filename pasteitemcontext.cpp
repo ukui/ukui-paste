@@ -11,6 +11,7 @@
 #include <QPair>
 #include <QList>
 #include <QMimeDatabase>
+#include <QGraphicsDropShadowEffect>
 #include <QDebug>
 
 #include "pasteitemcontext.h"
@@ -194,7 +195,7 @@ bool FileFrame::setUrls(QList<QUrl> &urls)
 void FileFrame::resizeEvent(QResizeEvent *event)
 {
 	if (!this->m_labels.isEmpty()) {
-		int width = this->width() - 40;
+		int width = this->width() - 60;
 		int height = this->height() - 80;
 		int label_size = std::min(width, height);
 		int start_x = (this->width() - label_size)/2;
@@ -202,19 +203,25 @@ void FileFrame::resizeEvent(QResizeEvent *event)
 
 		for (auto pair : this->m_labels) {
 			QLabel *label = pair.first;
-			QPixmap pixmap = pair.second;
+			QPixmap pixmap = pair.second.scaled(label_size, label_size, Qt::KeepAspectRatio, Qt::SmoothTransformation);
 			label->setGeometry(start_x, start_y, label_size, label_size);
-			label->setPixmap(pixmap.scaled(label_size, label_size, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+			label->setPixmap(pixmap);
+
+			QGraphicsDropShadowEffect *shadow = new QGraphicsDropShadowEffect(this);
+			shadow->setOffset(0, 0);
+			shadow->setColor(Qt::gray);
+			shadow->setBlurRadius(8);
+			label->setGraphicsEffect(shadow);
 		}
 
 		if (this->m_labels.count() == 2) {
-			this->m_labels[0].first->move(this->m_labels[0].first->pos()-QPoint(10, 10));
-			this->m_labels[1].first->move(this->m_labels[1].first->pos()+QPoint(10, 10));
+			this->m_labels[0].first->move(this->m_labels[0].first->pos()-QPoint(15, 10));
+			this->m_labels[1].first->move(this->m_labels[1].first->pos()+QPoint(15, 10));
 			this->m_labels[1].first->raise();
 		} else if (this->m_labels.count() == 3) {
-			this->m_labels[0].first->move(this->m_labels[1].first->pos()-QPoint(20, 20));
+			this->m_labels[0].first->move(this->m_labels[1].first->pos()-QPoint(30, 20));
 			this->m_labels[1].first->raise();
-			this->m_labels[2].first->move(this->m_labels[1].first->pos()+QPoint(20, 20));
+			this->m_labels[2].first->move(this->m_labels[1].first->pos()+QPoint(30, 20));
 			this->m_labels[2].first->raise();
 		}
 	}
