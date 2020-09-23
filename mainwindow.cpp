@@ -242,7 +242,7 @@ void MainWindow::initUI(void)
 		for (int i = 0; i < this->__scroll_widget->count(); i++) {
 			QListWidgetItem *item = this->__scroll_widget->item(i);
 			PasteItem *widget = reinterpret_cast<PasteItem *>(this->__scroll_widget->itemWidget(item));
-			if (!widget->text().contains(text)) {
+			if (!widget->text().toLower().contains(text.toLower())) {
 				item->setHidden(true);
 			} else {
 				item->setHidden(false);
