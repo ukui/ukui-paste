@@ -120,11 +120,12 @@ void PasteItem::keyPressEvent(QKeyEvent *event)
 
 void PasteItem::copyData(void)
 {
+	emit this->hideWindow();
+
 	QClipboard *clipboard = QApplication::clipboard();
 	ItemData itemData = this->m_listwidget_item->data(Qt::UserRole).value<ItemData>();
 	if (!itemData.image.isNull())
 		itemData.mimeData->setImageData(itemData.image);
 
 	clipboard->setMimeData(itemData.mimeData);
-	emit this->hideWindow();
 }

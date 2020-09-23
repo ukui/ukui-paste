@@ -64,6 +64,6 @@ private:
 	QPixmap				__pasteitem_icon;
 
 	/* Use for store current row when searching */
-	int				__current_row;
+	QListWidgetItem			*__current_item;
 };
 #endif // MAINWINDOW_H

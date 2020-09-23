@@ -105,7 +105,7 @@ MainWindow::MainWindow(QWidget *parent)
 	  __shortcut(new DoubleCtrlShortcut(this)),
 	  __hide_state(true),
 	  __clipboard(QApplication::clipboard()),
-	  __current_row(-1)
+	  __current_item(nullptr)
 {
 	QRect rect = QApplication::primaryScreen()->geometry();
 
@@ -177,12 +177,12 @@ bool MainWindow::event(QEvent *e)
 
 void MainWindow::showEvent(QShowEvent *event)
 {
-	auto lists = this->__scroll_widget->selectedItems();
-	if(lists.length() > 0) {
-		auto *widget = this->__scroll_widget->itemWidget(lists.value(0));
+	QListWidgetItem *item = this->__scroll_widget->currentItem();
+	if(item) {
+		auto *widget = this->__scroll_widget->itemWidget(item);
 		/* Let the selected item has focus */
 		widget->setFocus();
-		this->__scroll_widget->scrollToItem(lists.value(0));
+		this->__scroll_widget->scrollToItem(item);
 	}
 
 	/* That is a workaround for QListWidget pixel scroll */
@@ -235,8 +235,8 @@ void MainWindow::initUI(void)
 		int show_row_count = 0;
 
 		/* Store current row num when first time searching */
-		if (this->__current_row == -1) {
-			this->__current_row = this->__scroll_widget->currentRow();
+		if (this->__current_item == nullptr) {
+			this->__current_item = this->__scroll_widget->currentItem();
 		}
 
 		for (int i = 0; i < this->__scroll_widget->count(); i++) {
@@ -255,20 +255,23 @@ void MainWindow::initUI(void)
 		}
 
 		/* That is the first showing item */
-		if (temp_current_item_row != -1)
+		if (temp_current_item_row != -1) {
 			this->__scroll_widget->item(temp_current_item_row)->setSelected(true);
+			this->__scroll_widget->scrollToItem(this->__scroll_widget->item(temp_current_item_row));
+		}
 
 		if (show_row_count == this->__scroll_widget->count()) {
 			/* restore current row in search before */
-			this->__scroll_widget->item(this->__current_row)->setSelected(true);
-			this->__current_row = -1;
+			this->__current_item->setSelected(true);
+			this->__scroll_widget->scrollToItem(this->__current_item);
+			this->__current_item = nullptr;
 		}
 	});
 	QObject::connect(this->__searchbar, &SearchBar::selectItem, [this](void) {
 		QListWidgetItem *item = this->__scroll_widget->selectedItems()[0];
 		PasteItem *widget = reinterpret_cast<PasteItem *>(this->__scroll_widget->itemWidget(item));
+		this->__current_item = nullptr;
 		widget->copyData();
-		this->__scroll_widget->setCurrentItem(item);
 	});
 
 	this->__menu_button = new PushButton(this->__main_frame);
