@@ -65,13 +65,16 @@ void PasteItem::setRichText(QString richText, QString plainText)
 		this->m_barnner->setTitle(QObject::tr("RichText"));
 }
 
-void PasteItem::setUrls(QList<QUrl> &urls)
+bool PasteItem::setUrls(QList<QUrl> &urls)
 {
 	for (auto url : urls) {
 		m_text += url.toString();
 	}
-	m_context->setUrls(urls);
+	if (!m_context->setUrls(urls))
+		return false;
+
 	this->m_barnner->setTitle(QString("%1 ").arg(urls.count()) + QObject::tr("Files"));
+	return true;
 }
 
 void PasteItem::setIcon(QPixmap pixmap)

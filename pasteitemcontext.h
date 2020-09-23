@@ -66,7 +66,7 @@ public:
 	~FileFrame();
 
 	QIcon getIcon(const QString &uri);
-	void setUrls(QList<QUrl> &);
+	bool setUrls(QList<QUrl> &);
 
 	void setFilename(QString filename)
 	{
@@ -96,7 +96,7 @@ public:
 	void setPixmap(QPixmap &);
 	void setText(QString &);
 	void setRichText(QString &richText, QString &plainText);
-	void setUrls(QList<QUrl> &);
+	bool setUrls(QList<QUrl> &);
 
 	enum V { IMAGE, TEXT, RICHTEXT, URLS };
 	Q_ENUM(V)

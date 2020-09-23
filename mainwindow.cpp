@@ -318,12 +318,16 @@ void MainWindow::reloadData()
 			widget->setImage(itemData->image);
 		} else if (itemData->mimeData->hasUrls()) {
 			QList<QUrl> urls = itemData->mimeData->urls();
-			widget->setUrls(urls);
+			if (!widget->setUrls(urls)) {
+				this->__db.delelePasteItem(itemData->md5);
+				delete this->__scroll_widget->takeItem(0);
+				continue;
+			}
 		} else if (itemData->mimeData->hasText() && !itemData->mimeData->text().isEmpty()) {
 			widget->setPlainText(itemData->mimeData->text().trimmed());
 		} else {
 			/* No data, remove it */
-			this->__scroll_widget->takeItem(0);
+			delete this->__scroll_widget->takeItem(0);
 			continue;
 		}
 		widget->setTime(itemData->time);

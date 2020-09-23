@@ -32,7 +32,7 @@ public:
 	void setImage(QImage &);
 	void setPlainText(QString);
 	void setRichText(QString richText, QString plainText);
-	void setUrls(QList<QUrl> &);
+	bool setUrls(QList<QUrl> &);
 	void setIcon(QPixmap);
 	void setTime(QDateTime &);
 	void copyData(void);

@@ -160,11 +160,20 @@ QIcon FileFrame::getIcon(const QString &uri)
 	return QIcon();
 }
 
-void FileFrame::setUrls(QList<QUrl> &urls)
+bool FileFrame::setUrls(QList<QUrl> &urls)
 {
+	bool ret = false;
+
 	for (int i = 0; i < urls.count() && i < 3; i++) {
 		QPixmap pixmap;
 		auto url = urls.at(i);
+
+		QFileInfo fileinfo(url.toLocalFile());
+		if (!fileinfo.exists())
+			continue;
+		else
+			ret |= true;
+
 		QMimeDatabase db;
 		QMimeType mime = db.mimeTypeForUrl(url);
 		if (mime.name().startsWith("image/")) {
@@ -178,6 +187,8 @@ void FileFrame::setUrls(QList<QUrl> &urls)
 		QPair<QLabel *, QPixmap> pair(label, pixmap);
 		this->m_labels.push_back(pair);
 	}
+
+	return ret;
 }
 
 void FileFrame::resizeEvent(QResizeEvent *event)
@@ -292,9 +303,10 @@ void StackedWidget::setRichText(QString &richText, QString &plainText)
 	this->setCurrentIndex(StackedWidget::RICHTEXT);
 }
 
-void StackedWidget::setUrls(QList<QUrl> &urls)
+bool StackedWidget::setUrls(QList<QUrl> &urls)
 {
-	m_file_frame->setUrls(urls);
+	if (!m_file_frame->setUrls(urls))
+		return false;
 
 	if (urls.count() > 1)
 		m_file_frame->setMaskFrameText(QObject::tr("MultiPath"));
@@ -303,4 +315,6 @@ void StackedWidget::setUrls(QList<QUrl> &urls)
 	}
 
 	this->setCurrentIndex(StackedWidget::URLS);
+
+	return true;
 }
