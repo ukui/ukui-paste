@@ -38,7 +38,8 @@ void LoadTranlateFile(SingleApplication *app)
 
 	QLocale locale = QLocale::system();
 	if (locale.language() == QLocale::Chinese) {
-		translator->load(":/Pastes_zh_CN.qm");
+		if (!translator->load(QString(QM_FILES_INSTALL_PATH)+"/Pastes_zh_CN.qm"))
+			translator->load("Pastes_zh_CN.qm");
 		app->installTranslator(translator);
 	}
 }

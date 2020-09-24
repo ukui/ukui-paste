@@ -1,0 +1,15 @@
+Source: pastes
+Section: unknown
+Priority: optional
+Maintainer: jackieliu <liuyun01@kylinos.cn>
+Build-Depends: debhelper-compat (= 12)
+Standards-Version: 4.4.1
+#Homepage: <insert the upstream URL, if relevant>
+#Vcs-Browser: https://salsa.debian.org/debian/pastes
+Vcs-Git: https://gitee.com/newbeats/pastes.git
+
+Package: pastes
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: <insert up to 60 chars description>
+ <insert long description, indented with spaces>

@@ -1,0 +1,12 @@
+[Desktop Entry]
+Name=Pastes
+comment=Pastes
+Comment[zh_CN]=粘贴板
+Exec=/usr/bin/pastes
+Terminal=false
+Type=Application
+Icon=pastes
+X-UKUI-AutoRestart=true
+OnlyShowIn=UKUI
+X-UKUI-Autostart-Phase=Application
+NoDisplay=true

@@ -30,6 +30,15 @@ include(3rd/SingleApplication/singleapplication.pri)
 DEFINES += QT_DEPRECATED_WARNINGS
 DEFINES += QAPPLICATION_CLASS=QApplication
 
+TARGET = pastes
+TEMPLATE = app
+
+unix:!macx {
+        target.path = /usr/bin
+        QM_FILES_INSTALL_PATH = /usr/share/$${TARGET}/translations/
+        DEFINES += QM_FILES_INSTALL_PATH='\\"$${QM_FILES_INSTALL_PATH}\\"'
+}
+
 # You can also make your code fail to compile if it uses deprecated APIs.
 # In order to do so, uncomment the following line.
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
@@ -57,13 +66,37 @@ HEADERS += \
 TRANSLATIONS += \
     Pastes_zh_CN.ts
 
-# Default rules for deployment.
-qnx: target.path = /tmp/$${TARGET}/bin
-else: unix:!android: target.path = /opt/$${TARGET}/bin
-!isEmpty(target.path): INSTALLS += target
+unix:!macx {
+        # CONFIG += lrelase not work for qt5.6, add those from lrelease.prf for compatibility
+        qtPrepareTool(QMAKE_LRELEASE, lrelease)
+        lrelease.name = lrelease
+        lrelease.input = TRANSLATIONS
+        lrelease.output = ${QMAKE_FILE_IN_BASE}.qm
+        lrelease.commands = $$QMAKE_LRELEASE ${QMAKE_FILE_IN} -qm ${QMAKE_FILE_OUT}
+        lrelease.CONFIG = no_link
+        QMAKE_EXTRA_COMPILERS += lrelease
+        PRE_TARGETDEPS += compiler_lrelease_make_all
+
+        for (translation, TRANSLATIONS) {
+            translation = $$basename(translation)
+            QM_FILES += $$OUT_PWD/$$replace(translation, \\..*$, .qm)
+        }
+        qm_files.files = $$QM_FILES
+        qm_files.path = $$QM_FILES_INSTALL_PATH
+        qm_files.CONFIG = no_check_exist
+        INSTALLS += qm_files
+}
 
 RESOURCES += \
     sources.qrc
 
 DISTFILES += \
     stylesheet.qss
+
+unix:!macx {
+        desktop_file.files = $${TARGET}.desktop
+        desktop_file.path = /etc/xdg/autostart
+        INSTALLS += desktop_file
+}
+
+INSTALLS += target

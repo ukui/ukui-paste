@@ -15,7 +15,12 @@ Database::Database(QObject *parent) : QObject(parent)
 	this->m_db = QSqlDatabase::addDatabase("QSQLITE");
 	this->m_db.setUserName("root");
 	this->m_db.setPassword("QeErTyUiOp{]");
-	this->m_db.setDatabaseName(QCoreApplication::applicationDirPath() + "/" + ".PasteDatabase.db");
+#ifdef Q_OS_LINUX
+	this->m_db.setDatabaseName(QString(getenv("HOME")) + "/.cache/PastesDatabase.db");
+#endif
+#ifdef Q_OS_WIN
+	this->m_db.setDatabaseName(QCoreApplication::applicationDirPath() + "/" + "PastesDatabase.db");
+#endif
 	DEBUG() << this->m_db.databaseName();
 
 	if (!this->m_db.open())

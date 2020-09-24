@@ -3,7 +3,6 @@
         <file>resources/stylesheet.qss</file>
         <file>resources/background.jpg</file>
         <file>resources/ubuntu.png</file>
-        <file>Pastes_zh_CN.qm</file>
         <file>resources/search_white.png</file>
         <file>resources/points.png</file>
     </qresource>
