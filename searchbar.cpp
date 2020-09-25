@@ -36,19 +36,26 @@ void LineEdit::focusOutEvent(QFocusEvent *event)
 	QLineEdit::focusOutEvent(event);
 }
 
-void LineEdit::keyPressEvent(QKeyEvent *event)
+bool LineEdit::event(QEvent *event)
 {
-	switch (event->key()) {
-	case Qt::Key_Return:
-	case Qt::Key_Enter:
-		emit this->selectItem();
-		break;
-	case Qt::Key_Escape:
-		emit this->hideWindow();
-		break;
+	if (event->type() == QEvent::KeyPress) {
+		QKeyEvent *ke = static_cast<QKeyEvent *>(event);
+		switch (ke->key()) {
+		case Qt::Key_Return:
+		case Qt::Key_Enter:
+			emit this->selectItem();
+			break;
+		case Qt::Key_Escape:
+			emit this->hideWindow();
+			break;
+		case Qt::Key_Tab:
+			emit this->moveFocusNext();
+			/* event is done */
+			return true;
+		}
 	}
 
-	QLineEdit::keyPressEvent(event);
+	return QLineEdit::event(event);
 }
 
 void LineEdit::hideEvent(QHideEvent *event)
@@ -120,8 +127,11 @@ SearchBar::SearchBar(QWidget *parent, int width, int height) : QWidget(parent),
 	QObject::connect(m_search_edit, &LineEdit::textChanged, [this](const QString &text) {
 		emit this->textChanged(text);
 	});
-	QObject::connect(m_search_edit, &LineEdit::selectItem, [this]() {
+	QObject::connect(m_search_edit, &LineEdit::selectItem, [this](void) {
 		emit this->selectItem();
+	});
+	QObject::connect(m_search_edit, &LineEdit::moveFocusNext, [this](void) {
+		emit this->moveFocusNext();
 	});
 
 	QHBoxLayout *layout = new QHBoxLayout();

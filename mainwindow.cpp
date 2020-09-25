@@ -273,6 +273,16 @@ void MainWindow::initUI(void)
 		this->__current_item = nullptr;
 		widget->copyData();
 	});
+	QObject::connect(this->__searchbar, &SearchBar::moveFocusNext, [this](void) {
+		QListWidgetItem *item = this->__scroll_widget->selectedItems()[0];
+		PasteItem *widget = reinterpret_cast<PasteItem *>(this->__scroll_widget->itemWidget(item));
+
+		do {
+			/* Get next focus widget and isn't hidden */
+			widget = reinterpret_cast<PasteItem *>(widget->nextInFocusChain());
+		} while (widget->isHidden());
+		widget->setFocus();
+	});
 
 	this->__menu_button = new PushButton(this->__main_frame);
 	this->__menu_button->setPixmap(QPixmap(":/resources/points.png"));

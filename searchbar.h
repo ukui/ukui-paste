@@ -16,14 +16,15 @@ public:
 protected:
 	void focusInEvent(QFocusEvent *event);
 	void focusOutEvent(QFocusEvent *event);
-	void keyPressEvent(QKeyEvent *event);
 	void hideEvent(QHideEvent *event);
+	bool event(QEvent * event);
 
 Q_SIGNALS:
 	void focusIn(void);
 	void focusOut(void);
 	void hideWindow(void);
 	void selectItem(void);
+	void moveFocusNext(void);
 
 private:
 	QPropertyAnimation	*m_zoom_animation;
@@ -55,6 +56,7 @@ private:
 	PushButton		*m_search_button;
 
 Q_SIGNALS:
+	void moveFocusNext(void);
 	void selectItem(void);
 	void hideWindow(void);
 	void textChanged(const QString &);
