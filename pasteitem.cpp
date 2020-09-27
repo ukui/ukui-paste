@@ -118,6 +118,40 @@ void PasteItem::keyPressEvent(QKeyEvent *event)
 	QWidget::keyPressEvent(event);
 }
 
+#ifdef Q_OS_LINUX
+#include <X11/Xlib.h>
+#include <X11/Intrinsic.h>
+#include <X11/extensions/XTest.h>
+
+#include <QTimer>
+#include <QThread>
+
+static void SendKey(Display * disp, KeySym keysym, KeySym modsym)
+{
+	KeyCode keycode = 0, modcode = 0;
+	keycode = XKeysymToKeycode (disp, keysym);
+	if (keycode == 0)
+		return;
+
+	XTestGrabControl (disp, True);
+	/* Generate modkey press */
+	if (modsym != 0) {
+		modcode = XKeysymToKeycode(disp, modsym);
+		XTestFakeKeyEvent (disp, modcode, True, 0);
+	}
+	/* Generate regular key press and release */
+	XTestFakeKeyEvent (disp, keycode, True, 0);
+	XTestFakeKeyEvent (disp, keycode, False, 0);
+
+	/* Generate modkey release */
+	if (modsym != 0)
+		XTestFakeKeyEvent (disp, modcode, False, 0);
+
+	XSync (disp, False);
+	XTestGrabControl (disp, False);
+}
+#endif
+
 void PasteItem::copyData(void)
 {
 	emit this->hideWindow();
@@ -128,4 +162,24 @@ void PasteItem::copyData(void)
 		itemData.mimeData->setImageData(itemData.image);
 
 	clipboard->setMimeData(itemData.mimeData);
+
+#ifdef Q_OS_LINUX
+	/* Send keypress event 'Ctrl +v' for direct paste */
+	QThread *thread = new QThread;
+	QTimer *timer = new QTimer;
+	timer->setInterval(1000);
+	timer->moveToThread(thread);
+	QObject::connect(timer, &QTimer::timeout, [thread, timer](void) {
+		Display *disp = XOpenDisplay(nullptr);
+		SendKey(disp, XK_v, XK_Control_L);
+		XCloseDisplay(disp);
+
+		timer->stop();
+		timer->deleteLater();
+		thread->quit();
+		thread->deleteLater();
+	});
+	QObject::connect(thread, SIGNAL(started()), timer, SLOT(start()));
+	thread->start();
+#endif
 }
