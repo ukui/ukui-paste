@@ -164,6 +164,9 @@ void PasteItem::copyData(void)
 	clipboard->setMimeData(itemData.mimeData);
 
 #ifdef Q_OS_LINUX
+	if (itemData.mimeData->hasUrls())
+		return;
+
 	/* Send keypress event 'Ctrl +v' for direct paste */
 	QThread *thread = new QThread;
 	QTimer *timer = new QTimer;
