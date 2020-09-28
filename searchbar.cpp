@@ -21,7 +21,8 @@ LineEdit::LineEdit(QWidget *parent, int parent_width, int parent_height) : QLine
 	QObject::connect(this->m_zoom_animation, &QAbstractAnimation::finished, [parent](void){
 		parent->update();
 		QWidget *focusWidget = QApplication::focusWidget();
-		focusWidget->update();
+		if (focusWidget)
+			focusWidget->update();
 	});
 }
 
