@@ -4,7 +4,7 @@
         outline: 0px;
 }
 
-QWidget#MainFrame
+#MainFrame
 {
         background-color: rgba(244, 249, 255, 50%);
         border-top: 1px solid rgb(202, 202, 202);

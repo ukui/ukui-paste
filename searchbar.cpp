@@ -3,6 +3,9 @@
 #include <QHBoxLayout>
 #include <QResizeEvent>
 
+#include <QApplication>
+#include <QDebug>
+
 LineEdit::LineEdit(QWidget *parent, int parent_width, int parent_height) : QLineEdit(parent),
 	m_zoom_animation(new QPropertyAnimation(this, "minimumWidth"))
 {
@@ -17,6 +20,8 @@ LineEdit::LineEdit(QWidget *parent, int parent_width, int parent_height) : QLine
 	m_zoom_animation->setEndValue(parent_width-parent_height*1.2);
 	QObject::connect(this->m_zoom_animation, &QAbstractAnimation::finished, [parent](void){
 		parent->update();
+		QWidget *focusWidget = QApplication::focusWidget();
+		focusWidget->update();
 	});
 }
 
@@ -49,7 +54,11 @@ bool LineEdit::event(QEvent *event)
 			emit this->hideWindow();
 			break;
 		case Qt::Key_Tab:
-			emit this->moveFocusNext();
+			emit this->moveFocusPrevNext(false);
+			/* event is done */
+			return true;
+		case Qt::Key_Backtab:
+			emit this->moveFocusPrevNext(true);
 			/* event is done */
 			return true;
 		}
@@ -130,8 +139,8 @@ SearchBar::SearchBar(QWidget *parent, int width, int height) : QWidget(parent),
 	QObject::connect(m_search_edit, &LineEdit::selectItem, [this](void) {
 		emit this->selectItem();
 	});
-	QObject::connect(m_search_edit, &LineEdit::moveFocusNext, [this](void) {
-		emit this->moveFocusNext();
+	QObject::connect(m_search_edit, &LineEdit::moveFocusPrevNext, [this](bool prev) {
+		emit this->moveFocusPrevNext(prev);
 	});
 
 	QHBoxLayout *layout = new QHBoxLayout();

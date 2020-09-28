@@ -1,6 +1,12 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include "mainframe.h"
+#include "pasteitem.h"
+#include "shortcut.h"
+#include "searchbar.h"
+#include "database.h"
+
 #include <QMainWindow>
 #include <QPropertyAnimation>
 #include <QGraphicsDropShadowEffect>
@@ -11,11 +17,6 @@
 #include <QListWidgetItem>
 #include <QClipboard>
 #include <QTimer>
-
-#include "pasteitem.h"
-#include "shortcut.h"
-#include "searchbar.h"
-#include "database.h"
 
 class MainWindow : public QMainWindow
 {
@@ -39,13 +40,14 @@ private:
 	QPixmap getClipboardOwnerIcon(void);
 	void enabledGlassEffect(void);
 
-public Q_SLOTS:
+public slots:
 	void hide_window(void);
 	void show_window(void);
 	void clipboard_later(void);
+	void move_to_prev_next_focus_widget(bool);
 
 private:
-	QWidget				*__main_frame;
+	MainFrame			*__main_frame;
 	QGraphicsDropShadowEffect	*__main_frame_shadow;
 	QPropertyAnimation		*__hide_animation;
 	DoubleCtrlShortcut		*__shortcut;

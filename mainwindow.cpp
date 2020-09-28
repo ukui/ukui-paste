@@ -17,6 +17,7 @@
 #include <QMutex>
 #include <QMutexLocker>
 #include <QShortcut>
+#include <QEvent>
 #include <QDebug>
 
 #include "mainwindow.h"
@@ -99,7 +100,7 @@ typedef BOOL (WINAPI *pfnSetWindowCompositionAttribute)(HWND, WINDOWCOMPOSITIONA
 
 MainWindow::MainWindow(QWidget *parent)
 	: QMainWindow(parent),
-	  __main_frame(new QWidget(this)),
+	  __main_frame(new MainFrame(this)),
 	  __main_frame_shadow(new QGraphicsDropShadowEffect(this)),
 	  __hide_animation(new QPropertyAnimation(this, "pos")),
 	  __shortcut(new DoubleCtrlShortcut(this)),
@@ -113,8 +114,6 @@ MainWindow::MainWindow(QWidget *parent)
 	this->setWindowFlags(Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint |
 			     Qt::BypassWindowManagerHint | Qt::SplashScreen);
 	this->setFocusPolicy(Qt::NoFocus);
-	this->__main_frame->setGeometry(this->geometry());
-	this->__main_frame->setObjectName(QString("MainFrame"));
 	MainWindow::loadStyleSheet(this, ":/resources/stylesheet.qss");
 	this->setCentralWidget(this->__main_frame);
 #if !defined Q_OS_LINUX && !defined Q_OS_WIN
@@ -123,11 +122,13 @@ MainWindow::MainWindow(QWidget *parent)
 	this->setAttribute(Qt::WA_TranslucentBackground, true);
 	this->enabledGlassEffect();
 
+	this->__main_frame->setGeometry(this->geometry());
 	this->__main_frame_shadow->setOffset(0, 0);
 	this->__main_frame_shadow->setColor(Qt::lightGray);
 	this->__main_frame_shadow->setBlurRadius(10);
 	this->__main_frame->setGraphicsEffect(this->__main_frame_shadow);
-	this->__main_frame->setFocusPolicy(Qt::NoFocus);
+	this->__main_frame->setFocusPolicy(Qt::ClickFocus);
+	QObject::connect(this->__main_frame, SIGNAL(moveFocusPrevNext(bool)), this, SLOT(move_to_prev_next_focus_widget(bool)));
 
 	QObject::connect(this->__clipboard, &QClipboard::dataChanged, [this](void) {
 		QTimer::singleShot(100, this, SLOT(clipboard_later()));
@@ -224,6 +225,23 @@ void MainWindow::hide_window(void)
 	this->__hide_state = true;
 }
 
+void MainWindow::move_to_prev_next_focus_widget(bool prev)
+{
+	QListWidgetItem *item = this->__scroll_widget->selectedItems()[0];
+	PasteItem *widget = reinterpret_cast<PasteItem *>(this->__scroll_widget->itemWidget(item));
+
+	do {
+		if (prev) {
+			/* Get prev focus widget and isn't hidden */
+			widget = reinterpret_cast<PasteItem *>(widget->previousInFocusChain());
+		} else {
+			/* Get next focus widget and isn't hidden */
+			widget = reinterpret_cast<PasteItem *>(widget->nextInFocusChain());
+		}
+	} while (widget->isHidden());
+	widget->setFocus();
+}
+
 void MainWindow::initUI(void)
 {
 	this->__searchbar = new SearchBar(this->__main_frame, 2*this->width()/5, 40);
@@ -273,16 +291,7 @@ void MainWindow::initUI(void)
 		this->__current_item = nullptr;
 		widget->copyData();
 	});
-	QObject::connect(this->__searchbar, &SearchBar::moveFocusNext, [this](void) {
-		QListWidgetItem *item = this->__scroll_widget->selectedItems()[0];
-		PasteItem *widget = reinterpret_cast<PasteItem *>(this->__scroll_widget->itemWidget(item));
-
-		do {
-			/* Get next focus widget and isn't hidden */
-			widget = reinterpret_cast<PasteItem *>(widget->nextInFocusChain());
-		} while (widget->isHidden());
-		widget->setFocus();
-	});
+	QObject::connect(this->__searchbar, SIGNAL(moveFocusPrevNext(bool)), this, SLOT(move_to_prev_next_focus_widget(bool)));
 
 	this->__menu_button = new PushButton(this->__main_frame);
 	this->__menu_button->setPixmap(QPixmap(":/resources/points.png"));

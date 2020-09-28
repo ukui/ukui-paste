@@ -3,9 +3,13 @@
 
 #include <QTimer>
 #include <QThread>
+
 #include <X11/Xlib.h>
 #include <X11/extensions/record.h>
 #include <X11/Xlibint.h>
+
+/* Needs by QMetaType::Bool, They are conflict */
+#undef Bool
 
 class ShortcutPrivateX11 : public QThread
 {

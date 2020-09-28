@@ -47,6 +47,7 @@ unix:!macx {
 SOURCES += \
     database.cpp \
     main.cpp \
+    mainframe.cpp \
     mainwindow.cpp \
     pasteitem.cpp \
     pasteitembarnner.cpp \
@@ -56,6 +57,7 @@ SOURCES += \
 
 HEADERS += \
     database.h \
+    mainframe.h \
     mainwindow.h \
     pasteitem.h \
     pasteitembarnner.h \
