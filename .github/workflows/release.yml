@@ -1,0 +1,58 @@
+# This is a basic workflow to help you get started with Actions
+
+name: Release-CI
+
+# Controls when the action will run. Triggers the workflow on push or pull request
+# events but only for the master branch
+on:
+  push:
+    tags:
+      - '*'
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  release:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-20.04
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+      
+      - name: Update apt repository
+        run: sudo apt-get update -y
+
+      - name: Install build dependcies
+        run: sudo apt-get install -y build-essential qt5-default qttools5-dev-tools qtmultimedia5-dev debhelper-compat pkg-kde-tools libglib2.0-dev libqt5x11extras5-dev libkf5windowsystem-dev libgsettings-qt-dev pkg-config qt5-qmake qtbase5-dev qtbase5-dev-tools qtbase5-private-dev qtchooser qttools5-dev-tools libxtst-dev dpkg-dev
+
+      - name: Build debian package
+        id: build_debian_package
+        run: |
+            dpkg-buildpackage -us -uc -b
+            filename=$(find .. -type f \( -iname \*.deb -o -iname \*.rpm \) -exec basename {} \;) 
+            echo "::set-output name=filepath::../$filename" 
+            echo "::set-output name=filename::$filename" 
+      
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@master
+        env:
+            GITHUB_TOKEN: ${{ secrets.PASTES_RELEASE }}
+        with:
+            tag_name: ${{ github.ref }}
+            release_name: Release ${{ github.ref }}
+            draft: false
+            prerelease: false
+      
+      - name: Upload Release Asset
+        id: upload-release-asset
+        uses: actions/upload-release-asset@master
+        env:
+           GITHUB_TOKEN: ${{ secrets.PASTES_RELEASE }}
+        with:
+           upload_url: ${{ steps.create_release.outputs.upload_url }}
+           asset_path: ${{ steps.build_debian_package.outputs.filepath }}
+           asset_name: ${{ steps.build_debian_package.outputs.filename }}
+           asset_content_type: application/x-tgz
