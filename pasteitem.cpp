@@ -161,7 +161,8 @@ void PasteItem::copyData(void)
 	if (!itemData.image.isNull())
 		itemData.mimeData->setImageData(itemData.image);
 
-	clipboard->setMimeData(itemData.mimeData);
+	clipboard->setMimeData(itemData.mimeData, QClipboard::Clipboard);
+	clipboard->setMimeData(itemData.mimeData, QClipboard::Selection);
 
 #ifdef Q_OS_LINUX
 	if (itemData.mimeData->hasUrls())
@@ -174,7 +175,7 @@ void PasteItem::copyData(void)
 	timer->moveToThread(thread);
 	QObject::connect(timer, &QTimer::timeout, [thread, timer](void) {
 		Display *disp = XOpenDisplay(nullptr);
-		SendKey(disp, XK_v, XK_Control_L);
+		SendKey(disp, XK_Insert, XK_Shift_L);
 		XCloseDisplay(disp);
 
 		timer->stop();
