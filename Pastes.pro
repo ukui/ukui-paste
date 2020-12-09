@@ -1,11 +1,11 @@
-QT       += core gui sql
+QT       += core gui sql dbus
 
 unix:!macx {
         QT += KWindowSystem
         HEADERS += shortcut_x11.h
         SOURCES += shortcut_x11.cpp
         CONFIG += link_pkgconfig
-        PKGCONFIG += gio-2.0 glib-2.0 gio-unix-2.0
+        PKGCONFIG += gio-2.0 glib-2.0 gio-unix-2.0 gsettings-qt
         LIBS +=-lgio-2.0 -lglib-2.0 -lX11 -lXtst
 }
 
@@ -52,6 +52,7 @@ SOURCES += \
     pasteitem.cpp \
     pasteitembarnner.cpp \
     pasteitemcontext.cpp \
+    pastestyle.cpp \
     searchbar.cpp \
     shortcut.cpp
 
@@ -62,6 +63,7 @@ HEADERS += \
     pasteitem.h \
     pasteitembarnner.h \
     pasteitemcontext.h \
+    pastestyle.h \
     searchbar.h \
     shortcut.h
 

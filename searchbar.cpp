@@ -1,3 +1,21 @@
+/*
+ * Copyright (C) 2019 Tianjin KYLIN Information Technology Co., Ltd.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3, or (at your option)
+ * any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, see <http://www.gnu.org/licenses/&gt;.
+ *
+ */
+
 #include "searchbar.h"
 
 #include <QHBoxLayout>
@@ -6,42 +24,25 @@
 #include <QApplication>
 #include <QDebug>
 
-LineEdit::LineEdit(QWidget *parent, int parent_width, int parent_height) : QLineEdit(parent),
-	m_zoom_animation(new QPropertyAnimation(this, "minimumWidth"))
+/*搜索框的样式*/
+LineEdit::LineEdit(QWidget *parent) : QLineEdit(parent)
 {
-	this->setFocusPolicy(Qt::ClickFocus);
-	this->setContextMenuPolicy(Qt::NoContextMenu);
-	this->setFixedHeight(parent_height);
-	this->setMaximumWidth(parent_width-parent_height*1.2);
-	this->setMinimumWidth(parent_width/2);
-
-	m_zoom_animation->setDuration(100);
-	m_zoom_animation->setStartValue(parent_width/2);
-	m_zoom_animation->setEndValue(parent_width-parent_height*1.2);
-	QObject::connect(this->m_zoom_animation, &QAbstractAnimation::finished, [parent](void){
-		parent->update();
-		QWidget *focusWidget = QApplication::focusWidget();
-		if (focusWidget)
-			focusWidget->update();
-	});
+    this->setFocusPolicy(Qt::ClickFocus);
+    this->setContextMenuPolicy(Qt::NoContextMenu);
 }
 
 void LineEdit::focusInEvent(QFocusEvent *event)
 {
-	m_zoom_animation->setDirection(QAbstractAnimation::Forward);
-	m_zoom_animation->start();
-	emit this->focusIn();
-	QLineEdit::focusInEvent(event);
+    emit this->focusIn();
+    QLineEdit::focusInEvent(event);
 }
 
 void LineEdit::focusOutEvent(QFocusEvent *event)
 {
-	m_zoom_animation->setDirection(QAbstractAnimation::Backward);
-	m_zoom_animation->start();
-	emit this->focusOut();
-	QLineEdit::focusOutEvent(event);
+    emit this->focusOut();
+    QLineEdit::focusOutEvent(event);
 }
-
+/*监听对搜索框的按键设置*/
 bool LineEdit::event(QEvent *event)
 {
 	if (event->type() == QEvent::KeyPress) {
@@ -74,83 +75,39 @@ void LineEdit::hideEvent(QHideEvent *event)
 	QLineEdit::hideEvent(event);
 }
 
-PushButton::PushButton(QWidget *parent) : QPushButton(parent),
-	m_label(new QLabel(this)),
-	m_pixmap(QPixmap(":/resources/search_white.png"))
+
+SearchBar::SearchBar(QWidget *parent, int width, int height) : QWidget(parent)
 {
-	this->setObjectName("PushButton");
-	this->setAttribute(Qt::WA_StyledBackground);
-	this->setFocusPolicy(Qt::ClickFocus);
-	m_label->setAlignment(Qt::AlignCenter);
-}
+    this->setAttribute(Qt::WA_TranslucentBackground);
+    this->setAttribute(Qt::WA_StyledBackground);
+    this->setObjectName("SearchBar");
+    this->setFixedSize(width, height);
 
-void PushButton::updatePixmap(void)
-{
-	if (!m_pixmap.isNull()) {
-		QPixmap pixmap = m_pixmap.scaled(this->size()*0.8, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-		m_label->setPixmap(pixmap);
-	}
-}
+    this->m_search_edit = new LineEdit(this);
 
-void PushButton::setPixmap(QPixmap pixmap)
-{
-	m_pixmap = pixmap;
-	this->updatePixmap();
-}
 
-void PushButton::resizeEvent(QResizeEvent *event)
-{
-	m_label->setGeometry(QRect(0, 0, event->size().width(), event->size().height()));
-	this->updatePixmap();
-	QPushButton::resizeEvent(event);
-}
+    m_search_edit->setPlaceholderText(QObject::tr("Search"));
+    m_search_edit->setTextMargins(10, 0, 0, 0);
+    QObject::connect(m_search_edit, &LineEdit::focusOut, [this](void) {   });
+    QObject::connect(m_search_edit, &LineEdit::focusIn, [this](void) {
+    });
+    QObject::connect(m_search_edit, &LineEdit::hideWindow, [this](void) {
+        emit this->hideWindow();
+    });
+    QObject::connect(m_search_edit, &LineEdit::textChanged, [this](const QString &text) {
+        emit this->textChanged(text);
+    });
+    QObject::connect(m_search_edit, &LineEdit::selectItem, [this](void) {
+        emit this->selectItem();
+    });
+    QObject::connect(m_search_edit, &LineEdit::moveFocusPrevNext, [this](bool prev) {
+        emit this->moveFocusPrevNext(prev);
+    });
 
-SearchBar::SearchBar(QWidget *parent, int width, int height) : QWidget(parent),
-	m_search_button(new PushButton(this))
-{
-	this->setAttribute(Qt::WA_TranslucentBackground);
-	this->setAttribute(Qt::WA_StyledBackground);
-	this->setObjectName("SearchBar");
-	this->setFixedSize(width, height);
+    QHBoxLayout *layout = new QHBoxLayout();
+    layout->addWidget(this->m_search_edit);
+    layout->setContentsMargins(0, 0, 0, 0);
+    layout->addStretch();
 
-	this->m_search_edit = new LineEdit(this, width, height);
-
-	this->m_search_button->setFocusPolicy(Qt::NoFocus);
-	this->m_search_button->setDisabled(true);
-	this->m_search_button->setFixedSize(height*1.2, height);
-
-	m_search_edit->setPlaceholderText(QObject::tr("Search"));
-	m_search_edit->setTextMargins(10, 0, 0, 0);
-	QObject::connect(m_search_edit, &LineEdit::focusOut, [this](void) {
-		this->m_search_button->setStyleSheet("background-color: rgb(170, 170, 170);"
-						     "border-top-right-radius: 3px;"
-						     "border-bottom-right-radius: 3px;");
-	});
-	QObject::connect(m_search_edit, &LineEdit::focusIn, [this](void) {
-		this->m_search_button->setStyleSheet("background-color: rgb(79, 79, 79);"
-						     "border-top-right-radius: 3px;"
-						     "border-bottom-right-radius: 3px;");
-	});
-	QObject::connect(m_search_edit, &LineEdit::hideWindow, [this](void) {
-		emit this->hideWindow();
-	});
-	QObject::connect(m_search_edit, &LineEdit::textChanged, [this](const QString &text) {
-		emit this->textChanged(text);
-	});
-	QObject::connect(m_search_edit, &LineEdit::selectItem, [this](void) {
-		emit this->selectItem();
-	});
-	QObject::connect(m_search_edit, &LineEdit::moveFocusPrevNext, [this](bool prev) {
-		emit this->moveFocusPrevNext(prev);
-	});
-
-	QHBoxLayout *layout = new QHBoxLayout();
-	layout->addStretch();
-	layout->addWidget(this->m_search_edit);
-	layout->addWidget(this->m_search_button);
-	layout->addStretch();
-	layout->setSpacing(0);
-	layout->setContentsMargins(0, 0, 0, 0);
-
-	this->setLayout(layout);
+    this->setLayout(layout);
 }

@@ -1,11 +1,5 @@
-pastes (0.2-1) unstable; urgency=medium
+ukui-paste (1.0.1-1) groovy; urgency=medium
 
-  * Update
+  * Initial release to Debian (Closes: #)
 
- -- jackieliu <liuyun01@kylinos.cn>  Fri, 09 Oct 2020 20:30:54 +0800
-
-pastes (0.1-1) unstable; urgency=medium
-
-  * Initial release
-
- -- jackieliu <liuyun01@kylinos.cn>  Thu, 24 Sep 2020 11:29:20 +0800
+ -- Kevin Duan <duankaiwen@kylinos.cn>  Mon, 07 Dec 2020 20:11:34 +0800
