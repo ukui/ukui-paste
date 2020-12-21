@@ -1,4 +1,5 @@
-ukui-paste (1.0.1-1) groovy; urgency=medium
+"NMU"
+ukui-paste (1-0.0) unstable; urgency=medium
 
   * Initial release to Debian (Closes: #)
 

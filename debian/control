@@ -3,7 +3,7 @@ Section: x11
 Priority: optional
 Maintainer: Kylin Team <team+kylin@tracker.debian.org>
 Uploaders: jackieliu <liuyun01@kylinos.cn>
-Build-Depends: debhelper-compat (= 13),
+Build-Depends: debhelper-compat (= 12),
                qtbase5-dev,
                libqt5svg5-dev,
                libqt5x11extras5-dev,
@@ -15,7 +15,7 @@ Build-Depends: debhelper-compat (= 13),
                libxtst-dev,
                libx11-dev,
                libkf5windowsystem-dev
-Standards-Version: 4.5.0
+Standards-Version: 4.5.1
 Rules-Requires-Root: no
 Homepage: https://github.com/ukui/ukui-paste.git
 Vcs-Browser: https://github.com/ukui/ukui-paste
@@ -26,5 +26,5 @@ Architecture: any
 Depends: ${shlibs:Depends},
          ${misc:Depends}
 Description: Paste tool for UKUI
- ukui-pastes is a modern UI design and lowest learning costs.
+ ukui-paste is a modern UI design and lowest learning costs.
  You only need to double-click the Ctrl key to call it to serve you.
