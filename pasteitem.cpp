@@ -125,7 +125,7 @@ void PasteItem::mousePressEvent(QMouseEvent *event)
 {
     if(event->button() == Qt::RightButton){
         qDebug()<<"test";
-        this->menuData();
+//        this->menuData();
     }
     QWidget::mousePressEvent(event);
 }
@@ -157,3 +157,7 @@ void PasteItem::copyData(void)
     clipboard->setMimeData(itemData.mimeData, QClipboard::Selection);
 
 }
+
+//void PasteItem::menuData(void){
+//    QMenu menu =new QMenu;
+//}
