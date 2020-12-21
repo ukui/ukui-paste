@@ -37,84 +37,13 @@
 #include <QShortcut>
 #include <QEvent>
 #include <QDebug>
+#include <QTextEdit>
 
 #include "mainwindow.h"
-
-#ifdef Q_OS_WIN
-#include <QtWin>
-#include <windows.h>
-#include <windowsx.h>
-#include <winuser.h>
-#include <shellapi.h>
-#include <comdef.h>
-#include <commctrl.h>
-#include <objbase.h>
-#include <commoncontrols.h>
-#include <psapi.h>
-#include <QOperatingSystemVersion>
-#endif
-
-#ifdef Q_OS_LINUX
 #include <KF5/KWindowSystem/KWindowEffects>
 #include <X11/Xlib.h>
 #include <X11/Xatom.h>
-#endif
 
-#ifdef Q_OS_WIN
-typedef enum _WINDOWCOMPOSITIONATTRIB
-{
-    WCA_UNDEFINED = 0,
-    WCA_NCRENDERING_ENABLED = 1,
-    WCA_NCRENDERING_POLICY = 2,
-    WCA_TRANSITIONS_FORCEDISABLED = 3,
-    WCA_ALLOW_NCPAINT = 4,
-    WCA_CAPTION_BUTTON_BOUNDS = 5,
-    WCA_NONCLIENT_RTL_LAYOUT = 6,
-    WCA_FORCE_ICONIC_REPRESENTATION = 7,
-    WCA_EXTENDED_FRAME_BOUNDS = 8,
-    WCA_HAS_ICONIC_BITMAP = 9,
-    WCA_THEME_ATTRIBUTES = 10,
-    WCA_NCRENDERING_EXILED = 11,
-    WCA_NCADORNMENTINFO = 12,
-    WCA_EXCLUDED_FROM_LIVEPREVIEW = 13,
-    WCA_VIDEO_OVERLAY_ACTIVE = 14,
-    WCA_FORCE_ACTIVEWINDOW_APPEARANCE = 15,
-    WCA_DISALLOW_PEEK = 16,
-    WCA_CLOAK = 17,
-    WCA_CLOAKED = 18,
-    WCA_ACCENT_POLICY = 19,
-    WCA_FREEZE_REPRESENTATION = 20,
-    WCA_EVER_UNCLOAKED = 21,
-    WCA_VISUAL_OWNER = 22,
-    WCA_LAST = 23
-} WINDOWCOMPOSITIONATTRIB;
-
-typedef struct _WINDOWCOMPOSITIONATTRIBDATA
-{
-    WINDOWCOMPOSITIONATTRIB Attrib;
-    PVOID pvData;
-    SIZE_T cbData;
-} WINDOWCOMPOSITIONATTRIBDATA;
-
-typedef enum _ACCENT_STATE
-{
-    ACCENT_DISABLED = 0,
-    ACCENT_ENABLE_GRADIENT = 1,
-    ACCENT_ENABLE_TRANSPARENTGRADIENT = 2,
-    ACCENT_ENABLE_BLURBEHIND = 3,
-    ACCENT_INVALID_STATE = 4
-} ACCENT_STATE;
-
-typedef struct _ACCENT_POLICY
-{
-    ACCENT_STATE AccentState;
-    DWORD AccentFlags;
-    DWORD GradientColor;
-    DWORD AnimationId;
-} ACCENT_POLICY;
-
-typedef BOOL (WINAPI *pfnSetWindowCompositionAttribute)(HWND, WINDOWCOMPOSITIONATTRIBDATA*);
-#endif
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent),
       __main_frame(new MainFrame(this)),
@@ -125,13 +54,7 @@ MainWindow::MainWindow(QWidget *parent)
       __current_item(nullptr)
 {
     /* 初始化与任务栏交互的dbus和gsetting */
-//    initPanelDbusGsetting();
-
-    /*获取分辨率*/
-    desktop_width();
-    desktop_height();
-    /*整体窗口位置*/
-    window_xy();
+    initPanelDbusGsetting();
     /*分辨率是否变化*/
     desktoparea_change();
 
@@ -144,17 +67,27 @@ MainWindow::MainWindow(QWidget *parent)
             this->hide();
         }
     });
-    this->__hide_animation->setDuration(200);
-    this->__hide_animation->setStartValue(this->pos());
-    this->__hide_animation->setEndValue(QPoint(0, QApplication::primaryScreen()->geometry().height()));
-    this->__hide_animation->setEasingCurve(QEasingCurve::OutQuad);
 
     QObject::connect(this->__shortcut, &DoubleCtrlShortcut::activated, [this](void) {
+        /*整体窗口位置*/
+        window_xy();
+
         if (!this->isVisible())
             this->show_window();
         else
             this->hide_window();
     });
+
+    this->setWindowFlags(Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint |
+                     Qt::BypassWindowManagerHint | Qt::SplashScreen);
+    this->setFocusPolicy(Qt::NoFocus);
+    this->setCentralWidget(this->__main_frame);
+    this->setAttribute(Qt::WA_TranslucentBackground, false);
+    this->enabledGlassEffect();
+
+    this->__main_frame->setGeometry(this->geometry());
+    this->__main_frame->setFocusPolicy(Qt::ClickFocus);
+    QObject::connect(this->__main_frame, SIGNAL(moveFocusPrevNext(bool)), this, SLOT(move_to_prev_next_focus_widget(bool)));
 
     QShortcut *shortcut_search = new QShortcut(this);
     shortcut_search->setKey(QKeySequence("Ctrl+f"));
@@ -167,136 +100,93 @@ MainWindow::MainWindow(QWidget *parent)
     return;
 }
 
-//void MainWindow::initPanelDbusGsetting()
-//{
-//    /* 链接任务栏Dbus接口，获取任务栏高度和位置 */
-//    m_pServiceInterface = new QDBusInterface(PANEL_DBUS_SERVICE, PANEL_DBUS_PATH, PANEL_DBUS_INTERFACE, QDBusConnection::sessionBus());
-//    m_pServiceInterface->setTimeout(2147483647);
+void MainWindow::initPanelDbusGsetting(){
+    /* 链接任务栏Dbus接口，获取任务栏高度和位置 */
+    m_pServiceInterface = new QDBusInterface(PANEL_DBUS_SERVICE, PANEL_DBUS_PATH, PANEL_DBUS_INTERFACE, QDBusConnection::sessionBus());
+    m_pServiceInterface->setTimeout(2147483647);
 
-//    /* 链接任务栏dgsetting接口 */
-//    if(QGSettings::isSchemaInstalled(UKUI_PANEL_SETTING))
-//        m_pPanelSetting = new QGSettings(UKUI_PANEL_SETTING);
-//}
-
-/*整体窗口位置*/
-void MainWindow::window_xy(){
-        this->setGeometry(8, screenHeight*0.5, screenWidth-16, screenHeight*0.2);
-        qDebug() <<screenHeight*0.5;
-        this->setWindowFlags(Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint |
-                     Qt::BypassWindowManagerHint | Qt::SplashScreen);
-        this->setFocusPolicy(Qt::NoFocus);
-        this->setCentralWidget(this->__main_frame);
-        this->__main_frame->setFocusPolicy(Qt::ClickFocus);
-        QObject::connect(this->__main_frame, SIGNAL(moveFocusPrevNext(bool)), this, SLOT(move_to_prev_next_focus_widget(bool)));
+    /* 链接任务栏dgsetting接口 */
+    if(QGSettings::isSchemaInstalled(UKUI_PANEL_SETTING))
+        m_pPanelSetting = new QGSettings(UKUI_PANEL_SETTING);
 }
+
 /*获取桌面是否有改变*/
 void MainWindow::desktoparea_change(){
     QDesktopWidget* desktopWidget = QApplication::desktop();
-    connect(desktopWidget, &QDesktopWidget::resized, this, &MainWindow::desktoparea);
+    connect(desktopWidget, &QDesktopWidget::resized, this, &MainWindow::window_xy);
 }
-void MainWindow::desktoparea(){
+
+/*整体窗口位置*/
+void MainWindow::window_xy(){
     desktop_width();
     desktop_height();
-    window_xy();
+    switch(getPanelSite()){
+        case 0:
+            this->setGeometry(8, screenHeight*0.68, screenWidth-16, screenHeight*0.32-connectTaskBarDbus()-8);
+            break;
+        case 1:
+            this->setGeometry(8, screenHeight*0.68+connectTaskBarDbus(), screenWidth-16, screenHeight*0.32-connectTaskBarDbus()-8);
+            break;
+        case 2:
+            this->setGeometry(8+connectTaskBarDbus(), screenHeight*0.68, screenWidth-16-connectTaskBarDbus(), screenHeight*0.32-8);
+            break;
+        case 3:
+            this->setGeometry(8, screenHeight*0.68, screenWidth-16-connectTaskBarDbus(), screenHeight*0.32-8);
+            break;
+        default:
+            break;
+    }
 }
+
 /*获取主桌面分辨率大小*/
 int MainWindow::desktop_width(){
     QRect screenRect1 = desktop->screenGeometry();
     screenWidth = screenRect1.width();
-    qDebug() << "主屏幕宽" << screenWidth;
     return screenWidth;
 }
 int MainWindow::desktop_height(){
     QRect screenRect2 = desktop->screenGeometry();
     screenHeight = screenRect2.height();
-    qDebug() << "主屏幕高" << screenHeight;
     return screenHeight;
 }
 
-/*获取任务栏状态是否有改变*/
 /*获取任务栏的大小*/
-//int MainWindow::connectTaskBarDbus()
-//{
-//    int panelHeight = 46;
-//    if (m_pPanelSetting != nullptr) {
-//        QStringList keys = m_pPanelSetting->keys();
-//        if (keys.contains("panelsize")) {
-//            panelHeight = m_pPanelSetting->get("panelsize").toInt();
-//        }
-//    } else {
-//        QDBusMessage msg = m_pServiceInterface->call("GetPanelSize", QVariant("Hight"));
-//        panelHeight = msg.arguments().at(0).toInt();
-//        return panelHeight;
-//    }
-//    return panelHeight;
-//}
+int MainWindow::connectTaskBarDbus(){
+    int panelHeight = 46;
+    if (m_pPanelSetting != nullptr) {
+        QStringList keys = m_pPanelSetting->keys();
+        if (keys.contains("panelsize")) {
+            panelHeight = m_pPanelSetting->get("panelsize").toInt();
+        }
+    } else {
+        QDBusMessage msg = m_pServiceInterface->call("GetPanelSize", QVariant("Hight"));
+        panelHeight = msg.arguments().at(0).toInt();
+        return panelHeight;
+    }
+    return panelHeight;
+}
+
 /*获取任务栏位置*/
-//int MainWindow::getPanelSite()
-//{
-//    int panelPosition = 0;
-//    if (m_pPanelSetting != nullptr) {
-//        QStringList keys = m_pPanelSetting->keys();
-//        if (keys.contains("panelposition")) {
-//            panelPosition = m_pPanelSetting->get("panelposition").toInt();
-//        }
-//    } else {
-//        QDBusMessage msg = m_pServiceInterface->call("GetPanelPosition", QVariant("Site"));
-//        panelPosition = msg.arguments().at(0).toInt();
-//    }
-//    qDebug() << "panel所在的位置" << panelPosition;
-//    return panelPosition;
-//}
-/* 修改屏幕分辨率或者主屏需要做的事情 */
-//void MainWindow::ModifyScreenNeeds()
-//{
-//    int clipboardhight = setClipBoardWidgetScaleFactor();
-//    sidebarPluginsWidgets::getInstancePluinsWidgets()->setClipboardWidgetSize(clipboardhight); //设定剪贴板高度
-//    return;
-//}
-/* 设定剪贴板高度 */
-//int MainWindow::setClipBoardWidgetScaleFactor()
-//{
-//    if (screenHeight >= 600 && screenHeight <= 768) {
-//        return screenHeight/2 - connectTaskBarDbus() - 60;
-//    } else if (screenHeight >= 900 && screenHeight <= 1080) {
-//        return screenHeight/3;
-//    } else if (screenHeight >= 1200 && screenHeight <= 2160) {
-//        return screenHeight/4;
-//    } else {
-//        return screenHeight/2 - connectTaskBarDbus();
-//    }
-//}
-/* 设置剪贴板的高度 */
-//void sidebarPluginsWidgets::setClipboardWidgetSize(int ClipHight)
-//{
-//    m_cliboardHight = ClipHight;
-//    qDebug() << "设置小剪贴板的界面大小---->" << ClipHight;
-//    this->setFixedSize(400, ClipHight);
-//    m_pClipboardWidget->setFixedSize(400, ClipHight - 50);
-//    m_pPluginsButtonWidget->setFixedSize(400, ClipHight - 50);
-//    return;
-//}
-//链接任务栏dbus获取高度的接口
-//int MainWindow::connectTaskBarDbus()
-//{
-//    int panelHeight = 46;
-//    if (m_pPanelSetting != nullptr) {
-//        QStringList keys = m_pPanelSetting->keys();
-//        if (keys.contains("panelsize")) {
-//            panelHeight = m_pPanelSetting->get("panelsize").toInt();
-//        }
-//    } else {
-//        QDBusMessage msg = m_pServiceInterface->call("GetPanelSize", QVariant("Hight"));
-//        panelHeight = msg.arguments().at(0).toInt();
-//        return panelHeight;
-//    }
-//    return panelHeight;
-//}
+int MainWindow::getPanelSite(){
+    int panelPosition = 0;
+    if (m_pPanelSetting != nullptr) {
+        QStringList keys = m_pPanelSetting->keys();
+        if (keys.contains("panelposition")) {
+            panelPosition = m_pPanelSetting->get("panelposition").toInt();
+        }
+    } else {
+        QDBusMessage msg = m_pServiceInterface->call("GetPanelPosition", QVariant("Site"));
+        panelPosition = msg.arguments().at(0).toInt();
+    }
+    return panelPosition;
+}
+
 
 MainWindow::~MainWindow()
 {
     delete this->__hide_animation;
 }
+
 bool MainWindow::event(QEvent *e)
 {
     if (e->type() == QEvent::ActivationChange) {
@@ -375,6 +265,7 @@ void MainWindow::move_to_prev_next_focus_widget(bool prev)
 
 void MainWindow::initUI(void)
 {
+    /*搜索部分*/
     this->__searchbar = new SearchBar(this->__main_frame, this->width()/3, 40);
     QObject::connect(this->__searchbar, &SearchBar::textChanged, [this](const QString &text) {
         int temp_current_item_row = -1;
@@ -421,7 +312,46 @@ void MainWindow::initUI(void)
     });
     QObject::connect(this->__searchbar, SIGNAL(moveFocusPrevNext(bool)), this, SLOT(move_to_prev_next_focus_widget(bool)));
 
+    /*分类部分*/
+    this->__classify1 = new PushButton(this->__main_frame);
+    this->__classify1->setText("fuwenben");
+    this->__classify1->setFixedSize(80, 30);
+    this->__classify1->setFlat(true);
+    this->__classify2 = new PushButton(this->__main_frame);
+    this->__classify2->setText("pics");
+    this->__classify2->setFixedSize(80, 30);
+    this->__classify2->setFlat(true);
+    this->__classify3 = new PushButton(this->__main_frame);
+    this->__classify3->setText("wenjian");
+    this->__classify3->setFixedSize(80, 30);
+    this->__classify3->setFlat(true);
+    this->__classify4 = new PushButton(this->__main_frame);
+    this->__classify4->setText("wenben");
+    this->__classify4->setFixedSize(80, 30);
+    this->__classify4->setFlat(true);
+    this->__classify5 = new PushButton(this->__main_frame);
+    this->__classify5->setText("all");
+    this->__classify5->setFixedSize(80, 30);
+    this->__classify5->setFlat(true);
 
+    QObject::connect(this->__classify1, &PushButton::clicked, [this](void) {
+        this->reloadData(1);
+    });
+    QObject::connect(this->__classify2, &PushButton::clicked, [this](void) {
+        this->reloadData(2);
+    });
+    QObject::connect(this->__classify3, &PushButton::clicked, [this](void) {
+        this->reloadData(3);
+    });
+    QObject::connect(this->__classify4, &PushButton::clicked, [this](void) {
+        this->reloadData(4);
+    });
+    QObject::connect(this->__classify5, &PushButton::clicked, [this](void) {
+        this->reloadData(0);
+    });
+
+
+    /*展示部分*/
     this->__scroll_widget = new QListWidget(this->__main_frame);
     this->__scroll_widget->setSelectionMode(QAbstractItemView::SingleSelection);
     this->__scroll_widget->setHorizontalScrollMode(QListWidget::ScrollPerPixel);
@@ -438,9 +368,15 @@ void MainWindow::initUI(void)
     QObject::connect(this->__scroll_widget, &QListWidget::currentItemChanged, [this](void) {
         this->__scroll_widget->update();
     });
-    /*搜索栏水平排列*/
+
+    /*整体布局*/
     QHBoxLayout *hlayout = new QHBoxLayout();
     hlayout->addWidget(this->__searchbar);
+    hlayout->addWidget(this->__classify5);
+    hlayout->addWidget(this->__classify1);
+    hlayout->addWidget(this->__classify2);
+    hlayout->addWidget(this->__classify3);
+    hlayout->addWidget(this->__classify4);
     hlayout->addStretch();
 
     QVBoxLayout *vlayout = new QVBoxLayout();
@@ -452,52 +388,118 @@ void MainWindow::initUI(void)
     this->__main_frame->show();
 
     /* load data from database */
-    this->reloadData();
+    this->reloadData(0);
 }
 
-void MainWindow::reloadData()
-{
+/*处理复制粘贴的展示数据*/
+void MainWindow::reloadData(int format){
+    /*第一次打开时创造数据表*/
     if (!this->__db.isTableExist()) {
         this->__db.createTable();
         return;
     }
+    int y =this->__scroll_widget->count();
+    for (int x=0 ;x<=y;x++){
+        delete this->__scroll_widget->takeItem(0);
+        int y = y+1;
+    }
 
     for (auto itemData : this->__db.loadData()) {
-        /* remove the data if it's too old (than a week) */
+        /* 时间过长删除 */
         if (QDateTime::currentDateTime().toSecsSinceEpoch() - itemData->time.toSecsSinceEpoch() > (60 * 60 * 24 * 7)) {
             this->__db.delelePasteItem(itemData->md5);
             continue;
         }
 
-        PasteItem *widget = this->insertItemWidget();
-
-        if (itemData->mimeData->hasHtml() && !itemData->mimeData->text().isEmpty()) {
-            widget->setRichText(itemData->mimeData->html(), itemData->mimeData->text());
-        } else if (itemData->mimeData->hasImage()) {
-            widget->setImage(itemData->image);
-        } else if (itemData->mimeData->hasUrls()) {
-            QList<QUrl> urls = itemData->mimeData->urls();
-            if (!widget->setUrls(urls)) {
-                this->__db.delelePasteItem(itemData->md5);
+        if(format == 1){
+            PasteItem *widgetRichText = this->insertItemWidgetRichText();
+            if (itemData->mimeData->hasHtml() && !itemData->mimeData->text().isEmpty()) {
+                widgetRichText->setRichText(itemData->mimeData->html(), itemData->mimeData->text());
+            } else {
+                /* No data, remove it */
                 delete this->__scroll_widget->takeItem(0);
                 continue;
             }
-        } else if (itemData->mimeData->hasText() && !itemData->mimeData->text().isEmpty()) {
-            widget->setPlainText(itemData->mimeData->text().trimmed());
+            widgetRichText->setTime(itemData->time);
+            widgetRichText->setIcon(itemData->icon);
+
+        } else if (format == 2){
+
+            PasteItem *widgetImage = this->insertItemWidgetImage();
+            if (itemData->mimeData->hasImage()) {
+                widgetImage->setImage(itemData->image);
+            } else {
+                /* No data, remove it */
+                delete this->__scroll_widget->takeItem(0);
+                continue;
+            }
+            widgetImage->setTime(itemData->time);
+            widgetImage->setIcon(itemData->icon);
+
+        } else if(format == 3){
+
+            PasteItem *widgetUrls = this->insertItemWidgetUrls();
+            QList<QUrl> urls = itemData->mimeData->urls();
+            if (itemData->mimeData->hasUrls()) {
+                if (!widgetUrls->setUrls(urls)) {
+                    this->__db.delelePasteItem(itemData->md5);
+                    delete this->__scroll_widget->takeItem(0);
+                    continue;
+                }
+            } else {
+                /* No data, remove it */
+                delete this->__scroll_widget->takeItem(0);
+                continue;
+            }
+            widgetUrls->setTime(itemData->time);
+            widgetUrls->setIcon(itemData->icon);
+
+        } else if (format == 4){
+
+            PasteItem *widgetPlainText = this->insertItemWidgetPlainText();
+            if (itemData->mimeData->hasText() && !itemData->mimeData->text().isEmpty()) {
+                widgetPlainText->setPlainText(itemData->mimeData->text().trimmed());
+            } else {
+                /* No data, remove it */
+                delete this->__scroll_widget->takeItem(0);
+                continue;
+            }
+            widgetPlainText->setTime(itemData->time);
+            widgetPlainText->setIcon(itemData->icon);
+
         } else {
-            /* No data, remove it */
-            delete this->__scroll_widget->takeItem(0);
-            continue;
+
+            PasteItem *widget = this->insertItemWidget();
+            /*复制网页内容 空内容时 链接 图片 文本 以及文件地址*/
+            if (itemData->mimeData->hasHtml() && !itemData->mimeData->text().isEmpty()) {
+                widget->setRichText(itemData->mimeData->html(), itemData->mimeData->text());
+            } else if (itemData->mimeData->hasImage()) {
+                widget->setImage(itemData->image);
+            } else if (itemData->mimeData->hasUrls()) {
+                QList<QUrl> urls = itemData->mimeData->urls();
+                if (!widget->setUrls(urls)) {
+                    this->__db.delelePasteItem(itemData->md5);
+                    delete this->__scroll_widget->takeItem(0);
+                    continue;
+                }
+            } else if (itemData->mimeData->hasText() && !itemData->mimeData->text().isEmpty()) {
+                widget->setPlainText(itemData->mimeData->text().trimmed());
+            } else {
+                /* No data, remove it */
+                delete this->__scroll_widget->takeItem(0);
+                continue;
+            }
+            widget->setTime(itemData->time);
+            widget->setIcon(itemData->icon);
+
         }
-        widget->setTime(itemData->time);
-        widget->setIcon(itemData->icon);
 
         this->__scroll_widget->item(0)->setData(Qt::UserRole, QVariant::fromValue(*itemData));
     }
 }
 
-
 /* Insert a PasteItem into listwidget */
+/* 插入一个可以粘贴的内容 */
 PasteItem *MainWindow::insertItemWidget(void)
 {
     QListWidgetItem *item = new QListWidgetItem;
@@ -517,6 +519,90 @@ PasteItem *MainWindow::insertItemWidget(void)
     this->resetItemTabOrder();
 
     return widget;
+}
+
+PasteItem *MainWindow::insertItemWidgetRichText(void)
+{
+    QListWidgetItem *item = new QListWidgetItem;
+    auto *widgetRichText = new PasteItem(nullptr, item);
+
+    QObject::connect(widgetRichText, &PasteItem::hideWindow, [this](void) {
+        this->hide_window();
+    });
+
+    QRect rect = QApplication::primaryScreen()->geometry();
+    /* resize item, It's use for pasteitem frame */
+    item->setSizeHint(QSize(rect.width()/6, 1));
+
+    this->__scroll_widget->insertItem(0, item);
+    this->__scroll_widget->setCurrentRow(0);
+    this->__scroll_widget->setItemWidget(item, widgetRichText);
+    this->resetItemTabOrder();
+
+    return widgetRichText;
+}
+
+PasteItem *MainWindow::insertItemWidgetImage(void)
+{
+    QListWidgetItem *item = new QListWidgetItem;
+    auto *widgetImage = new PasteItem(nullptr, item);
+
+    QObject::connect(widgetImage, &PasteItem::hideWindow, [this](void) {
+        this->hide_window();
+    });
+
+    QRect rect = QApplication::primaryScreen()->geometry();
+    /* resize item, It's use for pasteitem frame */
+    item->setSizeHint(QSize(rect.width()/6, 1));
+
+    this->__scroll_widget->insertItem(0, item);
+    this->__scroll_widget->setCurrentRow(0);
+    this->__scroll_widget->setItemWidget(item, widgetImage);
+    this->resetItemTabOrder();
+
+    return widgetImage;
+}
+
+PasteItem *MainWindow::insertItemWidgetUrls(void)
+{
+    QListWidgetItem *item = new QListWidgetItem;
+    auto *widgetUrls = new PasteItem(nullptr, item);
+
+    QObject::connect(widgetUrls, &PasteItem::hideWindow, [this](void) {
+        this->hide_window();
+    });
+
+    QRect rect = QApplication::primaryScreen()->geometry();
+    /* resize item, It's use for pasteitem frame */
+    item->setSizeHint(QSize(rect.width()/6, 1));
+
+    this->__scroll_widget->insertItem(0, item);
+    this->__scroll_widget->setCurrentRow(0);
+    this->__scroll_widget->setItemWidget(item, widgetUrls);
+    this->resetItemTabOrder();
+
+    return widgetUrls;
+}
+
+PasteItem *MainWindow::insertItemWidgetPlainText(void)
+{
+    QListWidgetItem *item = new QListWidgetItem;
+    auto *widgetPlainText = new PasteItem(nullptr, item);
+
+    QObject::connect(widgetPlainText, &PasteItem::hideWindow, [this](void) {
+        this->hide_window();
+    });
+
+    QRect rect = QApplication::primaryScreen()->geometry();
+    /* resize item, It's use for pasteitem frame */
+    item->setSizeHint(QSize(rect.width()/6, 1));
+
+    this->__scroll_widget->insertItem(0, item);
+    this->__scroll_widget->setCurrentRow(0);
+    this->__scroll_widget->setItemWidget(item, widgetPlainText);
+    this->resetItemTabOrder();
+
+    return widgetPlainText;
 }
 
 void MainWindow::resetItemTabOrder(void)
@@ -757,6 +843,7 @@ again:
 
     return pixmap;
 }
+
 
 void MainWindow::enabledGlassEffect(void)
 {

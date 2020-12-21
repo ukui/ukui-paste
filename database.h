@@ -36,13 +36,14 @@ public:
 	void createTable(void);
 	void insertPasteItem(ItemData *itemData);
 	QList<ItemData *> loadData(void);
-	void delelePasteItem(QByteArray);
+    void delelePasteItem(QByteArray);
+    QList<ItemData *> selectPasteItem(QString);
 
 private:
 	static QByteArray convertImage2Array(QImage image);
 
 private:
-	QSqlDatabase	m_db;
+    QSqlDatabase	m_db;
 };
 
 #endif // DATABASE_H

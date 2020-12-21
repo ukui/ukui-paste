@@ -32,30 +32,24 @@ Barnner::Barnner(QWidget *parent) : QWidget(parent),
 	this->setObjectName("Barnner");
 	this->setAttribute(Qt::WA_StyledBackground, true);
 
-	this->m_icon->setScaledContents(false);
-	this->m_text->setStyleSheet(this->m_text->styleSheet()+"font-size: 22px;");
-	this->m_time->setStyleSheet(this->m_time->styleSheet()+"font-size: 11px; color: rgba(255, 255, 255, 0.7);");
+    this->m_icon->setScaledContents(false);
+    this->m_text->setStyleSheet(this->m_text->styleSheet()+"font-size: 22px;");
+    this->m_time->setStyleSheet(this->m_time->styleSheet()+"font-size: 11px; color: rgba(255, 255, 255, 0.7);");
 
-	QVBoxLayout *vboxlayout = new QVBoxLayout();
-	vboxlayout->setSpacing(3);
-	vboxlayout->addStretch();
-	vboxlayout->setContentsMargins(20, 0, 0, 0);
-	vboxlayout->addWidget(this->m_text);
-	vboxlayout->addWidget(this->m_time);
-	vboxlayout->addStretch();
+    QHBoxLayout *hboxlayout = new QHBoxLayout();
 
-	QHBoxLayout *hboxlayout = new QHBoxLayout();
-	hboxlayout->addLayout(vboxlayout);
-	hboxlayout->addStretch();
-	hboxlayout->addWidget(this->m_icon);
-	hboxlayout->setSpacing(0);
-	hboxlayout->setContentsMargins(0, 0, 0, 0);
-	this->setLayout(hboxlayout);
+    hboxlayout->addWidget(this->m_icon);
+    hboxlayout->addWidget(this->m_text);
+    hboxlayout->addStretch();
+    hboxlayout->addWidget(this->m_time);
+    hboxlayout->setSpacing(0);
+    hboxlayout->setContentsMargins(0, 0, 0, 0);
+    this->setLayout(hboxlayout);
 }
 
 Barnner::~Barnner()
 {
-	delete m_time;
+    delete m_time;
 	delete m_text;
 	delete m_icon;
 }
@@ -69,6 +63,7 @@ void Barnner::setBackground(QRgb rgb)
 	this->setStyleSheet(s);
 }
 
+/*标题背景色*/
 QRgb Barnner::averageColor(QPixmap *pixmap)
 {
 	float r = 0, g = 0, b = 0;
@@ -103,23 +98,24 @@ void Barnner::resizeEvent(QResizeEvent *event)
 		QPixmap mp;
 
 		m_icon->setFixedHeight(size.height());
-		if (m_pixmap.height() >= 128 || m_pixmap.width() >= 128) {
+        if (m_pixmap.height() >= 16 || m_pixmap.width() >= 16) {
 			m_icon->setFixedWidth(size.height()*1.45);
-			mp = this->m_pixmap.scaled(128, 128, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+            mp = this->m_pixmap.scaled(16, 16, Qt::KeepAspectRatio, Qt::SmoothTransformation);
 			this->m_icon->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
 		} else {
 			m_icon->setFixedWidth(size.height()*0.8);
-			mp = this->m_pixmap.scaled(32, 32, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+            mp = this->m_pixmap.scaled(16, 16, Qt::KeepAspectRatio, Qt::SmoothTransformation);
 			m_icon->setAlignment(Qt::AlignCenter);
 		}
 
-		this->setBackground(Barnner::averageColor(&this->m_pixmap));
+//        this->setBackground(Barnner::averageColor(&this->m_pixmap));
 		this->m_icon->setPixmap(mp);
 	}
 
 	QWidget::resizeEvent(event);
 }
 
+/*时间*/
 void Barnner::showEvent(QShowEvent *event)
 {
 	if (!this->m_datetime.isNull()) {

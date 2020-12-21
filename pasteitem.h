@@ -63,6 +63,7 @@ public:
 protected:
 	void resizeEvent(QResizeEvent *event);
 	void mouseDoubleClickEvent(QMouseEvent *event);
+    void mousePressEvent(QMouseEvent *event);
 	void keyPressEvent(QKeyEvent *event);
 
 private:

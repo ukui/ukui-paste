@@ -44,19 +44,20 @@ Q_SIGNALS:
 	void selectItem(void);
 	void moveFocusPrevNext(bool);
 
-private:
 
+private:
+    QPropertyAnimation	*m_zoom_animation;
 };
 
 class PushButton : public QPushButton
 {
 public:
     PushButton(QWidget *parent = nullptr);
-	void updatePixmap(void);
-	void setPixmap(QPixmap pixmap);
+    void updatePixmap(void);
+    void setPixmap(QPixmap pixmap);
 
 protected:
-	void resizeEvent(QResizeEvent *event);
+    void resizeEvent(QResizeEvent *event);
 
 private:
     QLabel	*m_label;
@@ -70,8 +71,8 @@ public:
 	SearchBar(QWidget *parent = nullptr, int width = 0, int height = 0);
 
 private:
-	LineEdit		*m_search_edit;
-	PushButton		*m_search_button;
+    LineEdit		*m_search_edit;
+    PushButton		*m_search_button;
 
 Q_SIGNALS:
 	void moveFocusPrevNext(bool);

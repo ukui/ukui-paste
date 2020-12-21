@@ -33,6 +33,7 @@ DoubleCtrlShortcut::DoubleCtrlShortcut(QObject *parent) : QObject(parent),
 	this->m_shortcut = new ShortcutPrivateWin();
 	auto signal_address = &ShortcutPrivateWin::activated;
 #endif
+
 	QObject::connect(this->m_timer, &QTimer::timeout, [this](void) {
 		this->m_isActive = false;
 		this->m_timer->stop();

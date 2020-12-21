@@ -24,7 +24,6 @@
 MainFrame::MainFrame(QWidget *parent) : QWidget(parent)
 {
     this->setObjectName("MainFrame");
-//	this->setAttribute(Qt::WA_StyledBackground);
 }
 
 bool MainFrame::event(QEvent *event)

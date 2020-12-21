@@ -45,40 +45,68 @@ void LineEdit::focusOutEvent(QFocusEvent *event)
 /*监听对搜索框的按键设置*/
 bool LineEdit::event(QEvent *event)
 {
-	if (event->type() == QEvent::KeyPress) {
-		QKeyEvent *ke = static_cast<QKeyEvent *>(event);
-		switch (ke->key()) {
-		case Qt::Key_Return:
-		case Qt::Key_Enter:
-			emit this->selectItem();
-			break;
-		case Qt::Key_Escape:
-			emit this->hideWindow();
-			break;
-		case Qt::Key_Tab:
-			emit this->moveFocusPrevNext(false);
-			/* event is done */
-			return true;
-		case Qt::Key_Backtab:
-			emit this->moveFocusPrevNext(true);
-			/* event is done */
-			return true;
-		}
-	}
+    if (event->type() == QEvent::KeyPress) {
+        QKeyEvent *ke = static_cast<QKeyEvent *>(event);
+        switch (ke->key()) {
+        case Qt::Key_Return:
+        case Qt::Key_Enter:
+            emit this->selectItem();
+            break;
+        case Qt::Key_Escape:
+            emit this->hideWindow();
+            break;
+        case Qt::Key_Tab:
+            emit this->moveFocusPrevNext(false);
+            /* event is done */
+            return true;
+        case Qt::Key_Backtab:
+            emit this->moveFocusPrevNext(true);
+            /* event is done */
+            return true;
+        }
+    }
 
-	return QLineEdit::event(event);
+    return QLineEdit::event(event);
 }
 
 void LineEdit::hideEvent(QHideEvent *event)
 {
-	this->clear();
-	QLineEdit::hideEvent(event);
+    this->clear();
+    QLineEdit::hideEvent(event);
 }
 
+PushButton::PushButton(QWidget *parent) : QPushButton(parent),
+    m_label(new QLabel(this))
+{
+    this->setObjectName("PushButton");
+    this->setAttribute(Qt::WA_StyledBackground);
+    this->setFocusPolicy(Qt::ClickFocus);
+    m_label->setAlignment(Qt::AlignCenter);
+}
+//void PushButton::updatePixmap(void)
+//{
+//    if (!m_pixmap.isNull()) {
+//        QPixmap pixmap = m_pixmap.scaled(this->size()*0.8, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+//        m_label->setPixmap(pixmap);
+//    }
+//}
+
+//void PushButton::setPixmap(QPixmap pixmap)
+//{
+//    m_pixmap = pixmap;
+//    this->updatePixmap();
+//}
+
+void PushButton::resizeEvent(QResizeEvent *event)
+{
+    m_label->setGeometry(QRect(0, 0, event->size().width(), event->size().height()));
+//    this->updatePixmap();
+    QPushButton::resizeEvent(event);
+}
 
 SearchBar::SearchBar(QWidget *parent, int width, int height) : QWidget(parent)
 {
-    this->setAttribute(Qt::WA_TranslucentBackground);
+//    this->setAttribute(Qt::WA_TranslucentBackground);
     this->setAttribute(Qt::WA_StyledBackground);
     this->setObjectName("SearchBar");
     this->setFixedSize(width, height);

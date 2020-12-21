@@ -15,7 +15,6 @@
  * along with this program; if not, see <http://www.gnu.org/licenses/&gt;.
  *
  */
-
 #include "database.h"
 
 #include <QApplication>
@@ -34,6 +33,7 @@ Database::Database(QObject *parent) : QObject(parent)
     this->m_db.setUserName("root");
     this->m_db.setPassword("QeErTyUiOp{]");
 #ifdef Q_OS_LINUX
+    /*存放复制粘贴的地址*/
     this->m_db.setDatabaseName(QString(getenv("HOME")) + "/.cache/PastesDatabase.db");
 #endif
 #ifdef Q_OS_WIN
@@ -64,11 +64,20 @@ void Database::createTable()
 {
     QSqlQuery query(this->m_db);
 
-    if (!query.exec("create table if not exists item(id integer primary key autoincrement, md5 blob, imagedata blob, icondata blob, time integer)"))
+    if (!query.exec("create table if not exists item(id integer primary key autoincrement,"
+                    " md5 blob,"
+                    " imagedata blob,"
+                    " icondata blob,"
+                    " time integer)"))
         DEBUG() << query.lastError();
 
-    if (!query.exec("create table if not exists data(id integer primary key autoincrement, md5 blob, formats text, format_data blob)"))
+    if (!query.exec("create table if not exists data(id integer primary key autoincrement,"
+                    " md5 blob,"
+                    " formats text,"
+                    " format_data blob)"))
         DEBUG() << query.lastError();
+
+
 }
 
 QByteArray Database::convertImage2Array(QImage image)
@@ -130,6 +139,53 @@ void Database::insertPasteItem(ItemData *itemData)
     });
 
     insert_thread->start();
+}
+/*查询数据类型 根据分类展示*/
+QList<ItemData *> Database::selectPasteItem(QString format){
+    QList<ItemData *> list;
+    QSqlQuery query(this->m_db);
+
+    query.prepare("select * from item;");
+    if (!query.exec())
+        DEBUG() << query.lastError();
+
+    while (query.next()) {
+        ItemData *itemData = new ItemData;
+        itemData->md5 = query.value("md5").toByteArray();
+        itemData->image = QImage::fromData(query.value("imagedata").toByteArray());
+        itemData->icon = QPixmap::fromImage(QImage::fromData(query.value("icondata").toByteArray()));
+        itemData->time = QDateTime::fromSecsSinceEpoch(query.value("time").toUInt());
+
+        itemData->mimeData = new QMimeData;
+        QSqlQuery query_data(this->m_db);
+        query_data.prepare("select * from data where md5 = x'" + itemData->md5.toHex() + "'");
+
+        if(format == "1"){
+            query_data.prepare("select * from data;");
+        }else{
+            query_data.prepare("select * from data where formats = '"+format+"' ;");
+        }
+
+        if (!query_data.exec())
+            DEBUG() << query.lastError();
+
+        while (query_data.next()) {
+            QString mimeType = query_data.value("formats").toString();
+            QByteArray data = query_data.value("format_data").toByteArray();
+            itemData->mimeData->setData(mimeType, data);
+        }
+
+        if (!itemData->image.isNull())
+            itemData->mimeData->setImageData(itemData->image);
+
+        list.push_back(itemData);
+    }
+
+    while (query.next()){
+         qDebug() << query.value(0).toString() << query.value(1).toString() << query.value(2).toString();
+    }
+    return list;
+
 }
 
 void Database::delelePasteItem(QByteArray md5)

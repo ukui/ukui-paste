@@ -157,3 +157,7 @@ void PasteItem::copyData(void)
     clipboard->setMimeData(itemData.mimeData, QClipboard::Selection);
 
 }
+
+void PasteItem::menuData(void){
+    QMenu menu =new QMenu;
+}

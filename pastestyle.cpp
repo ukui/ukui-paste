@@ -26,6 +26,7 @@
 #include <QStyleOptionSlider>
 #include <QPainter>
 #include <QDebug>
+
 PasteStyle::PasteStyle(const QString &proxyStyleName, QObject *parent) : QProxyStyle (proxyStyleName)
 {
     Q_UNUSED(parent);
