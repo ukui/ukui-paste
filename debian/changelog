@@ -1,6 +1,5 @@
-"NMU"
-ukui-paste (1-0.0) unstable; urgency=medium
+ukui-paste (1.0.0-1) unstable; urgency=medium
 
   * Initial release to Debian (Closes: #)
 
- -- Kevin Duan <duankaiwen@kylinos.cn>  Mon, 07 Dec 2020 20:11:34 +0800
+ -- Kevin Duan <duankaiwen@ubuntukylin.com>  Mon, 07 Dec 2020 20:11:34 +0800
