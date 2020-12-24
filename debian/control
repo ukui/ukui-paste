@@ -3,7 +3,8 @@ Section: x11
 Priority: optional
 Maintainer: Kylin Team <team+kylin@tracker.debian.org>
 Uploaders: Kevin Duan <duankaiwen@ubuntukylin.com>,
-           handsome_feng <jianfengli@ubuntukylin.com>
+           handsome_feng <jianfengli@ubuntukylin.com>,
+           jackieliu <liuyun01@kylinos.cn>
 Build-Depends: debhelper-compat (= 12),
                qtbase5-dev,
                libqt5svg5-dev,
