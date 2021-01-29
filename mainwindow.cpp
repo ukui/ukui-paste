@@ -805,6 +805,7 @@ again:
                &ret);
     if (!ret) {
         qDebug() << "No X11 Icon height Found.";
+        XCloseDisplay(display);
         return pixmap;
     }
 
@@ -825,6 +826,7 @@ again:
                &ret);
     if (!ret) {
         qDebug() << "No X11 Icon Data Found.";
+        XCloseDisplay(display);
         return pixmap;
     }
 
