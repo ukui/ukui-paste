@@ -97,27 +97,6 @@ FileFrame::~FileFrame()
 	}
 }
 
-#ifdef Q_OS_WIN
-QPixmap pixmapFromShellImageList(int iImageList, const SHFILEINFO &info)
-{
-	QPixmap result;
-	// For MinGW:
-	static const IID iID_IImageList = {0x46eb5926, 0x582e, 0x4017, {0x9f, 0xdf, 0xe8, 0x99, 0x8d, 0xaa, 0x9, 0x50}};
-
-	IImageList *imageList = nullptr;
-	if (FAILED(SHGetImageList(iImageList, iID_IImageList, reinterpret_cast<void **>(&imageList))))
-		return result;
-
-	HICON hIcon = 0;
-	if (SUCCEEDED(imageList->GetIcon(info.iIcon, ILD_TRANSPARENT, &hIcon))) {
-		result = QtWin::fromHICON(hIcon);
-		DestroyIcon(hIcon);
-	}
-
-	return result;
-}
-#endif
-
 QIcon FileFrame::getIcon(const QString &uri)
 {
 	QString icon_name;
@@ -154,28 +133,7 @@ QIcon FileFrame::getIcon(const QString &uri)
 		return QIcon::fromTheme(icon_name, QIcon::fromTheme("text-x-generic"));
 	}
 #endif
-#ifdef Q_OS_WIN
-	if (!uri.isEmpty()) {
-		const QString nativeName = QDir::toNativeSeparators(uri);
-		const wchar_t *sourceFileC = reinterpret_cast<const wchar_t *>(nativeName.utf16());
 
-		SHFILEINFO  info;
-		if(SHGetFileInfo(sourceFileC,
-				 0,
-				 &info,
-				 sizeof(info),
-				 SHGFI_SYSICONINDEX| SHGFI_ICON |  SHGFI_LARGEICON))
-		{
-			QIcon icon;
-
-			const QPixmap extraLarge = pixmapFromShellImageList(0x4, info);
-			icon.addPixmap(extraLarge);
-
-			return icon;
-		}
-	}
-
-#endif
 	return QIcon();
 }
 

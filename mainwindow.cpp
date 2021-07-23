@@ -55,7 +55,7 @@ MainWindow::MainWindow(QWidget *parent)
 {
     /* 初始化与任务栏交互的dbus和gsetting */
     initPanelDbusGsetting();
-    /*分辨率是否变化*/
+    /* 分辨率是否变化 */
     desktoparea_change();
 
     QObject::connect(this->__clipboard, &QClipboard::dataChanged, [this](void) {
@@ -69,7 +69,7 @@ MainWindow::MainWindow(QWidget *parent)
     });
 
     QObject::connect(this->__shortcut, &DoubleCtrlShortcut::activated, [this](void) {
-        /*整体窗口位置*/
+        /* 整体窗口位置 */
         window_xy();
 
         if (!this->isVisible())
@@ -100,7 +100,7 @@ MainWindow::MainWindow(QWidget *parent)
     return;
 }
 
-void MainWindow::initPanelDbusGsetting(){
+void MainWindow::initPanelDbusGsetting() {
     /* 链接任务栏Dbus接口，获取任务栏高度和位置 */
     m_pServiceInterface = new QDBusInterface(PANEL_DBUS_SERVICE, PANEL_DBUS_PATH, PANEL_DBUS_INTERFACE, QDBusConnection::sessionBus());
     m_pServiceInterface->setTimeout(2147483647);
@@ -110,17 +110,17 @@ void MainWindow::initPanelDbusGsetting(){
         m_pPanelSetting = new QGSettings(UKUI_PANEL_SETTING);
 }
 
-/*获取桌面是否有改变*/
-void MainWindow::desktoparea_change(){
+/* 获取桌面是否有改变 */
+void MainWindow::desktoparea_change() {
     QDesktopWidget* desktopWidget = QApplication::desktop();
     connect(desktopWidget, &QDesktopWidget::resized, this, &MainWindow::window_xy);
 }
 
-/*整体窗口位置*/
-void MainWindow::window_xy(){
+/* 整体窗口位置 */
+void MainWindow::window_xy() {
     desktop_width();
     desktop_height();
-    switch(getPanelSite()){
+    switch(getPanelSite()) {
         case 0:
             this->setGeometry(8, screenHeight*0.68, screenWidth-16, screenHeight*0.32-connectTaskBarDbus()-8);
             break;
@@ -138,8 +138,8 @@ void MainWindow::window_xy(){
     }
 }
 
-/*获取主桌面分辨率大小*/
-int MainWindow::desktop_width(){
+/* 获取主桌面分辨率大小 */
+int MainWindow::desktop_width() {
     QRect screenRect1 = desktop->screenGeometry();
     screenWidth = screenRect1.width();
     return screenWidth;
@@ -150,8 +150,8 @@ int MainWindow::desktop_height(){
     return screenHeight;
 }
 
-/*获取任务栏的大小*/
-int MainWindow::connectTaskBarDbus(){
+/* 获取任务栏的大小 */
+int MainWindow::connectTaskBarDbus() {
     int panelHeight = 46;
     if (m_pPanelSetting != nullptr) {
         QStringList keys = m_pPanelSetting->keys();
@@ -166,8 +166,8 @@ int MainWindow::connectTaskBarDbus(){
     return panelHeight;
 }
 
-/*获取任务栏位置*/
-int MainWindow::getPanelSite(){
+/* 获取任务栏位置 */
+int MainWindow::getPanelSite() {
     int panelPosition = 0;
     if (m_pPanelSetting != nullptr) {
         QStringList keys = m_pPanelSetting->keys();
@@ -182,13 +182,11 @@ int MainWindow::getPanelSite(){
 }
 
 
-MainWindow::~MainWindow()
-{
+MainWindow::~MainWindow() {
     delete this->__hide_animation;
 }
 
-bool MainWindow::event(QEvent *e)
-{
+bool MainWindow::event(QEvent *e){
     if (e->type() == QEvent::ActivationChange) {
         if (QApplication::activeWindow() != this)
             this->hide_window();
@@ -197,8 +195,7 @@ bool MainWindow::event(QEvent *e)
     return QMainWindow::event(e);
 }
 
-void MainWindow::showEvent(QShowEvent *event)
-{
+void MainWindow::showEvent(QShowEvent *event) {
     QListWidgetItem *item = this->__scroll_widget->currentItem();
     if(item) {
         auto *widget = this->__scroll_widget->itemWidget(item);
@@ -216,8 +213,7 @@ void MainWindow::showEvent(QShowEvent *event)
     QWidget::showEvent(event);
 }
 
-void MainWindow::hideEvent(QHideEvent *event)
-{
+void MainWindow::hideEvent(QHideEvent *event) {
     /* That is a workaround for QListWidget pixel scroll */
     int count = this->__scroll_widget->count();
     if(count > 0) {
@@ -227,8 +223,7 @@ void MainWindow::hideEvent(QHideEvent *event)
     QWidget::hideEvent(event);
 }
 
-void MainWindow::show_window(void)
-{
+void MainWindow::show_window(void) {
     this->__hide_animation->setDirection(QAbstractAnimation::Backward);
     this->__hide_animation->start();
     this->__hide_state = false;
@@ -236,8 +231,7 @@ void MainWindow::show_window(void)
     this->show();
 }
 
-void MainWindow::hide_window(void)
-{
+void MainWindow::hide_window(void) {
     if (this->__hide_state)
         return;
 
@@ -246,8 +240,7 @@ void MainWindow::hide_window(void)
     this->__hide_state = true;
 }
 
-void MainWindow::move_to_prev_next_focus_widget(bool prev)
-{
+void MainWindow::move_to_prev_next_focus_widget(bool prev) {
     QListWidgetItem *item = this->__scroll_widget->selectedItems()[0];
     PasteItem *widget = reinterpret_cast<PasteItem *>(this->__scroll_widget->itemWidget(item));
 
@@ -263,9 +256,8 @@ void MainWindow::move_to_prev_next_focus_widget(bool prev)
     widget->setFocus();
 }
 
-void MainWindow::initUI(void)
-{
-    /*搜索部分*/
+void MainWindow::initUI(void) {
+    /* 搜索部分 */
     this->__searchbar = new SearchBar(this->__main_frame, this->width()/3, 40);
     QObject::connect(this->__searchbar, &SearchBar::textChanged, [this](const QString &text) {
         int temp_current_item_row = -1;
@@ -296,13 +288,13 @@ void MainWindow::initUI(void)
             this->__scroll_widget->item(temp_current_item_row)->setSelected(true);
             this->__scroll_widget->scrollToItem(this->__scroll_widget->item(temp_current_item_row));
         }
-
-        if (show_row_count == this->__scroll_widget->count()) {
-            /* restore current row in search before */
-            this->__current_item->setSelected(true);
-            this->__scroll_widget->scrollToItem(this->__current_item);
-            this->__current_item = nullptr;
-        }
+          /* 这一段会导致空数据搜索时程序崩溃 */
+//        if (show_row_count == this->__scroll_widget->count()) {
+//            /* restore current row in search before */
+//            this->__current_item->setSelected(true);
+//            this->__scroll_widget->scrollToItem(this->__current_item);
+//            this->__current_item = nullptr;
+//        }
     });
     QObject::connect(this->__searchbar, &SearchBar::selectItem, [this](void) {
         QListWidgetItem *item = this->__scroll_widget->selectedItems()[0];
@@ -312,46 +304,53 @@ void MainWindow::initUI(void)
     });
     QObject::connect(this->__searchbar, SIGNAL(moveFocusPrevNext(bool)), this, SLOT(move_to_prev_next_focus_widget(bool)));
 
-    /*分类部分*/
+    /* 分类按钮部分 */
     this->__classify1 = new PushButton(this->__main_frame);
-    this->__classify1->setText("fuwenben");
+    this->__classify1->setText("all");
     this->__classify1->setFixedSize(80, 30);
     this->__classify1->setFlat(true);
     this->__classify2 = new PushButton(this->__main_frame);
-    this->__classify2->setText("pics");
+    this->__classify2->setText("fuwenben");
     this->__classify2->setFixedSize(80, 30);
     this->__classify2->setFlat(true);
     this->__classify3 = new PushButton(this->__main_frame);
-    this->__classify3->setText("wenjian");
+    this->__classify3->setText("pics");
     this->__classify3->setFixedSize(80, 30);
     this->__classify3->setFlat(true);
     this->__classify4 = new PushButton(this->__main_frame);
-    this->__classify4->setText("wenben");
+    this->__classify4->setText("wenjian");
     this->__classify4->setFixedSize(80, 30);
     this->__classify4->setFlat(true);
     this->__classify5 = new PushButton(this->__main_frame);
-    this->__classify5->setText("all");
+    this->__classify5->setText("wenben");
     this->__classify5->setFixedSize(80, 30);
     this->__classify5->setFlat(true);
+    this->__classify6 = new PushButton(this->__main_frame);
+    this->__classify6->setText("clean");
+    this->__classify6->setFixedSize(80, 30);
+    this->__classify6->setFlat(true);
 
-    QObject::connect(this->__classify1, &PushButton::clicked, [this](void) {
-        this->reloadData(1);
+    QObject::connect(this->__classify1, &PushButton::clicked, [this](void) {   
+        this->reloadData(0);
     });
     QObject::connect(this->__classify2, &PushButton::clicked, [this](void) {
-        this->reloadData(2);
+        this->reloadData(1);
     });
     QObject::connect(this->__classify3, &PushButton::clicked, [this](void) {
-        this->reloadData(3);
+        this->reloadData(2);
     });
     QObject::connect(this->__classify4, &PushButton::clicked, [this](void) {
-        this->reloadData(4);
+        this->reloadData(3);
     });
     QObject::connect(this->__classify5, &PushButton::clicked, [this](void) {
+        this->reloadData(4);
+    });
+    QObject::connect(this->__classify6, &PushButton::clicked, [this](void) {
+        this->__db.deleleAllPasteItem();
         this->reloadData(0);
     });
 
-
-    /*展示部分*/
+    /* 列表展示部分 */
     this->__scroll_widget = new QListWidget(this->__main_frame);
     this->__scroll_widget->setSelectionMode(QAbstractItemView::SingleSelection);
     this->__scroll_widget->setHorizontalScrollMode(QListWidget::ScrollPerPixel);
@@ -369,17 +368,19 @@ void MainWindow::initUI(void)
         this->__scroll_widget->update();
     });
 
-    /*整体布局*/
+    /* 整体布局 */
     QHBoxLayout *hlayout = new QHBoxLayout();
     hlayout->addWidget(this->__searchbar);
-    hlayout->addWidget(this->__classify5);
     hlayout->addWidget(this->__classify1);
     hlayout->addWidget(this->__classify2);
     hlayout->addWidget(this->__classify3);
     hlayout->addWidget(this->__classify4);
+    hlayout->addWidget(this->__classify5);
     hlayout->addStretch();
+    hlayout->addWidget(this->__classify6);
 
     QVBoxLayout *vlayout = new QVBoxLayout();
+
     vlayout->addLayout(hlayout);
     vlayout->addWidget(this->__scroll_widget);
 
@@ -391,13 +392,18 @@ void MainWindow::initUI(void)
     this->reloadData(0);
 }
 
-/*处理复制粘贴的展示数据*/
-void MainWindow::reloadData(int format){
-    /*第一次打开时创造数据表*/
+/* 处理复制粘贴的展示数据 */
+void MainWindow::reloadData(int format)  {
+    /* 第一次打开时创造数据表 */
     if (!this->__db.isTableExist()) {
         this->__db.createTable();
         return;
     }
+    /* 打开时判断是否数据为空 */
+    if(!this->__db.isDataExist()){
+        qDebug("null");
+    }
+    /* 增加展示区域 */
     int y =this->__scroll_widget->count();
     for (int x=0 ;x<=y;x++){
         delete this->__scroll_widget->takeItem(0);
@@ -410,8 +416,8 @@ void MainWindow::reloadData(int format){
             this->__db.delelePasteItem(itemData->md5);
             continue;
         }
-
-        if(format == 1){
+        /* 不同分类展示内容判断 */
+        if(format == 1) {
             PasteItem *widgetRichText = this->insertItemWidgetRichText();
             if (itemData->mimeData->hasHtml() && !itemData->mimeData->text().isEmpty()) {
                 widgetRichText->setRichText(itemData->mimeData->html(), itemData->mimeData->text());
@@ -423,7 +429,7 @@ void MainWindow::reloadData(int format){
             widgetRichText->setTime(itemData->time);
             widgetRichText->setIcon(itemData->icon);
 
-        } else if (format == 2){
+        } else if (format == 2) {
 
             PasteItem *widgetImage = this->insertItemWidgetImage();
             if (itemData->mimeData->hasImage()) {
@@ -436,7 +442,7 @@ void MainWindow::reloadData(int format){
             widgetImage->setTime(itemData->time);
             widgetImage->setIcon(itemData->icon);
 
-        } else if(format == 3){
+        } else if(format == 3) {
 
             PasteItem *widgetUrls = this->insertItemWidgetUrls();
             QList<QUrl> urls = itemData->mimeData->urls();
@@ -454,7 +460,7 @@ void MainWindow::reloadData(int format){
             widgetUrls->setTime(itemData->time);
             widgetUrls->setIcon(itemData->icon);
 
-        } else if (format == 4){
+        } else if (format == 4) {
 
             PasteItem *widgetPlainText = this->insertItemWidgetPlainText();
             if (itemData->mimeData->hasText() && !itemData->mimeData->text().isEmpty()) {
@@ -470,7 +476,7 @@ void MainWindow::reloadData(int format){
         } else {
 
             PasteItem *widget = this->insertItemWidget();
-            /*复制网页内容 空内容时 链接 图片 文本 以及文件地址*/
+            /* 复制网页内容 空内容时 链接 图片 文本 以及文件地址 */
             if (itemData->mimeData->hasHtml() && !itemData->mimeData->text().isEmpty()) {
                 widget->setRichText(itemData->mimeData->html(), itemData->mimeData->text());
             } else if (itemData->mimeData->hasImage()) {
@@ -499,9 +505,8 @@ void MainWindow::reloadData(int format){
 }
 
 /* Insert a PasteItem into listwidget */
-/* 插入一个可以粘贴的内容 */
-PasteItem *MainWindow::insertItemWidget(void)
-{
+/* 在列表中插入一个可以粘贴的内容块 */
+PasteItem *MainWindow::insertItemWidget(void) {
     QListWidgetItem *item = new QListWidgetItem;
     auto *widget = new PasteItem(nullptr, item);
 
@@ -521,8 +526,7 @@ PasteItem *MainWindow::insertItemWidget(void)
     return widget;
 }
 
-PasteItem *MainWindow::insertItemWidgetRichText(void)
-{
+PasteItem *MainWindow::insertItemWidgetRichText(void) {
     QListWidgetItem *item = new QListWidgetItem;
     auto *widgetRichText = new PasteItem(nullptr, item);
 
@@ -542,8 +546,7 @@ PasteItem *MainWindow::insertItemWidgetRichText(void)
     return widgetRichText;
 }
 
-PasteItem *MainWindow::insertItemWidgetImage(void)
-{
+PasteItem *MainWindow::insertItemWidgetImage(void) {
     QListWidgetItem *item = new QListWidgetItem;
     auto *widgetImage = new PasteItem(nullptr, item);
 
@@ -563,8 +566,7 @@ PasteItem *MainWindow::insertItemWidgetImage(void)
     return widgetImage;
 }
 
-PasteItem *MainWindow::insertItemWidgetUrls(void)
-{
+PasteItem *MainWindow::insertItemWidgetUrls(void) {
     QListWidgetItem *item = new QListWidgetItem;
     auto *widgetUrls = new PasteItem(nullptr, item);
 
@@ -584,8 +586,7 @@ PasteItem *MainWindow::insertItemWidgetUrls(void)
     return widgetUrls;
 }
 
-PasteItem *MainWindow::insertItemWidgetPlainText(void)
-{
+PasteItem *MainWindow::insertItemWidgetPlainText(void) {
     QListWidgetItem *item = new QListWidgetItem;
     auto *widgetPlainText = new PasteItem(nullptr, item);
 
@@ -605,8 +606,7 @@ PasteItem *MainWindow::insertItemWidgetPlainText(void)
     return widgetPlainText;
 }
 
-void MainWindow::resetItemTabOrder(void)
-{
+void MainWindow::resetItemTabOrder(void) {
     int count = this->__scroll_widget->count();
 
     for (int i = 0; i < count-1; i++) {
@@ -617,8 +617,7 @@ void MainWindow::resetItemTabOrder(void)
 }
 
 QMutex clipboard_mutex;
-void MainWindow::clipboard_later(void)
-{
+void MainWindow::clipboard_later(void) {
     QMutexLocker locker(&clipboard_mutex);
     const QMimeData *mime_data = this->__clipboard->mimeData();
     PasteItem *widget = nullptr;
@@ -697,54 +696,8 @@ void MainWindow::clipboard_later(void)
     this->__db.insertPasteItem(&itemData);
 }
 
-QPixmap MainWindow::getClipboardOwnerIcon(void)
-{
+QPixmap MainWindow::getClipboardOwnerIcon(void) {
     QPixmap pixmap;
-
-#ifdef Q_OS_WIN
-    HWND hwnd = GetClipboardOwner();
-    /* Get icon from Window */
-    HICON icon = reinterpret_cast<HICON>(::SendMessageW(hwnd, WM_GETICON, ICON_BIG, 0));
-    if (!icon)
-        /* Try get icon from window class */
-        icon = reinterpret_cast<HICON>(::GetClassLongPtr(hwnd, GCLP_HICON));
-    if (!icon) {
-        /* Find process id and get the process path, Final extract icons from executable files */
-        DWORD pid;
-        ::GetWindowThreadProcessId(hwnd, &pid);
-        HANDLE processHandle = ::OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, pid);
-        TCHAR filename[MAX_PATH];
-        DWORD cbNeeded;
-        HMODULE hMod;
-        if (processHandle) {
-            if(::EnumProcessModules(processHandle, &hMod, sizeof(hMod), &cbNeeded)) {
-                GetModuleFileNameEx(processHandle, NULL, filename, MAX_PATH);
-                SHFILEINFO info;
-                ZeroMemory(&info, sizeof(SHFILEINFO));
-                unsigned int flags = SHGFI_ICON | SHGFI_SYSICONINDEX | SHGFI_ICONLOCATION |
-                    SHGFI_OPENICON | SHGFI_USEFILEATTRIBUTES;
-                const HRESULT hr = SHGetFileInfo(filename, 0, &info, sizeof(SHFILEINFO), flags);
-                if (FAILED(hr)) {
-                    pixmap = QtWin::fromHICON(::LoadIcon(0, IDI_APPLICATION));
-                } else  {
-                    pixmap = pixmapFromShellImageList(0x4, info);
-                    if (pixmap.isNull())
-                        pixmap = pixmapFromShellImageList(0x2, info);
-                    if (pixmap.isNull())
-                        pixmap = QtWin::fromHICON(info.hIcon);
-                    if (pixmap.isNull())
-                        pixmap = QtWin::fromHICON(::LoadIcon(0, IDI_APPLICATION));
-                }
-            }
-            ::CloseHandle(processHandle);
-        } else {
-            /* Failed, use default windows icon */
-            pixmap = QtWin::fromHICON(::LoadIcon(0, IDI_APPLICATION));
-        }
-    } else {
-        pixmap = QtWin::fromHICON(icon);
-    }
-#endif
 
 #ifdef Q_OS_LINUX
     int i = 0;
@@ -845,27 +798,7 @@ again:
 }
 
 
-void MainWindow::enabledGlassEffect(void)
-{
-#ifdef Q_OS_WIN
-    if (QOperatingSystemVersion::current() >= QOperatingSystemVersion(QOperatingSystemVersion::Windows, 10, 0)) {
-        HWND hWnd = HWND(this->winId());
-        HMODULE hUser = GetModuleHandle(L"user32.dll");
-        if (hUser) {
-            pfnSetWindowCompositionAttribute setWindowCompositionAttribute =
-                    (pfnSetWindowCompositionAttribute)GetProcAddress(hUser, "SetWindowCompositionAttribute");
-            if (setWindowCompositionAttribute) {
-                ACCENT_POLICY accent = { ACCENT_ENABLE_BLURBEHIND, 0, 0, 0 };
-                WINDOWCOMPOSITIONATTRIBDATA data;
-                data.Attrib = WCA_ACCENT_POLICY;
-                data.pvData = &accent;
-                data.cbData = sizeof(accent);
-                setWindowCompositionAttribute(hWnd, &data);
-            }
-        }
-    }
-#endif
-
+void MainWindow::enabledGlassEffect(void) {
 #ifdef Q_OS_LINUX
     KWindowEffects::enableBlurBehind(this->winId(), true);
 #endif

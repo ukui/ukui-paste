@@ -23,8 +23,9 @@
 
 #include <QApplication>
 #include <QDebug>
+#include <QStyleFactory>
 
-/*搜索框的样式*/
+/* 搜索框的样式 */
 LineEdit::LineEdit(QWidget *parent) : QLineEdit(parent)
 {
     this->setFocusPolicy(Qt::ClickFocus);
@@ -42,9 +43,8 @@ void LineEdit::focusOutEvent(QFocusEvent *event)
     emit this->focusOut();
     QLineEdit::focusOutEvent(event);
 }
-/*监听对搜索框的按键设置*/
-bool LineEdit::event(QEvent *event)
-{
+/* 监听对搜索框的按键设置 */
+bool LineEdit::event(QEvent *event) {
     if (event->type() == QEvent::KeyPress) {
         QKeyEvent *ke = static_cast<QKeyEvent *>(event);
         switch (ke->key()) {
@@ -79,55 +79,60 @@ PushButton::PushButton(QWidget *parent) : QPushButton(parent),
     m_label(new QLabel(this))
 {
     this->setObjectName("PushButton");
+    this->setStyle(QStyleFactory::create("oxygen"));
     this->setAttribute(Qt::WA_StyledBackground);
     this->setFocusPolicy(Qt::ClickFocus);
     m_label->setAlignment(Qt::AlignCenter);
 }
-//void PushButton::updatePixmap(void)
-//{
-//    if (!m_pixmap.isNull()) {
-//        QPixmap pixmap = m_pixmap.scaled(this->size()*0.8, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-//        m_label->setPixmap(pixmap);
-//    }
-//}
 
-//void PushButton::setPixmap(QPixmap pixmap)
-//{
-//    m_pixmap = pixmap;
-//    this->updatePixmap();
-//}
+void PushButton::updatePixmap(void)
+{
+    if (!m_pixmap.isNull()) {
+        QPixmap pixmap = m_pixmap.scaled(this->size()*0.8, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+        m_label->setPixmap(pixmap);
+    }
+}
+
+void PushButton::setPixmap(QPixmap pixmap)
+{
+    m_pixmap = pixmap;
+    this->updatePixmap();
+}
 
 void PushButton::resizeEvent(QResizeEvent *event)
 {
     m_label->setGeometry(QRect(0, 0, event->size().width(), event->size().height()));
-//    this->updatePixmap();
+    this->updatePixmap();
     QPushButton::resizeEvent(event);
 }
 
 SearchBar::SearchBar(QWidget *parent, int width, int height) : QWidget(parent)
 {
-//    this->setAttribute(Qt::WA_TranslucentBackground);
+    this->setAttribute(Qt::WA_TranslucentBackground);
     this->setAttribute(Qt::WA_StyledBackground);
     this->setObjectName("SearchBar");
     this->setFixedSize(width, height);
-
     this->m_search_edit = new LineEdit(this);
-
-
     m_search_edit->setPlaceholderText(QObject::tr("Search"));
     m_search_edit->setTextMargins(10, 0, 0, 0);
-    QObject::connect(m_search_edit, &LineEdit::focusOut, [this](void) {   });
-    QObject::connect(m_search_edit, &LineEdit::focusIn, [this](void) {
-    });
+    /* 搜索框状态改变时触发 */
+    /* 搜索框点击 */
+    QObject::connect(m_search_edit, &LineEdit::focusIn, [this](void) {});
+    /* 搜索框点出 */
+    QObject::connect(m_search_edit, &LineEdit::focusOut, [this](void) {});
+    /**/
     QObject::connect(m_search_edit, &LineEdit::hideWindow, [this](void) {
         emit this->hideWindow();
     });
+    /* 搜索框编辑时 */
     QObject::connect(m_search_edit, &LineEdit::textChanged, [this](const QString &text) {
         emit this->textChanged(text);
     });
+    /* 搜索框确认、选中时 */
     QObject::connect(m_search_edit, &LineEdit::selectItem, [this](void) {
         emit this->selectItem();
     });
+    /* tab焦点跳出搜索框 */
     QObject::connect(m_search_edit, &LineEdit::moveFocusPrevNext, [this](bool prev) {
         emit this->moveFocusPrevNext(prev);
     });

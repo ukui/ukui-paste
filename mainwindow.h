@@ -103,12 +103,13 @@ private:
 
     /* widgets */
     SearchBar               *__searchbar;
+    PushButton              *__classify1;
+    PushButton              *__classify2;
+    PushButton              *__classify3;
+    PushButton              *__classify4;
+    PushButton              *__classify5;
+    PushButton              *__classify6;
     QListWidget             *__scroll_widget;
-    PushButton                *__classify1;
-    PushButton                *__classify2;
-    PushButton                *__classify3;
-    PushButton                *__classify4;
-    PushButton                *__classify5;
     QClipboard              *__clipboard;
     /* It's copyed from myself, We need save icon */
     QPixmap                 __pasteitem_icon;

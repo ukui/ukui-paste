@@ -26,8 +26,7 @@
 
 #ifdef Q_OS_LINUX
 
-static int getScreenWidth(void)
-{
+static int getScreenWidth(void) {
 	Display *display;
 	Screen *screen;
 	int width = 0;
@@ -49,8 +48,7 @@ out:
 
 #endif
 
-void LoadTranlateFile(SingleApplication *app)
-{
+void LoadTranlateFile(SingleApplication *app) {
 	QTranslator *translator = new QTranslator;
 
 	QLocale locale = QLocale::system();
@@ -61,8 +59,7 @@ void LoadTranlateFile(SingleApplication *app)
 	}
 }
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
 #ifdef Q_OS_LINUX
 	if (getScreenWidth() > 2560) {
 		QGuiApplication::setAttribute(Qt::AA_EnableHighDpiScaling);

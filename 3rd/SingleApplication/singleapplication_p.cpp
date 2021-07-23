@@ -300,7 +300,7 @@ void SingleApplicationPrivate::slotConnectionEstablished()
     );
 
     QObject::connect(nextConnSocket, &QLocalSocket::disconnected,
-        [nextConnSocket, this](){
+        [nextConnSocket, this]() {
             connectionMap.remove(nextConnSocket);
             nextConnSocket->deleteLater();
         }

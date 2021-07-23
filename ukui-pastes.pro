@@ -9,13 +9,6 @@ unix:!macx {
         LIBS +=-lgio-2.0 -lglib-2.0 -lX11 -lXtst
 }
 
-win32: {
-        QT += winextras
-        HEADERS += shortcut_win.h
-        SOURCES += shortcut_win.cpp
-        LIBS += -lpsapi
-}
-
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 CONFIG += c++11

@@ -21,18 +21,16 @@
 
 #include "mainframe.h"
 
-MainFrame::MainFrame(QWidget *parent) : QWidget(parent)
-{
+MainFrame::MainFrame(QWidget *parent) : QWidget(parent) {
     this->setObjectName("MainFrame");
 }
 
-bool MainFrame::event(QEvent *event)
-{
+bool MainFrame::event(QEvent *event) {
 	if (event->type() == QEvent::KeyPress) {
 		QKeyEvent *ke = static_cast<QKeyEvent *>(event);
 
 		switch (ke->key()) {
-		case Qt::Key_Tab:
+        case Qt::Key_Tab:
 			emit this->moveFocusPrevNext(false);
 			return true;
 		case Qt::Key_Backtab:

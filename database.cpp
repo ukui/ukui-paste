@@ -27,17 +27,14 @@
 
 #define DEBUG() qDebug()<<__FILE__<<__func__<<__LINE__
 
-Database::Database(QObject *parent) : QObject(parent)
-{
+Database::Database(QObject *parent) : QObject(parent) {
+    /* 创建数据库 */
     this->m_db = QSqlDatabase::addDatabase("QSQLITE");
     this->m_db.setUserName("root");
     this->m_db.setPassword("QeErTyUiOp{]");
 #ifdef Q_OS_LINUX
-    /*存放复制粘贴的地址*/
-    this->m_db.setDatabaseName(QString(getenv("HOME")) + "/.cache/PastesDatabase.db");
-#endif
-#ifdef Q_OS_WIN
-    this->m_db.setDatabaseName(QCoreApplication::applicationDirPath() + "/" + "PastesDatabase.db");
+    /* 存放复制数据的地址 */
+    this->m_db.setDatabaseName(QString(getenv("HOME")) + "/.cache/ukui-pastesDatabase.db");
 #endif
     DEBUG() << this->m_db.databaseName();
 
@@ -45,13 +42,12 @@ Database::Database(QObject *parent) : QObject(parent)
         DEBUG() << this->m_db.lastError();
 }
 
-Database::~Database()
-{
+Database::~Database() {
     this->m_db.close();
 }
 
-bool Database::isTableExist()
-{
+/* 查询是否存在表格 */
+bool Database::isTableExist() {
     QSqlQuery query_item(QString("select * from sqlite_master where name = 'item'"), this->m_db);
     QSqlQuery query_data(QString("select * from sqlite_master where name = 'data'"), this->m_db);
     query_item.exec();
@@ -60,8 +56,8 @@ bool Database::isTableExist()
     return query_item.next() && query_data.next();
 }
 
-void Database::createTable()
-{
+/* 创建表单 */
+void Database::createTable() {
     QSqlQuery query(this->m_db);
 
     if (!query.exec("create table if not exists item(id integer primary key autoincrement,"
@@ -77,11 +73,9 @@ void Database::createTable()
                     " format_data blob)"))
         DEBUG() << query.lastError();
 
-
 }
 
-QByteArray Database::convertImage2Array(QImage image)
-{
+QByteArray Database::convertImage2Array(QImage image) {
     QByteArray imagedata;
     QBuffer buffer(&imagedata);
 
@@ -94,9 +88,8 @@ QByteArray Database::convertImage2Array(QImage image)
 
 /* Used for lock database */
 QMutex mutex;
-
-void Database::insertPasteItem(ItemData *itemData)
-{
+/* 复制插入数据 */
+void Database::insertPasteItem(ItemData *itemData) {
     /*
      * We need copy an new itemdata for thread, because QImage or QPixmap
      * and others is an private data for Class, can't share for another
@@ -140,11 +133,19 @@ void Database::insertPasteItem(ItemData *itemData)
 
     insert_thread->start();
 }
-/*查询数据类型 根据分类展示*/
-QList<ItemData *> Database::selectPasteItem(QString format){
+
+/* 查询是否存在数据 */
+bool Database::isDataExist(){
+    QSqlQuery isdata(QString("select * from data;"), this->m_db);
+    isdata.exec();
+    return isdata.next();
+}
+
+/* 根据分类展示 */
+QList<ItemData *> Database::selectPasteItem(QString format) {
     QList<ItemData *> list;
     QSqlQuery query(this->m_db);
-
+    /* 查询是否存在表单 */
     query.prepare("select * from item;");
     if (!query.exec())
         DEBUG() << query.lastError();
@@ -188,9 +189,22 @@ QList<ItemData *> Database::selectPasteItem(QString format){
 
 }
 
-void Database::delelePasteItem(QByteArray md5)
-{
-    QThread *delete_thread = QThread::create([this, md5](void){
+/* 删除所有数据 */
+void Database::deleleAllPasteItem() {
+    QThread *delete_thread = QThread::create([this](void) {
+    QSqlQuery query(this->m_db);
+    QMutexLocker locker(&mutex);
+    query.prepare("delete from data");
+    if (!query.exec())
+        DEBUG() << query.lastError();
+    });
+
+    delete_thread->start();
+}
+
+/* 根据md5删除数据 */
+void Database::delelePasteItem(QByteArray md5) {
+    QThread *delete_thread = QThread::create([this, md5](void) {
         QSqlQuery query(this->m_db);
         QMutexLocker locker(&mutex);
 
@@ -205,15 +219,14 @@ void Database::delelePasteItem(QByteArray md5)
     delete_thread->start();
 }
 
-QList<ItemData *> Database::loadData(void)
-{
+QList<ItemData *> Database::loadData(void) {
     QList<ItemData *> list;
     QSqlQuery query(this->m_db);
 
     query.prepare("select * from item;");
     if (!query.exec())
         DEBUG() << query.lastError();
-
+    /* 增加数据格式 */
     while (query.next()) {
         ItemData *itemData = new ItemData;
         itemData->md5 = query.value("md5").toByteArray();

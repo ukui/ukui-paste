@@ -24,7 +24,8 @@ Vcs-Git: https://github.com/ukui/ukui-paste.git
 Package: ukui-paste
 Architecture: any
 Depends: ${shlibs:Depends},
-         ${misc:Depends}
+         ${misc:Depends},
+         ukui-panel
 Description: Paste tool for UKUI
  ukui-paste is a modern UI design and lowest learning costs.
  You only need to double-click the Ctrl key to call it to serve you.

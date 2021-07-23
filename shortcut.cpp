@@ -19,7 +19,6 @@
 #include <QDebug>
 
 #include "shortcut.h"
-#include "shortcut_win.h"
 
 DoubleCtrlShortcut::DoubleCtrlShortcut(QObject *parent) : QObject(parent),
 	m_timer(new QTimer),
@@ -29,12 +28,8 @@ DoubleCtrlShortcut::DoubleCtrlShortcut(QObject *parent) : QObject(parent),
 	this->m_shortcut = new ShortcutPrivateX11();
 	auto signal_address = &ShortcutPrivateX11::activated;
 #endif
-#ifdef Q_OS_WIN
-	this->m_shortcut = new ShortcutPrivateWin();
-	auto signal_address = &ShortcutPrivateWin::activated;
-#endif
 
-	QObject::connect(this->m_timer, &QTimer::timeout, [this](void) {
+    QObject::connect(this->m_timer, &QTimer::timeout, [this](void) {
 		this->m_isActive = false;
 		this->m_timer->stop();
 	});

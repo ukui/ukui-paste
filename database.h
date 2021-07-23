@@ -32,17 +32,17 @@ class Database : public QObject
 public:
 	explicit Database(QObject *parent = nullptr);
 	~Database();
-	bool isTableExist(void);
+    bool isTableExist(void);
 	void createTable(void);
-	void insertPasteItem(ItemData *itemData);
-	QList<ItemData *> loadData(void);
+    void insertPasteItem(ItemData *itemData);
+    void deleleAllPasteItem();
     void delelePasteItem(QByteArray);
+    bool isDataExist(void);
+    QList<ItemData *> loadData(void);
     QList<ItemData *> selectPasteItem(QString);
 
 private:
 	static QByteArray convertImage2Array(QImage image);
-
-private:
     QSqlDatabase	m_db;
 };
 

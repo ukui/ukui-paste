@@ -21,7 +21,6 @@
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <QResizeEvent>
-
 #include <QDebug>
 
 Barnner::Barnner(QWidget *parent) : QWidget(parent),
@@ -34,7 +33,7 @@ Barnner::Barnner(QWidget *parent) : QWidget(parent),
 
     this->m_icon->setScaledContents(false);
     this->m_text->setStyleSheet(this->m_text->styleSheet()+"font-size: 22px;");
-    this->m_time->setStyleSheet(this->m_time->styleSheet()+"font-size: 11px; color: rgba(255, 255, 255, 0.7);");
+    this->m_time->setStyleSheet(this->m_time->styleSheet()+"font-size: 11px;");
 
     QHBoxLayout *hboxlayout = new QHBoxLayout();
 
@@ -56,14 +55,14 @@ Barnner::~Barnner()
 
 void Barnner::setBackground(QRgb rgb)
 {
-	QString s = QString("background-color: rgb(%1, %2, %3);")
-				.arg(qRed(rgb))
-				.arg(qGreen(rgb))
-				.arg(qBlue(rgb));
-	this->setStyleSheet(s);
+    QString s = QString("background-color: rgb(%1, %2, %3);")
+                .arg(qRed(rgb))
+                .arg(qGreen(rgb))
+                .arg(qBlue(rgb));
+    this->setStyleSheet(s);
 }
 
-/*标题背景色*/
+/* 标题背景色 */
 QRgb Barnner::averageColor(QPixmap *pixmap)
 {
 	float r = 0, g = 0, b = 0;
@@ -115,7 +114,7 @@ void Barnner::resizeEvent(QResizeEvent *event)
 	QWidget::resizeEvent(event);
 }
 
-/*时间*/
+/* 时间 */
 void Barnner::showEvent(QShowEvent *event)
 {
 	if (!this->m_datetime.isNull()) {

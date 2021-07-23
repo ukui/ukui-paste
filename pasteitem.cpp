@@ -100,13 +100,11 @@ void PasteItem::setIcon(QPixmap pixmap)
     m_barnner->setIcon(pixmap);
 }
 
-void PasteItem::setTime(QDateTime &dateTime)
-{
+void PasteItem::setTime(QDateTime &dateTime) {
     m_barnner->setTime(dateTime);
 }
 
-void PasteItem::resizeEvent(QResizeEvent *event)
-{
+void PasteItem::resizeEvent(QResizeEvent *event) {
     QSize size = event->size();
     m_frame->resize(size);
     m_barnner->setFixedHeight(size.height()/5);
@@ -114,23 +112,20 @@ void PasteItem::resizeEvent(QResizeEvent *event)
     QWidget::resizeEvent(event);
 }
 
-void PasteItem::mouseDoubleClickEvent(QMouseEvent *event)
-{
+void PasteItem::mouseDoubleClickEvent(QMouseEvent *event) {
     this->copyData();
 
     QWidget::mouseDoubleClickEvent(event);
 }
 
-void PasteItem::mousePressEvent(QMouseEvent *event)
-{
-    if(event->button() == Qt::RightButton){
-        qDebug()<<"test";
+void PasteItem::mousePressEvent(QMouseEvent *event) {
+    if(event->button() == Qt::RightButton) {
+//        qDebug()<<"test";
 //        this->menuData();
     }
     QWidget::mousePressEvent(event);
 }
-void PasteItem::keyPressEvent(QKeyEvent *event)
-{
+void PasteItem::keyPressEvent(QKeyEvent *event) {
     switch (event->key()) {
     case Qt::Key_Return:
     case Qt::Key_Enter:
